@@ -171,11 +171,9 @@ public abstract class AuthUseCase<R extends AuthUseCase.AuthRequest> {
     @Inject protected TokenValidator tokenValidator;
     @Inject protected UserRepository userRepository;
 
-    // 内嵌 Request
-    public static class AuthRequest {
-        private final String token;
-        protected AuthRequest(String token) { this.token = token; }
-        public String getToken() { return token; }
+    // 内嵌接口（子类 Request 用 record 实现）
+    public interface AuthRequest {
+        String token();
     }
 
     private User authenticate(String token) { ... }
@@ -183,7 +181,7 @@ public abstract class AuthUseCase<R extends AuthUseCase.AuthRequest> {
     protected abstract void doExecute(User user, R request);
 
     public void execute(R request) {
-        User user = authenticate(request.getToken());
+        User user = authenticate(request.token());
         authorize(user, request);
         doExecute(user, request);
     }
@@ -212,17 +210,8 @@ public class ReserveUseCase extends StudentAuthUseCase<ReserveUseCase.Request> {
 
     public record Output(String reservationId) {}  // ← execute() 返回值，精简
 
-    public static class Request extends AuthRequest {
-        private final String seatId;
-        private final String timeSlotId;
-        private final LocalDate date;
-        public Request(String token, String seatId, String timeSlotId, LocalDate date) {
-            super(token);
-            this.seatId = seatId;
-            this.timeSlotId = timeSlotId;
-            this.date = date;
-        }
-    }
+    public record Request(String token, String seatId, String timeSlotId, LocalDate date)
+        implements AuthRequest {}                    // ← record 实现 AuthRequest 接口
 
     @Override
     protected Output doExecute(User user, Request req) {
