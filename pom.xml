@@ -13,6 +13,7 @@
         <module>SeatAndRoom</module>
         <module>Reservation</module>
         <module>SystemTask</module>
+        <module>WebApi</module>
     </modules>
 
     <properties>
