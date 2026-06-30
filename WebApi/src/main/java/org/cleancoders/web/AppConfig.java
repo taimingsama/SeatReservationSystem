@@ -1,6 +1,7 @@
 package org.cleancoders.web;
 
 import jakarta.ws.rs.core.Application;
+import org.cleancoders.web.binder.AppBinder;
 import org.cleancoders.web.filter.CorsFilter;
 import org.cleancoders.web.resource.HealthResource;
 
@@ -9,7 +10,7 @@ import java.util.Set;
 
 /**
  * JAX-RS Application configuration.
- * Registers all resource classes and providers.
+ * Registers all resource classes, providers, and HK2 binders.
  * Path mapping is handled by web.xml, so no @ApplicationPath annotation here.
  */
 public class AppConfig extends Application {
@@ -21,6 +22,8 @@ public class AppConfig extends Application {
         classes.add(HealthResource.class);
         // Providers / Filters
         classes.add(CorsFilter.class);
+        // HK2 Binder (must be registered as a class so Jersey discovers it)
+        classes.add(AppBinder.class);
         return classes;
     }
 }

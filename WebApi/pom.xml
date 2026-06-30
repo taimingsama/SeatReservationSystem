@@ -22,6 +22,33 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Business modules -->
+        <dependency>
+            <groupId>org.cleancoders</groupId>
+            <artifactId>UserAndAuth</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.cleancoders</groupId>
+            <artifactId>SeatAndRoom</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.cleancoders</groupId>
+            <artifactId>Reservation</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.cleancoders</groupId>
+            <artifactId>SystemTask</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.cleancoders</groupId>
+            <artifactId>Infrastructure</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- Jersey Servlet Container -->
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
