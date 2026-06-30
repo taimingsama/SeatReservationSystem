@@ -13,13 +13,15 @@
     <artifactId>WebApi</artifactId>
     <packaging>war</packaging>
 
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
     <dependencies>
+        <!-- Jakarta Servlet API -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>6.1.0</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- Jersey Servlet Container -->
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>

@@ -22,22 +22,4 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <dependencies>
-        <!-- Source: https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api -->
-        <dependency>
-            <groupId>jakarta.servlet</groupId>
-            <artifactId>jakarta.servlet-api</artifactId>
-            <version>6.1.0</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- Source: https://mvnrepository.com/artifact/junit/junit -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
 </project>
