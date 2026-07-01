@@ -37,7 +37,7 @@ public class ManageReservationsUseCase extends AdminAuthUseCase<ManageReservatio
     // --- Presenter ---
 
     public interface Presenter extends AdminAuthUseCase.AdminPresenter {
-        void presentReservations(List<ReservationItem> items);
+        void presentAllReservations(List<ReservationItem> items);
     }
 
     @Override
@@ -94,7 +94,7 @@ public class ManageReservationsUseCase extends AdminAuthUseCase<ManageReservatio
                 })
                 .toList();
 
-        presenter.presentReservations(items);
+        presenter.presentAllReservations(items);
         return new Output(items);
     }
 }

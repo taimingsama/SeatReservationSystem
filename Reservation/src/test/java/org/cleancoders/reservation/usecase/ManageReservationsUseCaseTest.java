@@ -157,7 +157,7 @@ class ManageReservationsUseCaseTest {
     static class StubPresenter implements ManageReservationsUseCase.Presenter {
         List<ManageReservationsUseCase.ReservationItem> items = List.of();
         boolean invalidTokenCalled, userNotFoundCalled, forbiddenCalled;
-        @Override public void presentReservations(List<ManageReservationsUseCase.ReservationItem> items) { this.items = items; }
+        @Override public void presentAllReservations(List<ManageReservationsUseCase.ReservationItem> items) { this.items = items; }
         @Override public void forbidden() { forbiddenCalled = true; }
         @Override public void invalidToken() { invalidTokenCalled = true; }
         @Override public void userNotFound() { userNotFoundCalled = true; }

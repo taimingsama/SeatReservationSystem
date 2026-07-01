@@ -150,7 +150,7 @@ public class WebApiReservationPresenter implements ReserveUseCase.Presenter, Che
     // --- ManageReservationsUseCase.Presenter ---
 
     @Override
-    public void presentReservations(List<ManageReservationsUseCase.ReservationItem> items) {
+    public void presentAllReservations(List<ManageReservationsUseCase.ReservationItem> items) {
         var list = items.stream()
                 .map(item -> {
                     var m = new java.util.LinkedHashMap<String, Object>();
