@@ -128,8 +128,7 @@ public class CheckInUseCase extends StudentAuthUseCase<CheckInUseCase.Request, C
             presenter.checkInNotAvailable("时段尚未开始，请在时段开始后 30 分钟内签到");
             return null;
         }
-        // Case 2: within slot — window is [now, now+30min], always satisfied
-
+        // Case 2: within slot — check-in allowed
         // 6. Perform check-in
         reservation.checkIn();
         reservationRepo.save(reservation);
