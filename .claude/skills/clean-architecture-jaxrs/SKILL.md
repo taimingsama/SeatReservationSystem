@@ -53,7 +53,7 @@ WebApi ──→ UseCase ──→ Outbound (接口) ←── Infrastructure
 
 | 模块 | 职责 | domain 包 | outbound 包 (接口) | usecase 包 |
 |------|------|-----------|---------------------|------------|
-| **UserAndAuth** | 用户、认证、授权 | `User`, `UserRole` | `UserRepository`, `TokenService`, `PasswordEncoder` | `RegisterUseCase`, `LoginUseCase`, `GetMeUseCase`, `AuthUseCase`(abstract), `StudentAuthUseCase`, `AdminAuthUseCase` |
+| **UserAndAuth** | 用户、认证、授权 | (见 Common) | `UserRepository`, `TokenService`, `PasswordEncoder` | `RegisterUseCase`, `LoginUseCase`, `GetMeUseCase`, `AuthUseCase`(abstract), `StudentAuthUseCase`, `AdminAuthUseCase` |
 | **SeatAndRoom** | 自习室、座位管理 | `StudyRoom`, `Seat`, `SeatStatus`, `TimeSlot` | `RoomRepository`, `SeatRepository`, `TimeSlotRepository` | `ListRoomsUseCase`, `ListSeatsUseCase`, `ManageRoomsUseCase`, `ManageSeatsUseCase` |
 | **Reservation** | 预约、签到、退座 | `Reservation`, `ReservationStatus` | `ReservationRepository` | `ReserveUseCase`, `CheckInUseCase`, `CheckOutUseCase`, `CancelReservationUseCase`, `ListMyReservationsUseCase`, `ManageReservationsUseCase` |
 | **SystemTask** | 定时任务、统计 | `Stats` (value object) | `StatsRepository` | `AutoReleaseUseCase`, `GetStatsUseCase` |
@@ -65,6 +65,76 @@ WebApi ──→ UseCase ──→ Outbound (接口) ←── Infrastructure
 - `filter`: `CorsFilter`, `AuthFilter`
 - `presenter`: `WebApiXxxPresenter`（实现各 UseCase 内嵌的 Presenter 接口）
 - `binder`: `AppBinder`
+
+## 公共模块提取规则
+
+当多个模块共用同一个类（实体 / 接口 / 枚举），**必须**将其提取到独立的公共模块中，避免模块间直接依赖导致的循环引用和耦合。
+
+### 命名规则
+
+| 共享范围 | 模块名 | 说明 |
+|----------|--------|------|
+| **所有模块** 都用到 | `Common` | 纯公共模块，不依赖任何业务模块 |
+| **两个模块** 共用 | `Common{模块A}_{模块B}` | 例：`CommonSeatAndRoom_Reservation` |
+| **三个及以上** 模块共用 | `Common{模块A}_{模块B}_{模块C}` | 例：`CommonUserAndAuth_Reservation_SystemTask` |
+
+关键约束：
+- 分隔符用 **`_`**（下划线），不是 `And`
+- 模块名用简称（`UserAndAuth`、`SeatAndRoom`、`Reservation`、`SystemTask`）
+- Common 模块之间可以互相依赖（如 `CommonSeatAndRoom_Reservation` 依赖 `Common`）
+
+### 已创建的公共模块
+
+| 模块 | 包含 | 使用者 |
+|------|------|--------|
+| **`Common`** | `User`, `UserRole` | UserAndAuth, Infrastructure, WebApi（及未来所有模块） |
+
+### 规划中的公共模块
+
+| 模块 | 包含 | 使用者 |
+|------|------|--------|
+| **`CommonSeatAndRoom_Reservation`** | `Seat`, `SeatStatus`, `StudyRoom`, `TimeSlot` + 对应 Repository 接口 | SeatAndRoom, Reservation |
+| **`CommonReservation_SystemTask`** | `Reservation`, `ReservationStatus` + `ReservationRepository` | Reservation, SystemTask |
+
+### 判断流程
+
+新增实体或接口时，按以下决策树选择放置位置：
+
+```
+新增的类被哪几个模块使用？
+  ├── 被所有模块使用？
+  │     └── 放入 Common
+  ├── 被 2 个模块使用？
+  │     └── 创建 Common{A}_{B}，放入其中
+  ├── 被 3 个及以上模块使用？
+  │     └── 创建 Common{A}_{B}_{C}，放入其中
+  └── 只被 1 个模块使用？
+        └── 放在该模块自己的 domain/outbound 包中
+```
+
+### 公共模块结构
+
+公共模块与业务模块结构一致，按层组织：
+
+```
+CommonSeatAndRoom_Reservation/
+├── pom.xml                          ← 依赖 Common
+└── src/main/java/org/cleancoders/
+    └── commonseatandroom_reservation/
+        ├── domain/                   ← 共享实体（Seat, StudyRoom, TimeSlot）
+        └── outbound/                 ← 共享仓储接口（SeatRepository 等）
+```
+
+> **注意**：公共模块只放 domain 实体和 outbound 接口，**不放** UseCase。UseCase 始终属于其业务模块。
+
+### 为什么需要公共模块
+
+如果 Reservation 直接依赖 SeatAndRoom 来获取 `Seat` 类：
+- Reservation 会被迫引入 SeatAndRoom 的所有传递依赖
+- 容易形成循环依赖（如 SeatAndRoom 后来又需要 Reservation 的类型）
+- 单元测试时必须加载整个 SeatAndRoom 模块
+
+提取到轻量的 Common 模块后，依赖方只需引入一个只含共享类型的 jar。
 
 ## 核心模式一：UseCase 继承体系 (Template Method)
 
@@ -680,6 +750,9 @@ AVAILABLE   ──维护──→ MAINTENANCE
 | 包路径 | `{module}.{layer}` | `reservation.usecase`, `reservation.domain` |
 | Outbound 接口 | `{实体}Repository` / `{能力}Service` | `UserRepository`, `TokenService` |
 | Infrastructure 包 | `infrastructure.{子包}` | `infrastructure.persistence`, `infrastructure.security` |
+| 公共模块（全部） | `Common` | `Common` |
+| 公共模块（两模块） | `Common{模块A}_{模块B}` | `CommonSeatAndRoom_Reservation` |
+| 公共模块（多模块） | `Common{模块A}_{模块B}_{模块C}` | `CommonUserAndAuth_Reservation_SystemTask` |
 
 ## 业务规则
 
