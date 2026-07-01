@@ -1,0 +1,23 @@
+{
+  "skill_name": "clean-architecture-jaxrs",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "帮我实现 UC-10 CheckOutUseCase：学生主动退座，将预约状态从 OCCUPIED 改为 CHECKED_OUT，释放座位为 AVAILABLE。这个功能属于 Reservation 模块，需要学生权限。请创建所有需要的文件。",
+      "expected_output": "创建的文件包括：Reservation 模块的 CheckOutUseCase（继承 StudentAuthUseCase，内嵌 Presenter/Output/Request），WebApi 层的 WebApiCheckoutPresenter（ThreadLocal 模式），ReservationResource 新增端点，AppBinder 注册绑定。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "我需要给系统加一个公告功能（Announcement）。管理员可以发布/编辑/删除公告，所有用户（含未登录）可以查看公告列表。公告有 title、content、createdAt 字段。请按项目的 Clean Architecture 模式创建完整的文件结构。",
+      "expected_output": "新建 Announcement 模块（或归入现有模块），domain 实体，outbound Repository 接口，管理员用例继承 AdminAuthUseCase，公开查看用例不继承 AuthUseCase，WebApi Presenter + Resource，AppBinder 绑定。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "帮我在现有的 ReserveUseCase 里加一个功能：预约成功后发送通知。需要新增一个 NotificationPresenter 方法 onReserved，然后在 WebApiReservationPresenter 里实现它（打印日志即可，不需要真的发通知）。只修改已有文件，不创建新文件。",
+      "expected_output": "修改 ReserveUseCase.Presenter 接口新增 onReserved 方法，在 ReserveUseCase.doExecute 中调用该方法，在 WebApiReservationPresenter 中实现该方法（日志输出）。保持 ThreadLocal 模式不变。",
+      "files": []
+    }
+  ]
+}
