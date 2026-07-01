@@ -1,9 +1,16 @@
 package org.cleancoders.web.binder;
 
 import jakarta.inject.Singleton;
+import org.cleancoders.infrastructure.persistence.InMemoryReservationRepo;
+import org.cleancoders.infrastructure.persistence.InMemorySeatRepo;
+import org.cleancoders.infrastructure.persistence.InMemoryTimeSlotRepo;
 import org.cleancoders.infrastructure.persistence.InMemoryUserRepo;
 import org.cleancoders.infrastructure.security.BCryptPasswordEncoder;
 import org.cleancoders.infrastructure.security.JjwtTokenService;
+import org.cleancoders.reservation.outbound.ReservationRepository;
+import org.cleancoders.reservation.usecase.ReserveUseCase;
+import org.cleancoders.seatandroom.outbound.SeatRepository;
+import org.cleancoders.seatandroom.outbound.TimeSlotRepository;
 import org.cleancoders.userandauth.outbound.PasswordEncoder;
 import org.cleancoders.userandauth.outbound.TokenService;
 import org.cleancoders.userandauth.outbound.UserRepository;
@@ -11,6 +18,7 @@ import org.cleancoders.userandauth.usecase.GetMeUseCase;
 import org.cleancoders.userandauth.usecase.LoginUseCase;
 import org.cleancoders.userandauth.usecase.RegisterUseCase;
 import org.cleancoders.web.presenter.WebApiAuthPresenter;
+import org.cleancoders.web.presenter.WebApiReservationPresenter;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 /**
@@ -46,10 +54,19 @@ public class AppBinder extends AbstractBinder
         bind(JjwtTokenService.class).to(TokenService.class).in(Singleton.class);
 
         // === SeatAndRoom ===
-        // bind(InMemorySeatRepo.class).to(SeatRepository.class);
+        bind(InMemorySeatRepo.class).to(SeatRepository.class).in(Singleton.class);
+        bind(InMemoryTimeSlotRepo.class).to(TimeSlotRepository.class).in(Singleton.class);
 
-        // === Reservation ===
-        // bind(InMemoryReservationRepo.class).to(ReservationRepository.class);
+        // === Reservation UseCases ===
+        bind(ReserveUseCase.class).to(ReserveUseCase.class);
+
+        // === Reservation Presenters ===
+        WebApiReservationPresenter reservationPresenterInstance = new WebApiReservationPresenter();
+        bind(reservationPresenterInstance).to(WebApiReservationPresenter.class);
+        bind(reservationPresenterInstance).to(ReserveUseCase.Presenter.class);
+
+        // === Reservation Repositories ===
+        bind(InMemoryReservationRepo.class).to(ReservationRepository.class).in(Singleton.class);
 
         // === SystemTask ===
         // bind(InMemoryTaskRepo.class).to(TaskRepository.class);

@@ -7,6 +7,7 @@ import org.cleancoders.web.binder.AppBinder;
 import org.cleancoders.web.filter.CorsFilter;
 import org.cleancoders.web.resource.AuthResource;
 import org.cleancoders.web.resource.HealthResource;
+import org.cleancoders.web.resource.ReservationResource;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,6 +27,7 @@ public class AppConfig extends Application
         // Resources
         classes.add(HealthResource.class);
         classes.add(AuthResource.class);
+        classes.add(ReservationResource.class);
         // Swagger / OpenAPI endpoints (served under /api/ prefix per web.xml mapping)
         classes.add(OpenApiConfig.class);
         classes.add(OpenApiResource.class);
