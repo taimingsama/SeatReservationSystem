@@ -22,16 +22,6 @@
                 ],
                 plugins: [SwaggerUIBundle.plugins.DownloadUrl],
                 layout: 'StandaloneLayout',
-                requestInterceptor: (req) => {
-                    // Strip the host from spec-generated absolute URLs so that
-                    // "Try it out" always uses the same origin as this page.
-                    // This keeps requests correct regardless of Tomcat's Context Path
-                    // (e.g. /SeatReservationSystem/api/auth/login).
-                    if (req.url.startsWith(window.location.origin)) {
-                        req.url = req.url.substring(window.location.origin.length);
-                    }
-                    return req;
-                }
             });
         };
     </script>

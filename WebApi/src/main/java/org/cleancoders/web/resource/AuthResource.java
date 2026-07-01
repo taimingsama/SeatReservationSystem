@@ -17,15 +17,19 @@ import org.cleancoders.web.dto.LoginRequest;
 import org.cleancoders.web.dto.RegisterRequest;
 import org.cleancoders.web.presenter.WebApiAuthPresenter;
 
-@Path("/api/auth")
+@Path("/auth")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Auth", description = "用户认证相关接口（登录 / 注册）")
-public class AuthResource {
+public class AuthResource
+{
 
-    @Inject LoginUseCase loginUseCase;
-    @Inject RegisterUseCase registerUseCase;
-    @Inject WebApiAuthPresenter presenter;
+    @Inject
+    LoginUseCase loginUseCase;
+    @Inject
+    RegisterUseCase registerUseCase;
+    @Inject
+    WebApiAuthPresenter presenter;
 
     @POST
     @Path("/login")
@@ -33,9 +37,11 @@ public class AuthResource {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "登录成功，返回 JWT token"),
             @ApiResponse(responseCode = "401", description = "用户名或密码错误"),
+            @ApiResponse(responseCode = "404", description = "用户名不存在"),
             @ApiResponse(responseCode = "400", description = "请求参数不合法")
     })
-    public Response login(LoginRequest request) {
+    public Response login(LoginRequest request)
+    {
         loginUseCase.execute(new LoginUseCase.Request(request.username(), request.password()));
         return presenter.getResponse();
     }
@@ -48,7 +54,8 @@ public class AuthResource {
             @ApiResponse(responseCode = "409", description = "用户名已存在"),
             @ApiResponse(responseCode = "400", description = "请求参数不合法")
     })
-    public Response register(RegisterRequest request) {
+    public Response register(RegisterRequest request)
+    {
         registerUseCase.execute(new RegisterUseCase.Request(
                 request.username(), request.password(), request.name(), request.email()));
         return presenter.getResponse();

@@ -16,15 +16,18 @@ import java.util.Set;
  * Registers all resource classes, providers, and HK2 binders.
  * Path mapping is handled by web.xml, so no @ApplicationPath annotation here.
  */
-public class AppConfig extends Application {
+public class AppConfig extends Application
+{
 
     @Override
-    public Set<Class<?>> getClasses() {
+    public Set<Class<?>> getClasses()
+    {
         Set<Class<?>> classes = new HashSet<>();
         // Resources
         classes.add(HealthResource.class);
         classes.add(AuthResource.class);
         // Swagger / OpenAPI endpoints (served under /api/ prefix per web.xml mapping)
+        classes.add(OpenApiConfig.class);
         classes.add(OpenApiResource.class);
         classes.add(AcceptHeaderOpenApiResource.class);
         // Providers / Filters

@@ -92,7 +92,7 @@
             <version>2.2.22</version>
         </dependency>
 
-        <!-- Swagger UI is served as a static page (src/main/webapp/swagger-ui.html).
+        <!-- Swagger UI is served as a static page (src/main/webapp/index.html).
              It loads Swagger UI JS/CSS from CDN and points to /api/openapi.json.
              No additional dependency required. -->
 
