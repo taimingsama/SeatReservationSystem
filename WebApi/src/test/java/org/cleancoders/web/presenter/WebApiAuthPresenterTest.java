@@ -3,6 +3,10 @@ package org.cleancoders.web.presenter;
 import jakarta.ws.rs.core.Response;
 import org.cleancoders.common.domain.User;
 import org.cleancoders.common.domain.UserRole;
+import org.cleancoders.web.dto.ErrorResponse;
+import org.cleancoders.web.dto.LoginResponse;
+import org.cleancoders.web.dto.RegisterResponse;
+import org.cleancoders.web.dto.UsernameConflictResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,17 +32,14 @@ class WebApiAuthPresenterTest
         Response response = presenter.getResponse();
         assertEquals(200, response.getStatus());
 
-        @SuppressWarnings("unchecked")
-        var entity = (java.util.Map<String, Object>) response.getEntity();
-        assertEquals("jwt.token.here", entity.get("token"));
+        LoginResponse entity = (LoginResponse) response.getEntity();
+        assertEquals("jwt.token.here", entity.token());
 
-        @SuppressWarnings("unchecked")
-        var userMap = (java.util.Map<String, Object>) entity.get("user");
-        assertEquals("u1", userMap.get("id"));
-        assertEquals("alice", userMap.get("username"));
-        assertEquals("STUDENT", userMap.get("role"));
-        assertEquals("Alice", userMap.get("name"));
-        assertEquals("a@b.com", userMap.get("email"));
+        assertEquals("u1", entity.user().id());
+        assertEquals("alice", entity.user().username());
+        assertEquals(UserRole.STUDENT, entity.user().role());
+        assertEquals("Alice", entity.user().name());
+        assertEquals("a@b.com", entity.user().email());
     }
 
     @Test
@@ -49,9 +50,8 @@ class WebApiAuthPresenterTest
         Response response = presenter.getResponse();
         assertEquals(401, response.getStatus());
 
-        @SuppressWarnings("unchecked")
-        var entity = (java.util.Map<String, Object>) response.getEntity();
-        assertEquals("Invalid credentials", entity.get("error"));
+        ErrorResponse entity = (ErrorResponse) response.getEntity();
+        assertEquals("Invalid credentials", entity.error());
     }
 
     @Test
@@ -62,9 +62,8 @@ class WebApiAuthPresenterTest
         Response response = presenter.getResponse();
         assertEquals(404, response.getStatus());
 
-        @SuppressWarnings("unchecked")
-        var entity = (java.util.Map<String, Object>) response.getEntity();
-        assertEquals("User not found", entity.get("error"));
+        ErrorResponse entity = (ErrorResponse) response.getEntity();
+        assertEquals("User not found", entity.error());
     }
 
     // --- RegisterUseCase.Presenter ---
@@ -78,14 +77,10 @@ class WebApiAuthPresenterTest
         Response response = presenter.getResponse();
         assertEquals(201, response.getStatus());
 
-        @SuppressWarnings("unchecked")
-        var entity = (java.util.Map<String, Object>) response.getEntity();
-
-        @SuppressWarnings("unchecked")
-        var userMap = (java.util.Map<String, Object>) entity.get("user");
-        assertEquals("u1", userMap.get("id"));
-        assertEquals("alice", userMap.get("username"));
-        assertEquals("STUDENT", userMap.get("role"));
+        RegisterResponse entity = (RegisterResponse) response.getEntity();
+        assertEquals("u1", entity.user().id());
+        assertEquals("alice", entity.user().username());
+        assertEquals(UserRole.STUDENT, entity.user().role());
     }
 
     @Test
@@ -96,9 +91,8 @@ class WebApiAuthPresenterTest
         Response response = presenter.getResponse();
         assertEquals(409, response.getStatus());
 
-        @SuppressWarnings("unchecked")
-        var entity = (java.util.Map<String, Object>) response.getEntity();
-        assertEquals("Username already exists", entity.get("error"));
-        assertEquals("alice", entity.get("username"));
+        UsernameConflictResponse entity = (UsernameConflictResponse) response.getEntity();
+        assertEquals("Username already exists", entity.error());
+        assertEquals("alice", entity.username());
     }
 }
