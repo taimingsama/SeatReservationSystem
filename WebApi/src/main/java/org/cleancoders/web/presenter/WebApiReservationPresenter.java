@@ -126,7 +126,6 @@ public class WebApiReservationPresenter extends WebApiCommonPresenter implements
 
         current.set(Response.ok(Map.of("reservations", list)).build());
     }
-
     // --- ManageReservationsUseCase.Presenter ---
 
     @Override

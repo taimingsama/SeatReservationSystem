@@ -144,7 +144,6 @@ public class ReservationResource {
         cancelReservationUseCase.execute(new CancelReservationUseCase.Request(authCookie, reservationId));
         return presenter.getResponse();
     }
-<<<<<<< HEAD
 
     @GET
     @Path("/my")
@@ -161,6 +160,4 @@ public class ReservationResource {
         listMyReservationsUseCase.execute(new ListMyReservationsUseCase.Request(authCookie));
         return presenter.getResponse();
     }
-=======
->>>>>>> 12643ae (feat: 实现 UC-11 DELETE /api/reservations/{id} 取消预约（学生）)
 }
