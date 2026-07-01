@@ -38,14 +38,14 @@ public class ReservationResource {
             @ApiResponse(responseCode = "201", description = "预约创建成功",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON,
                             schema = @Schema(implementation = ReservationCreatedResponse.class))),
-            @ApiResponse(responseCode = "400", description = "请求参数不合法",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "400", description = "请求参数不合法（日期格式错误等）",
+                    content = @Content(schema = @Schema(implementation = InvalidDateResponse.class))),
             @ApiResponse(responseCode = "401", description = "Token 无效或已过期",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "权限不足（非学生角色）",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "座位或时段不存在",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    content = @Content(schema = @Schema(implementation = SeatNotFoundResponse.class))),
             @ApiResponse(responseCode = "409", description = "座位已被预约",
                     content = @Content(schema = @Schema(implementation = SeatConflictResponse.class)))
     })
@@ -54,10 +54,8 @@ public class ReservationResource {
         try {
             date = LocalDate.parse(input.date());
         } catch (Exception e) {
-            return Response.status(400).entity(java.util.Map.of(
-                    "error", "日期格式不合法，请使用 YYYY-MM-DD 格式",
-                    "provided", input.date()
-            )).build();
+            return Response.status(400).entity(new InvalidDateResponse(
+                    "日期格式不合法，请使用 YYYY-MM-DD 格式", input.date())).build();
         }
 
         reserveUseCase.execute(new ReserveUseCase.Request(
