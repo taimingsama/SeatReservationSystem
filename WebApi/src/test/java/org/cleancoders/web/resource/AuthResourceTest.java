@@ -1,8 +1,8 @@
 package org.cleancoders.web.resource;
 
 import jakarta.ws.rs.core.Response;
-import org.cleancoders.userandauth.domain.User;
-import org.cleancoders.userandauth.domain.UserRole;
+import org.cleancoders.common.domain.User;
+import org.cleancoders.common.domain.UserRole;
 import org.cleancoders.userandauth.usecase.LoginUseCase;
 import org.cleancoders.userandauth.usecase.RegisterUseCase;
 import org.cleancoders.web.dto.LoginRequest;

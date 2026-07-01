@@ -9,6 +9,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
+        <module>Common</module>
         <module>UserAndAuth</module>
         <module>SeatAndRoom</module>
         <module>Reservation</module>

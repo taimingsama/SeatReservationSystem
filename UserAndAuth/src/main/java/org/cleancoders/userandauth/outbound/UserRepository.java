@@ -1,6 +1,6 @@
 package org.cleancoders.userandauth.outbound;
 
-import org.cleancoders.userandauth.domain.User;
+import org.cleancoders.common.domain.User;
 
 import java.util.Optional;
 

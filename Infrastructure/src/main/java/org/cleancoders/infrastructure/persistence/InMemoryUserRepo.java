@@ -1,6 +1,6 @@
 package org.cleancoders.infrastructure.persistence;
 
-import org.cleancoders.userandauth.domain.User;
+import org.cleancoders.common.domain.User;
 import org.cleancoders.userandauth.outbound.UserRepository;
 
 import java.util.Map;

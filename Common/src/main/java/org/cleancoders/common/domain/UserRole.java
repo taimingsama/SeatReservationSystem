@@ -1,4 +1,4 @@
-package org.cleancoders.userandauth.domain;
+package org.cleancoders.common.domain;
 
 public enum UserRole {
     STUDENT,

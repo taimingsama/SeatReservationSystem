@@ -2,7 +2,7 @@ package org.cleancoders.web.presenter;
 
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
-import org.cleancoders.userandauth.domain.User;
+import org.cleancoders.common.domain.User;
 import org.cleancoders.userandauth.usecase.LoginUseCase;
 import org.cleancoders.userandauth.usecase.RegisterUseCase;
 

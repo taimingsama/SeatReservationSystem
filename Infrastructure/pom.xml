@@ -16,6 +16,11 @@
     <dependencies>
         <dependency>
             <groupId>org.cleancoders</groupId>
+            <artifactId>Common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.cleancoders</groupId>
             <artifactId>UserAndAuth</artifactId>
             <version>${project.version}</version>
         </dependency>
