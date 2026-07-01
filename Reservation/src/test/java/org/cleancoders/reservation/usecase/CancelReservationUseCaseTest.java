@@ -185,6 +185,13 @@ class CancelReservationUseCaseTest {
                 String sid, LocalDate d, String ts, Set<ReservationStatus> ss) {
             return m.values().stream().filter(r -> r.seatId().equals(sid) && r.date().equals(d) && r.timeSlotId().equals(ts) && ss.contains(r.status())).findFirst();
         }
+
+        @Override
+        public List<Reservation> findByUserId(String userId) {
+            return m.values().stream()
+                    .filter(r -> r.userId().equals(userId))
+                    .toList();
+        }
     }
 
     static class StubSeatRepo implements SeatRepository {

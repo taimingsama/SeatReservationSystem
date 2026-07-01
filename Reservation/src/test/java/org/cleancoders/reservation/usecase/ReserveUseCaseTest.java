@@ -290,6 +290,13 @@ class ReserveUseCaseTest {
                     .filter(r -> statuses.contains(r.status()))
                     .findFirst();
         }
+
+        @Override
+        public List<Reservation> findByUserId(String userId) {
+            return reservations.values().stream()
+                    .filter(r -> r.userId().equals(userId))
+                    .toList();
+        }
     }
 
     static class StubPresenter implements ReserveUseCase.Presenter {
