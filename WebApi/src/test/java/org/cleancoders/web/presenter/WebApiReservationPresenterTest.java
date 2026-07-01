@@ -2,6 +2,14 @@ package org.cleancoders.web.presenter;
 
 import jakarta.ws.rs.core.Response;
 import org.cleancoders.reservation.domain.ReservationStatus;
+import org.cleancoders.web.dto.DuplicateReservationResponse;
+import org.cleancoders.web.dto.ErrorResponse;
+import org.cleancoders.web.dto.InvalidStatusResponse;
+import org.cleancoders.web.dto.ReservationCreatedResponse;
+import org.cleancoders.web.dto.ReservationNotFoundResponse;
+import org.cleancoders.web.dto.SeatConflictResponse;
+import org.cleancoders.web.dto.SeatNotFoundResponse;
+import org.cleancoders.web.dto.TimeSlotNotFoundResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,11 +31,10 @@ class WebApiReservationPresenterTest {
         Response response = presenter.getResponse();
         assertEquals(201, response.getStatus());
 
-        @SuppressWarnings("unchecked")
-        var entity = (java.util.Map<String, Object>) response.getEntity();
-        assertEquals("res-123", entity.get("reservationId"));
-        assertEquals("A-1", entity.get("seatNumber"));
-        assertEquals("上午 08:00-12:00", entity.get("timeSlot"));
+        ReservationCreatedResponse entity = (ReservationCreatedResponse) response.getEntity();
+        assertEquals("res-123", entity.reservationId());
+        assertEquals("A-1", entity.seatNumber());
+        assertEquals("上午 08:00-12:00", entity.timeSlot());
     }
 
     @Test
@@ -37,11 +44,10 @@ class WebApiReservationPresenterTest {
         Response response = presenter.getResponse();
         assertEquals(409, response.getStatus());
 
-        @SuppressWarnings("unchecked")
-        var entity = (java.util.Map<String, Object>) response.getEntity();
-        assertEquals("座位已被预约", entity.get("error"));
-        assertEquals("seat-1", entity.get("seatId"));
-        assertEquals("上午 08:00-12:00", entity.get("timeSlot"));
+        SeatConflictResponse entity = (SeatConflictResponse) response.getEntity();
+        assertEquals("座位已被预约", entity.error());
+        assertEquals("seat-1", entity.seatId());
+        assertEquals("上午 08:00-12:00", entity.timeSlot());
     }
 
     @Test
@@ -51,10 +57,9 @@ class WebApiReservationPresenterTest {
         Response response = presenter.getResponse();
         assertEquals(409, response.getStatus());
 
-        @SuppressWarnings("unchecked")
-        var entity = (java.util.Map<String, Object>) response.getEntity();
-        assertEquals("该时段已有预约", entity.get("error"));
-        assertEquals("existing-res-456", entity.get("existingReservationId"));
+        DuplicateReservationResponse entity = (DuplicateReservationResponse) response.getEntity();
+        assertEquals("该时段已有预约", entity.error());
+        assertEquals("existing-res-456", entity.existingReservationId());
     }
 
     @Test
@@ -64,10 +69,9 @@ class WebApiReservationPresenterTest {
         Response response = presenter.getResponse();
         assertEquals(404, response.getStatus());
 
-        @SuppressWarnings("unchecked")
-        var entity = (java.util.Map<String, Object>) response.getEntity();
-        assertEquals("时段不存在", entity.get("error"));
-        assertEquals("ts-nonexistent", entity.get("timeSlotId"));
+        TimeSlotNotFoundResponse entity = (TimeSlotNotFoundResponse) response.getEntity();
+        assertEquals("时段不存在", entity.error());
+        assertEquals("ts-nonexistent", entity.timeSlotId());
     }
 
     @Test
@@ -77,10 +81,9 @@ class WebApiReservationPresenterTest {
         Response response = presenter.getResponse();
         assertEquals(404, response.getStatus());
 
-        @SuppressWarnings("unchecked")
-        var entity = (java.util.Map<String, Object>) response.getEntity();
-        assertEquals("座位不存在", entity.get("error"));
-        assertEquals("seat-nonexistent", entity.get("seatId"));
+        SeatNotFoundResponse entity = (SeatNotFoundResponse) response.getEntity();
+        assertEquals("座位不存在", entity.error());
+        assertEquals("seat-nonexistent", entity.seatId());
     }
 
     @Test
@@ -90,9 +93,8 @@ class WebApiReservationPresenterTest {
         Response response = presenter.getResponse();
         assertEquals(403, response.getStatus());
 
-        @SuppressWarnings("unchecked")
-        var entity = (java.util.Map<String, Object>) response.getEntity();
-        assertEquals("权限不足，仅学生可创建预约", entity.get("error"));
+        ErrorResponse entity = (ErrorResponse) response.getEntity();
+        assertEquals("权限不足，仅学生可创建预约", entity.error());
     }
 
     @Test
@@ -102,9 +104,8 @@ class WebApiReservationPresenterTest {
         Response response = presenter.getResponse();
         assertEquals(401, response.getStatus());
 
-        @SuppressWarnings("unchecked")
-        var entity = (java.util.Map<String, Object>) response.getEntity();
-        assertEquals("Invalid or expired token", entity.get("error"));
+        ErrorResponse entity = (ErrorResponse) response.getEntity();
+        assertEquals("Invalid or expired token", entity.error());
     }
 
     @Test
@@ -114,9 +115,8 @@ class WebApiReservationPresenterTest {
         Response response = presenter.getResponse();
         assertEquals(404, response.getStatus());
 
-        @SuppressWarnings("unchecked")
-        var entity = (java.util.Map<String, Object>) response.getEntity();
-        assertEquals("User not found", entity.get("error"));
+        ErrorResponse entity = (ErrorResponse) response.getEntity();
+        assertEquals("User not found", entity.error());
     }
 
     // --- CheckInUseCase.Presenter ---
@@ -128,10 +128,9 @@ class WebApiReservationPresenterTest {
         Response response = presenter.getResponse();
         assertEquals(404, response.getStatus());
 
-        @SuppressWarnings("unchecked")
-        var entity = (java.util.Map<String, Object>) response.getEntity();
-        assertEquals("预约不存在", entity.get("error"));
-        assertEquals("res-unknown", entity.get("reservationId"));
+        ReservationNotFoundResponse entity = (ReservationNotFoundResponse) response.getEntity();
+        assertEquals("预约不存在", entity.error());
+        assertEquals("res-unknown", entity.reservationId());
     }
 
     @Test
@@ -141,9 +140,8 @@ class WebApiReservationPresenterTest {
         Response response = presenter.getResponse();
         assertEquals(403, response.getStatus());
 
-        @SuppressWarnings("unchecked")
-        var entity = (java.util.Map<String, Object>) response.getEntity();
-        assertEquals("只能签到自己的预约", entity.get("error"));
+        ErrorResponse entity = (ErrorResponse) response.getEntity();
+        assertEquals("只能签到自己的预约", entity.error());
     }
 
     @Test
@@ -153,10 +151,9 @@ class WebApiReservationPresenterTest {
         Response response = presenter.getResponse();
         assertEquals(409, response.getStatus());
 
-        @SuppressWarnings("unchecked")
-        var entity = (java.util.Map<String, Object>) response.getEntity();
-        assertEquals("当前状态不允许签到", entity.get("error"));
-        assertEquals("CHECKED_IN", entity.get("currentStatus"));
+        InvalidStatusResponse entity = (InvalidStatusResponse) response.getEntity();
+        assertEquals("当前状态不允许签到", entity.error());
+        assertEquals(ReservationStatus.CHECKED_IN, entity.currentStatus());
     }
 
     @Test
@@ -166,8 +163,7 @@ class WebApiReservationPresenterTest {
         Response response = presenter.getResponse();
         assertEquals(409, response.getStatus());
 
-        @SuppressWarnings("unchecked")
-        var entity = (java.util.Map<String, Object>) response.getEntity();
-        assertEquals("已过时段结束时间，无法签到", entity.get("error"));
+        ErrorResponse entity = (ErrorResponse) response.getEntity();
+        assertEquals("已过时段结束时间，无法签到", entity.error());
     }
 }
