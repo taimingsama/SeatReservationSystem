@@ -10,6 +10,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.cleancoders.reservation.usecase.CancelReservationUseCase;
 import org.cleancoders.reservation.usecase.CheckInUseCase;
 import org.cleancoders.reservation.usecase.CheckOutUseCase;
 import org.cleancoders.reservation.usecase.ReserveUseCase;
@@ -32,6 +33,9 @@ public class ReservationResource {
 
     @Inject
     CheckOutUseCase checkOutUseCase;
+
+    @Inject
+    CancelReservationUseCase cancelReservationUseCase;
 
     @Inject
     WebApiReservationPresenter presenter;
@@ -108,6 +112,27 @@ public class ReservationResource {
     })
     public Response checkOut(@CookieParam("Authorization") String authCookie, @PathParam("id") String reservationId) {
         checkOutUseCase.execute(new CheckOutUseCase.Request(authCookie, reservationId));
+        return presenter.getResponse();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    @Operation(summary = "取消预约 (UC-11)", description = "学生对未签到的预约进行取消操作。")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "取消成功",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = ReservationCreatedResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Token 无效或已过期",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "权限不足（非学生角色 / 非本人预约）",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "预约不存在",
+                    content = @Content(schema = @Schema(implementation = ReservationNotFoundResponse.class))),
+            @ApiResponse(responseCode = "409", description = "当前状态不允许取消",
+                    content = @Content(schema = @Schema(implementation = InvalidStatusResponse.class)))
+    })
+    public Response cancel(@CookieParam("Authorization") String authCookie, @PathParam("id") String reservationId) {
+        cancelReservationUseCase.execute(new CancelReservationUseCase.Request(authCookie, reservationId));
         return presenter.getResponse();
     }
 }

@@ -3,6 +3,7 @@ package org.cleancoders.web.presenter;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
 import org.cleancoders.reservation.domain.ReservationStatus;
+import org.cleancoders.reservation.usecase.CancelReservationUseCase;
 import org.cleancoders.reservation.usecase.CheckInUseCase;
 import org.cleancoders.reservation.usecase.CheckOutUseCase;
 import org.cleancoders.reservation.usecase.ReserveUseCase;
@@ -17,7 +18,7 @@ import java.util.Map;
  * allowing the singleton presenter to serve concurrent HTTP requests safely.
  */
 @Singleton
-public class WebApiReservationPresenter implements ReserveUseCase.Presenter, CheckInUseCase.Presenter, CheckOutUseCase.Presenter {
+public class WebApiReservationPresenter implements ReserveUseCase.Presenter, CheckInUseCase.Presenter, CheckOutUseCase.Presenter, CancelReservationUseCase.Presenter {
 
     private final ThreadLocal<Response> current = new ThreadLocal<>();
 

@@ -8,6 +8,7 @@ import org.cleancoders.infrastructure.persistence.InMemoryUserRepo;
 import org.cleancoders.infrastructure.security.BCryptPasswordEncoder;
 import org.cleancoders.infrastructure.security.JjwtTokenService;
 import org.cleancoders.reservation.outbound.ReservationRepository;
+import org.cleancoders.reservation.usecase.CancelReservationUseCase;
 import org.cleancoders.reservation.usecase.CheckInUseCase;
 import org.cleancoders.reservation.usecase.CheckOutUseCase;
 import org.cleancoders.reservation.usecase.ReserveUseCase;
@@ -63,6 +64,7 @@ public class AppBinder extends AbstractBinder
         bind(ReserveUseCase.class).to(ReserveUseCase.class);
         bind(CheckInUseCase.class).to(CheckInUseCase.class);
         bind(CheckOutUseCase.class).to(CheckOutUseCase.class);
+        bind(CancelReservationUseCase.class).to(CancelReservationUseCase.class);
 
         // === Reservation Presenters ===
         WebApiReservationPresenter reservationPresenterInstance = new WebApiReservationPresenter();
@@ -70,6 +72,7 @@ public class AppBinder extends AbstractBinder
         bind(reservationPresenterInstance).to(ReserveUseCase.Presenter.class);
         bind(reservationPresenterInstance).to(CheckInUseCase.Presenter.class);
         bind(reservationPresenterInstance).to(CheckOutUseCase.Presenter.class);
+        bind(reservationPresenterInstance).to(CancelReservationUseCase.Presenter.class);
 
         // === Reservation Repositories ===
         bind(InMemoryReservationRepo.class).to(ReservationRepository.class).in(Singleton.class);
