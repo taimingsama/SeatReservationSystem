@@ -12,4 +12,6 @@ public record RegisterRequest(
         String name,
         @Schema(description = "邮箱地址", required = true, example = "john@example.com")
         String email
-) {}
+)
+{
+}

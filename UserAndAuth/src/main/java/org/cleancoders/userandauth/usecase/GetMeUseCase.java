@@ -13,21 +13,8 @@ import org.cleancoders.userandauth.outbound.UserRepository;
  * 通过 JWT token 识别当前用户，返回用户基本信息。
  * 属于公开用例（不继承 AuthUseCase），自行处理 token 验证。
  */
-public class GetMeUseCase {
-
-    public record Request(String token) {
-    }
-
-    public record Output(User user) {
-    }
-
-    public interface Presenter {
-        void presentUser(User user);
-
-        void invalidToken();
-
-        void userNotFound();
-    }
+public class GetMeUseCase
+{
 
     @Inject
     UserRepository userRepo;
@@ -36,19 +23,23 @@ public class GetMeUseCase {
     @Inject
     Presenter presenter;
 
-    public Output execute(Request request) {
+    public Output execute(Request request)
+    {
         // 1. 验证并解析 JWT token
         TokenPayload payload;
-        try {
+        try
+        {
             payload = tokenService.validate(request.token());
-        } catch (TokenValidationException e) {
+        } catch (TokenValidationException e)
+        {
             presenter.invalidToken();
             return null;
         }
 
         // 2. 查找用户
         var user = userRepo.findById(payload.userId());
-        if (user.isEmpty()) {
+        if (user.isEmpty())
+        {
             presenter.userNotFound();
             return null;
         }
@@ -57,5 +48,22 @@ public class GetMeUseCase {
         User u = user.get();
         presenter.presentUser(u);
         return new Output(u);
+    }
+
+    public interface Presenter
+    {
+        void presentUser(User user);
+
+        void invalidToken();
+
+        void userNotFound();
+    }
+
+    public record Request(String token)
+    {
+    }
+
+    public record Output(User user)
+    {
     }
 }

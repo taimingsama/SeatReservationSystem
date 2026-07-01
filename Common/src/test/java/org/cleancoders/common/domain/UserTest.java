@@ -2,12 +2,14 @@ package org.cleancoders.common.domain;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class UserTest {
+class UserTest
+{
 
     @Test
-    void userRecordShouldStoreAllFields() {
+    void userRecordShouldStoreAllFields()
+    {
         User user = new User("u1", "alice", "hashedpw", UserRole.STUDENT, "Alice", "alice@example.com");
 
         assertEquals("u1", user.id());
@@ -19,14 +21,16 @@ class UserTest {
     }
 
     @Test
-    void userRoleEnumShouldHaveStudentAndAdmin() {
+    void userRoleEnumShouldHaveStudentAndAdmin()
+    {
         assertEquals(2, UserRole.values().length);
         assertEquals(UserRole.STUDENT, UserRole.valueOf("STUDENT"));
         assertEquals(UserRole.ADMIN, UserRole.valueOf("ADMIN"));
     }
 
     @Test
-    void userRecordsWithSameFieldsShouldBeEqual() {
+    void userRecordsWithSameFieldsShouldBeEqual()
+    {
         User u1 = new User("u1", "alice", "pw", UserRole.STUDENT, "Alice", "a@b.com");
         User u2 = new User("u1", "alice", "pw", UserRole.STUDENT, "Alice", "a@b.com");
         assertEquals(u1, u2);

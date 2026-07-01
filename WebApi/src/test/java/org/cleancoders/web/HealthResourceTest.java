@@ -9,23 +9,24 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Integration test for the health check endpoint.
  * Uses Jersey Test Framework with embedded Jetty HTTP server.
  */
-public class HealthResourceTest extends JerseyTest {
+public class HealthResourceTest extends JerseyTest
+{
 
     @Override
-    protected Application configure() {
+    protected Application configure()
+    {
         return new ResourceConfig(HealthResource.class, CorsFilter.class);
     }
 
     @Test
-    void healthEndpointShouldReturn200WithStatusUP() {
+    void healthEndpointShouldReturn200WithStatusUP()
+    {
         Response response = target("/health")
                 .request(MediaType.APPLICATION_JSON)
                 .get();
@@ -40,7 +41,8 @@ public class HealthResourceTest extends JerseyTest {
     }
 
     @Test
-    void healthEndpointShouldReturnJSONContentType() {
+    void healthEndpointShouldReturnJSONContentType()
+    {
         Response response = target("/health")
                 .request(MediaType.APPLICATION_JSON)
                 .get();

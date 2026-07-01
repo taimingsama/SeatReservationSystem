@@ -6,22 +6,20 @@ import org.cleancoders.common.domain.UserRole;
 import org.cleancoders.userandauth.outbound.PasswordEncoder;
 import org.cleancoders.userandauth.outbound.UserRepository;
 
-public class RegisterUseCase {
+public class RegisterUseCase
+{
 
-    public record Request(String username, String password, String name, String email) {}
-    public record Output(String userId) {}
+    @Inject
+    UserRepository userRepo;
+    @Inject
+    PasswordEncoder passwordEncoder;
+    @Inject
+    Presenter presenter;
 
-    public interface Presenter {
-        void success(User user);
-        void usernameAlreadyExists(String username);
-    }
-
-    @Inject UserRepository userRepo;
-    @Inject PasswordEncoder passwordEncoder;
-    @Inject Presenter presenter;
-
-    public Output execute(Request request) {
-        if (userRepo.findByUsername(request.username()).isPresent()) {
+    public Output execute(Request request)
+    {
+        if (userRepo.findByUsername(request.username()).isPresent())
+        {
             presenter.usernameAlreadyExists(request.username());
             return null;
         }
@@ -32,5 +30,20 @@ public class RegisterUseCase {
 
         presenter.success(saved);
         return new Output(saved.id());
+    }
+
+    public interface Presenter
+    {
+        void success(User user);
+
+        void usernameAlreadyExists(String username);
+    }
+
+    public record Request(String username, String password, String name, String email)
+    {
+    }
+
+    public record Output(String userId)
+    {
     }
 }

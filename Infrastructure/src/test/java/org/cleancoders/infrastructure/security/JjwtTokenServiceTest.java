@@ -10,35 +10,40 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class JjwtTokenServiceTest {
+class JjwtTokenServiceTest
+{
 
-    private final JjwtTokenService service = new JjwtTokenService();
     private static final String SECRET = "this-is-a-test-secret-key-for-jwt-signing-256bit!!";
+    private final JjwtTokenService service = new JjwtTokenService();
     private final SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
 
     @Test
-    void shouldGenerateNonEmptyToken() {
+    void shouldGenerateNonEmptyToken()
+    {
         String token = service.generate("u1", "alice", "STUDENT");
         assertNotNull(token);
         assertFalse(token.isEmpty());
     }
 
     @Test
-    void shouldGenerateTokenWithThreeDotSegments() {
+    void shouldGenerateTokenWithThreeDotSegments()
+    {
         String token = service.generate("u1", "alice", "STUDENT");
         String[] parts = token.split("\\.");
         assertEquals(3, parts.length, "JWT should have header.payload.signature");
     }
 
     @Test
-    void shouldGenerateDifferentTokensForDifferentUsers() {
+    void shouldGenerateDifferentTokensForDifferentUsers()
+    {
         String t1 = service.generate("u1", "alice", "STUDENT");
         String t2 = service.generate("u2", "bob", "ADMIN");
         assertNotEquals(t1, t2);
     }
 
     @Test
-    void shouldGenerateValidTokenWithCorrectClaims() {
+    void shouldGenerateValidTokenWithCorrectClaims()
+    {
         String token = service.generate("u1", "alice", "STUDENT");
 
         Claims claims = Jwts.parser()

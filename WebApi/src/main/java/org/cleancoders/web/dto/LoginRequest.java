@@ -8,4 +8,6 @@ public record LoginRequest(
         String username,
         @Schema(description = "密码", required = true, example = "secret123")
         String password
-) {}
+)
+{
+}

@@ -51,16 +51,18 @@ WebApi ──→ UseCase ──→ Outbound (接口) ←── Infrastructure
 按业务子域划分为 4 个模块，每个模块内部再按层组织。
 **Domain + Outbound 在模块内**（与模块业务绑定），**Infrastructure + WebApi 跨模块**（技术实现与协议适配）。
 
-| 模块 | 职责 | domain 包 | outbound 包 (接口) | usecase 包 |
-|------|------|-----------|---------------------|------------|
-| **UserAndAuth** | 用户、认证、授权 | (见 Common) | `UserRepository`, `TokenService`, `PasswordEncoder` | `RegisterUseCase`, `LoginUseCase`, `GetMeUseCase`, `AuthUseCase`(abstract), `StudentAuthUseCase`, `AdminAuthUseCase` |
-| **SeatAndRoom** | 自习室、座位管理 | `StudyRoom`, `Seat`, `SeatStatus`, `TimeSlot` | `RoomRepository`, `SeatRepository`, `TimeSlotRepository` | `ListRoomsUseCase`, `ListSeatsUseCase`, `ManageRoomsUseCase`, `ManageSeatsUseCase` |
-| **Reservation** | 预约、签到、退座 | `Reservation`, `ReservationStatus` | `ReservationRepository` | `ReserveUseCase`, `CheckInUseCase`, `CheckOutUseCase`, `CancelReservationUseCase`, `ListMyReservationsUseCase`, `ManageReservationsUseCase` |
-| **SystemTask** | 定时任务、统计 | `Stats` (value object) | `StatsRepository` | `AutoReleaseUseCase`, `GetStatsUseCase` |
+| 模块              | 职责       | domain 包                                      | outbound 包 (接口)                                          | usecase 包                                                                                                                                   |
+|-----------------|----------|-----------------------------------------------|----------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
+| **UserAndAuth** | 用户、认证、授权 | (见 Common)                                    | `UserRepository`, `TokenService`, `PasswordEncoder`      | `RegisterUseCase`, `LoginUseCase`, `GetMeUseCase`, `AuthUseCase`(abstract), `StudentAuthUseCase`, `AdminAuthUseCase`                        |
+| **SeatAndRoom** | 自习室、座位管理 | `StudyRoom`, `Seat`, `SeatStatus`, `TimeSlot` | `RoomRepository`, `SeatRepository`, `TimeSlotRepository` | `ListRoomsUseCase`, `ListSeatsUseCase`, `ManageRoomsUseCase`, `ManageSeatsUseCase`                                                          |
+| **Reservation** | 预约、签到、退座 | `Reservation`, `ReservationStatus`            | `ReservationRepository`                                  | `ReserveUseCase`, `CheckInUseCase`, `CheckOutUseCase`, `CancelReservationUseCase`, `ListMyReservationsUseCase`, `ManageReservationsUseCase` |
+| **SystemTask**  | 定时任务、统计  | `Stats` (value object)                        | `StatsRepository`                                        | `AutoReleaseUseCase`, `GetStatsUseCase`                                                                                                     |
 
-**Infrastructure 层**（跨模块，实现 Outbound 接口）: `InMemoryUserRepo` → `UserRepository`, `JjwtTokenService` → `TokenService`, `BCryptPasswordEncoder` → `PasswordEncoder`, `AutoReleaseScheduler`
+**Infrastructure 层**（跨模块，实现 Outbound 接口）: `InMemoryUserRepo` → `UserRepository`, `JjwtTokenService` →
+`TokenService`, `BCryptPasswordEncoder` → `PasswordEncoder`, `AutoReleaseScheduler`
 
 **WebApi 层**（跨模块）:
+
 - `resource`: `AuthResource`, `RoomResource`, `SeatResource`, `ReservationResource`, `AdminResource`, `StatsResource`
 - `filter`: `CorsFilter`, `AuthFilter`
 - `presenter`: `WebApiXxxPresenter`（实现各 UseCase 内嵌的 Presenter 接口）
@@ -72,29 +74,30 @@ WebApi ──→ UseCase ──→ Outbound (接口) ←── Infrastructure
 
 ### 命名规则
 
-| 共享范围 | 模块名 | 说明 |
-|----------|--------|------|
-| **所有模块** 都用到 | `Common` | 纯公共模块，不依赖任何业务模块 |
-| **两个模块** 共用 | `Common{模块A}_{模块B}` | 例：`CommonSeatAndRoom_Reservation` |
+| 共享范围           | 模块名                       | 说明                                           |
+|----------------|---------------------------|----------------------------------------------|
+| **所有模块** 都用到   | `Common`                  | 纯公共模块，不依赖任何业务模块                              |
+| **两个模块** 共用    | `Common{模块A}_{模块B}`       | 例：`CommonSeatAndRoom_Reservation`            |
 | **三个及以上** 模块共用 | `Common{模块A}_{模块B}_{模块C}` | 例：`CommonUserAndAuth_Reservation_SystemTask` |
 
 关键约束：
+
 - 分隔符用 **`_`**（下划线），不是 `And`
 - 模块名用简称（`UserAndAuth`、`SeatAndRoom`、`Reservation`、`SystemTask`）
 - Common 模块之间可以互相依赖（如 `CommonSeatAndRoom_Reservation` 依赖 `Common`）
 
 ### 已创建的公共模块
 
-| 模块 | 包含 | 使用者 |
-|------|------|--------|
+| 模块           | 包含                 | 使用者                                          |
+|--------------|--------------------|----------------------------------------------|
 | **`Common`** | `User`, `UserRole` | UserAndAuth, Infrastructure, WebApi（及未来所有模块） |
 
 ### 规划中的公共模块
 
-| 模块 | 包含 | 使用者 |
-|------|------|--------|
+| 模块                                  | 包含                                                               | 使用者                      |
+|-------------------------------------|------------------------------------------------------------------|--------------------------|
 | **`CommonSeatAndRoom_Reservation`** | `Seat`, `SeatStatus`, `StudyRoom`, `TimeSlot` + 对应 Repository 接口 | SeatAndRoom, Reservation |
-| **`CommonReservation_SystemTask`** | `Reservation`, `ReservationStatus` + `ReservationRepository` | Reservation, SystemTask |
+| **`CommonReservation_SystemTask`**  | `Reservation`, `ReservationStatus` + `ReservationRepository`     | Reservation, SystemTask  |
 
 ### 判断流程
 
@@ -130,6 +133,7 @@ CommonSeatAndRoom_Reservation/
 ### 为什么需要公共模块
 
 如果 Reservation 直接依赖 SeatAndRoom 来获取 `Seat` 类：
+
 - Reservation 会被迫引入 SeatAndRoom 的所有传递依赖
 - 容易形成循环依赖（如 SeatAndRoom 后来又需要 Reservation 的类型）
 - 单元测试时必须加载整个 SeatAndRoom 模块
@@ -180,7 +184,8 @@ AuthUseCase (abstract)
 
 ### 为什么这样设计
 
-Template Method 将认证和授权逻辑集中在基类中，避免每个 UseCase 重复编写 token 解析和角色检查代码。子类只需关注 `doExecute` 中的纯业务逻辑。当需要新增角色时，只需新增一个 AuthUseCase 子类即可。
+Template Method 将认证和授权逻辑集中在基类中，避免每个 UseCase 重复编写 token 解析和角色检查代码。子类只需关注 `doExecute`
+中的纯业务逻辑。当需要新增角色时，只需新增一个 AuthUseCase 子类即可。
 
 ## 核心模式：Domain 层（富领域模型）
 
@@ -240,11 +245,11 @@ UseCase ──注入──→ Outbound 接口 ←──实现── Infrastructu
 
 ### 三种 Outbound 接口类型
 
-| 类型 | 命名模式 | 示例 | 职责 |
-|------|----------|------|------|
-| **Repository** | `{实体}Repository` | `UserRepository`, `ReservationRepository` | 持久化（CRUD、查询） |
-| **Service** | `{能力}Service` | `TokenService`, `PasswordEncoder` | 基础设施服务（加密、JWT） |
-| **调度器** | `{任务}Scheduler` | `AutoReleaseScheduler` | 定时任务触发 |
+| 类型             | 命名模式             | 示例                                        | 职责             |
+|----------------|------------------|-------------------------------------------|----------------|
+| **Repository** | `{实体}Repository` | `UserRepository`, `ReservationRepository` | 持久化（CRUD、查询）   |
+| **Service**    | `{能力}Service`    | `TokenService`, `PasswordEncoder`         | 基础设施服务（加密、JWT） |
+| **调度器**        | `{任务}Scheduler`  | `AutoReleaseScheduler`                    | 定时任务触发         |
 
 ### 现有 Outbound 接口
 
@@ -285,6 +290,7 @@ PasswordEncoder         ←────    BCryptPasswordEncoder
 ### 为什么不直接注入 Infrastructure
 
 如果 UseCase 直接注入 `InMemoryUserRepo` 而不是 `UserRepository`：
+
 - 切换存储实现（如 InMemory → JDBC）需要改 UseCase 代码
 - 单元测试无法 Mock——必须用真实数据库
 
@@ -331,7 +337,7 @@ public class ReserveUseCase extends StudentAuthUseCase<ReserveUseCase.Request> {
     protected Output doExecute(User user, Request req) {
         // 1. 冲突检测
         // 2. 持久化
-        Reservation r = reservationRepo.save(...);
+        Reservation r = reservationRepo.save(...)
         // 3. 通知 Presenter（设置 HTTP 响应）
         presenter.success(r.getId(), r.getSeatNumber(), r.getTimeSlotLabel());
         // 4. 返回 Output（供 Resource 层获取业务标识）
@@ -348,7 +354,8 @@ public class ReserveUseCase extends StudentAuthUseCase<ReserveUseCase.Request> {
 
 ### 为什么需要内嵌接口
 
-将 Presenter 接口定义在 UseCase 内部，让 UseCase 成为"自说明"的契约：一眼就能看到这个用例有哪些输出分支。WebApi 层实现这些接口时，IDE 会强制覆盖所有方法，不会遗漏错误处理分支。
+将 Presenter 接口定义在 UseCase 内部，让 UseCase 成为"自说明"的契约：一眼就能看到这个用例有哪些输出分支。WebApi
+层实现这些接口时，IDE 会强制覆盖所有方法，不会遗漏错误处理分支。
 
 ## 核心模式四：Presenter + ThreadLocal
 
@@ -393,18 +400,19 @@ public class WebApiReservationPresenter implements ReserveUseCase.Presenter {
 
 ### 为什么用 ThreadLocal
 
-Presenter 是 `@Singleton` 实例（DI 容器中只有一个），但每个 HTTP 请求运行在独立线程中。ThreadLocal 确保每个请求写入自己的 Response，互不干扰。
+Presenter 是 `@Singleton` 实例（DI 容器中只有一个），但每个 HTTP 请求运行在独立线程中。ThreadLocal 确保每个请求写入自己的
+Response，互不干扰。
 
 ### HTTP 状态码约定
 
-| 场景 | 状态码 |
-|------|--------|
-| 创建成功 | 201 |
-| 查询成功 | 200 |
+| 场景                 | 状态码 |
+|--------------------|-----|
+| 创建成功               | 201 |
+| 查询成功               | 200 |
 | 业务冲突（如座位已被预约、重复预约） | 409 |
-| 权限不足 | 403 |
-| 资源不存在 | 404 |
-| 参数校验失败 | 400 |
+| 权限不足               | 403 |
+| 资源不存在              | 404 |
+| 参数校验失败             | 400 |
 
 ## 核心模式五：Resource 层的调用模式
 
@@ -481,12 +489,12 @@ public class AppBinder extends AbstractBinder {
 
 ### 绑定规则
 
-| 组件类型 | 作用域 | 原因 |
-|----------|--------|------|
-| UseCase | **PerLookup**（默认） | 每次请求新建实例，可持有请求级状态 |
-| Presenter | **Singleton** | 单例 + ThreadLocal 实现线程安全 |
-| Repository | **Singleton** | JDBC 实现无状态 |
-| TokenService / PasswordEncoder | **Singleton** | 无状态 |
+| 组件类型                           | 作用域               | 原因                      |
+|--------------------------------|-------------------|-------------------------|
+| UseCase                        | **PerLookup**（默认） | 每次请求新建实例，可持有请求级状态       |
+| Presenter                      | **Singleton**     | 单例 + ThreadLocal 实现线程安全 |
+| Repository                     | **Singleton**     | JDBC 实现无状态              |
+| TokenService / PasswordEncoder | **Singleton**     | 无状态                     |
 
 ## 新增功能的完整步骤
 
@@ -495,6 +503,7 @@ public class AppBinder extends AbstractBinder {
 ### 决策优先：哪些需要新建，哪些复用
 
 新增功能前，先判断：
+
 1. **需要新实体吗？** → 需要新数据表/新业务概念 → 新建 Domain 实体
 2. **需要新的 Outbound 接口吗？** → 需要新的数据访问/外部服务 → 新建 Repository/Service 接口
 3. **已有的 Outbound 接口够用吗？** → 复用已有接口，只加方法
@@ -565,6 +574,7 @@ public interface ReviewRepository {
 ```
 
 关键约束：
+
 - 参数和返回值用 Domain 类型或基本类型——不引入 `Connection`、`ResultSet`、`HttpClient` 等技术类型
 - 接口在模块内（`reservation.outbound`），实现在跨模块的 `infrastructure` 中
 
@@ -739,28 +749,30 @@ AVAILABLE   ──维护──→ MAINTENANCE
 
 ## 命名规范
 
-| 元素 | 命名规则 | 示例 |
-|------|----------|------|
-| UseCase 类 | `{动作}{对象}UseCase` | `ReserveUseCase`, `ListRoomsUseCase` |
-| Presenter 接口 | UseCase 内部命名为 `Presenter` | `ReserveUseCase.Presenter` |
-| Presenter 实现 | `WebApi{模块}Presenter` | `WebApiReservationPresenter` |
-| Resource 类 | `{模块}Resource` | `ReservationResource` |
-| Repository 接口 | `{实体}Repository` | `ReservationRepository` |
-| Repository 实现 | `{技术前缀}{接口名}` | `InMemoryUserRepo`, `JjwtTokenService`, `BCryptPasswordEncoder` |
-| 包路径 | `{module}.{layer}` | `reservation.usecase`, `reservation.domain` |
-| Outbound 接口 | `{实体}Repository` / `{能力}Service` | `UserRepository`, `TokenService` |
-| Infrastructure 包 | `infrastructure.{子包}` | `infrastructure.persistence`, `infrastructure.security` |
-| 公共模块（全部） | `Common` | `Common` |
-| 公共模块（两模块） | `Common{模块A}_{模块B}` | `CommonSeatAndRoom_Reservation` |
-| 公共模块（多模块） | `Common{模块A}_{模块B}_{模块C}` | `CommonUserAndAuth_Reservation_SystemTask` |
+| 元素               | 命名规则                             | 示例                                                              |
+|------------------|----------------------------------|-----------------------------------------------------------------|
+| UseCase 类        | `{动作}{对象}UseCase`                | `ReserveUseCase`, `ListRoomsUseCase`                            |
+| Presenter 接口     | UseCase 内部命名为 `Presenter`        | `ReserveUseCase.Presenter`                                      |
+| Presenter 实现     | `WebApi{模块}Presenter`            | `WebApiReservationPresenter`                                    |
+| Resource 类       | `{模块}Resource`                   | `ReservationResource`                                           |
+| Repository 接口    | `{实体}Repository`                 | `ReservationRepository`                                         |
+| Repository 实现    | `{技术前缀}{接口名}`                    | `InMemoryUserRepo`, `JjwtTokenService`, `BCryptPasswordEncoder` |
+| 包路径              | `{module}.{layer}`               | `reservation.usecase`, `reservation.domain`                     |
+| Outbound 接口      | `{实体}Repository` / `{能力}Service` | `UserRepository`, `TokenService`                                |
+| Infrastructure 包 | `infrastructure.{子包}`            | `infrastructure.persistence`, `infrastructure.security`         |
+| 公共模块（全部）         | `Common`                         | `Common`                                                        |
+| 公共模块（两模块）        | `Common{模块A}_{模块B}`              | `CommonSeatAndRoom_Reservation`                                 |
+| 公共模块（多模块）        | `Common{模块A}_{模块B}_{模块C}`        | `CommonUserAndAuth_Reservation_SystemTask`                      |
 
 ## 业务规则
 
 ### 预约冲突检测（三项检查）
+
 1. 座位在目标日期+时段是否为 AVAILABLE 状态
 2. 同一用户在目标日期+时段是否已有预约（一人一座）
 3. 座位在目标日期+时段是否已被他人预约/占用
 
 ### 签到规则
+
 - 预约时段未开始：需在时段开始后 30 分钟内签到，超时自动释放
 - 当前已在时段内：从当前时间起 30 分钟内签到，超时自动释放

@@ -17,15 +17,17 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
  * HK2 dependency injection binder.
  * Binds outbound interface implementations from Infrastructure module
  * to their corresponding interfaces defined in business modules.
- *
+ * <p>
  * Binding rules:
  * - bind(Implementation.class).to(Interface.class); — create new instance per injection (PerLookup)
  * - bind(instance).to(Contract.class); — share the same instance across contracts
  */
-public class AppBinder extends AbstractBinder {
+public class AppBinder extends AbstractBinder
+{
 
     @Override
-    protected void configure() {
+    protected void configure()
+    {
         // === UserAndAuth UseCases ===
         bind(LoginUseCase.class).to(LoginUseCase.class);
         bind(RegisterUseCase.class).to(RegisterUseCase.class);

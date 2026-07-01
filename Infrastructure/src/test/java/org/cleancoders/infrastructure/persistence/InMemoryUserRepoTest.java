@@ -7,17 +7,20 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class InMemoryUserRepoTest {
+class InMemoryUserRepoTest
+{
 
     private InMemoryUserRepo repo;
 
     @BeforeEach
-    void setUp() {
+    void setUp()
+    {
         repo = new InMemoryUserRepo();
     }
 
     @Test
-    void shouldSaveAndFindByUsername() {
+    void shouldSaveAndFindByUsername()
+    {
         User user = new User("u1", "alice", "hashed", UserRole.STUDENT, "Alice", "a@b.com");
         repo.save(user);
 
@@ -28,13 +31,15 @@ class InMemoryUserRepoTest {
     }
 
     @Test
-    void shouldReturnEmptyForUnknownUsername() {
+    void shouldReturnEmptyForUnknownUsername()
+    {
         var found = repo.findByUsername("nobody");
         assertTrue(found.isEmpty());
     }
 
     @Test
-    void shouldSaveAndFindById() {
+    void shouldSaveAndFindById()
+    {
         User user = new User("u1", "alice", "hashed", UserRole.STUDENT, "Alice", "a@b.com");
         repo.save(user);
 
@@ -43,7 +48,8 @@ class InMemoryUserRepoTest {
     }
 
     @Test
-    void shouldGenerateIdWhenNull() {
+    void shouldGenerateIdWhenNull()
+    {
         User user = new User(null, "bob", "hashed", UserRole.ADMIN, "Bob", "bob@b.com");
         User saved = repo.save(user);
 

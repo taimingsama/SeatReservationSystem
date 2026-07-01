@@ -1,12 +1,15 @@
 # Servlet REST API 骨架搭建 实现计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:
+> executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 新建 WebApi 模块（WAR），搭建 Jersey + Jakarta Servlet REST API 骨架，实现 `GET /api/health` 健康检查端点。
 
-**Architecture:** 新增 WebApi 子模块（WAR packaging），通过 Jersey 3.1.7 + Jakarta Servlet 6.1 提供 JAX-RS 风格的 JSON API。web.xml 声明 ServletContainer，AppConfig 注册 Resource 和 Filter。
+**Architecture:** 新增 WebApi 子模块（WAR packaging），通过 Jersey 3.1.7 + Jakarta Servlet 6.1 提供 JAX-RS 风格的 JSON
+API。web.xml 声明 ServletContainer，AppConfig 注册 Resource 和 Filter。
 
-**Tech Stack:** Jakarta Servlet 6.1, Jersey 3.1.7, Jackson (via jersey-media-json-jackson), HK2 DI, Java 17, Maven WAR Plugin 3.4.0
+**Tech Stack:** Jakarta Servlet 6.1, Jersey 3.1.7, Jackson (via jersey-media-json-jackson), HK2 DI, Java 17, Maven WAR
+Plugin 3.4.0
 
 ## Global Constraints
 
@@ -46,10 +49,12 @@ pom.xml                                              ← 修改：添加 WebApi 
 ### Task 1: 创建 WebApi 模块 POM 并更新父 POM
 
 **Files:**
+
 - Create: `WebApi/pom.xml`
 - Modify: `pom.xml:10-16`
 
 **Interfaces:**
+
 - Consumes: 父 POM 中的 `jakarta.servlet-api:6.1.0`（provided）
 - Produces: 无（后续 Task 依赖此模块存在且可编译）
 
@@ -62,6 +67,7 @@ pom.xml                                              ← 修改：添加 WebApi 
 ```
 
 编辑前：
+
 ```xml
 <modules>
     <module>UserAndAuth</module>
@@ -72,6 +78,7 @@ pom.xml                                              ← 修改：添加 WebApi 
 ```
 
 编辑后：
+
 ```xml
 <modules>
     <module>UserAndAuth</module>
@@ -178,9 +185,11 @@ git commit -m "feat: add WebApi module with Jersey dependencies"
 ### Task 2: 创建 web.xml
 
 **Files:**
+
 - Create: `WebApi/src/main/webapp/WEB-INF/web.xml`
 
 **Interfaces:**
+
 - Consumes: `AppConfig` 类（Task 3 创建）
 - Produces: Jersey ServletContainer 配置，映射 `/api/*`
 
@@ -226,9 +235,11 @@ git commit -m "feat: add web.xml with Jersey ServletContainer config"
 ### Task 3: 创建 AppConfig.java
 
 **Files:**
+
 - Create: `WebApi/src/main/java/org/cleancoders/web/AppConfig.java`
 
 **Interfaces:**
+
 - Consumes: `HealthResource.class`, `CorsFilter.class`（后续 Task 创建，此处先以注释说明）
 - Produces: JAX-RS Application 注册类，供 `web.xml` 中 `jakarta.ws.rs.Application` 参数引用
 
@@ -275,9 +286,11 @@ git commit -m "feat: add AppConfig JAX-RS application class"
 ### Task 4: 创建 HealthResource.java
 
 **Files:**
+
 - Create: `WebApi/src/main/java/org/cleancoders/web/resource/HealthResource.java`
 
 **Interfaces:**
+
 - Consumes: 无
 - Produces: `GET /api/health` — 返回 `{"status": "UP", "timestamp": "<ISO-8601>"}`
 
@@ -325,11 +338,14 @@ git commit -m "feat: add HealthResource health check endpoint"
 ### Task 5: 创建 CorsFilter.java
 
 **Files:**
+
 - Create: `WebApi/src/main/java/org/cleancoders/web/filter/CorsFilter.java`
 
 **Interfaces:**
+
 - Consumes: 无
-- Produces: 实现 `ContainerResponseFilter`，为所有响应添加 CORS 头（`Access-Control-Allow-Origin`, `Access-Control-Allow-Methods`, `Access-Control-Allow-Headers`）
+- Produces: 实现 `ContainerResponseFilter`，为所有响应添加 CORS 头（`Access-Control-Allow-Origin`,
+  `Access-Control-Allow-Methods`, `Access-Control-Allow-Headers`）
 
 - [ ] **Step 1: 创建 CorsFilter.java**
 
@@ -377,9 +393,11 @@ git commit -m "feat: add CorsFilter for cross-origin support"
 ### Task 6: 编写集成测试
 
 **Files:**
+
 - Create: `WebApi/src/test/java/org/cleancoders/web/HealthResourceTest.java`
 
 **Interfaces:**
+
 - Consumes: `HealthResource`, `AppConfig`, `CorsFilter`（所有以上类）
 - Produces: 验证端点返回 200 和正确 JSON body
 
@@ -459,6 +477,7 @@ git commit -m "test: add HealthResource integration test"
 ### Task 7: 整体构建验证
 
 **Files:**
+
 - 无新建/修改文件
 
 - [ ] **Step 1: 全量 Maven 构建（编译 + 测试 + 打包）**
@@ -476,6 +495,7 @@ jar tf WebApi/target/WebApi-1.0-SNAPSHOT.war | grep -E "WEB-INF/(web\.xml|classe
 ```
 
 预期输出包含：
+
 ```
 WEB-INF/web.xml
 WEB-INF/classes/org/cleancoders/web/AppConfig.class

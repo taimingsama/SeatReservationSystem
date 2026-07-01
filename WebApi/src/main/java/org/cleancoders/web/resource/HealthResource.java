@@ -20,14 +20,16 @@ import java.util.Map;
 @Path("/health")
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "Health", description = "服务健康检查")
-public class HealthResource {
+public class HealthResource
+{
 
     @GET
     @Operation(summary = "健康检查", description = "返回服务运行状态和时间戳。")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "服务正常运行")
     })
-    public Response health() {
+    public Response health()
+    {
         return Response.ok(Map.of(
                 "status", "UP",
                 "timestamp", Instant.now().toString()

@@ -1,10 +1,13 @@
 # Clean Architecture 重构 实现计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:
+> executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 将项目重构为 Clean Architecture 骨架：业务模块内部 domain/outbound/usecase 三层 + 新建 Infrastructure 模块 + WebApi 集成 HK2。
+**Goal:** 将项目重构为 Clean Architecture 骨架：业务模块内部 domain/outbound/usecase 三层 + 新建 Infrastructure 模块 +
+WebApi 集成 HK2。
 
-**Architecture:** 功能模块保留为 Maven jar，内部分 domain/outbound/usecase 子包；Infrastructure 模块实现各 outbound 接口；WebApi 通过 HK2 绑定依赖。
+**Architecture:** 功能模块保留为 Maven jar，内部分 domain/outbound/usecase 子包；Infrastructure 模块实现各 outbound
+接口；WebApi 通过 HK2 绑定依赖。
 
 **Tech Stack:** Java 17, Jakarta Servlet 6.1, Jersey 3.1.7, HK2, Maven 多模块
 
@@ -52,12 +55,14 @@ WebApi/src/main/java/.../web/
 ### Task 1: 清理业务模块并创建三层包结构
 
 **Files:**
+
 - Delete: `Reservation/src/main/java/org/cleancoders/Main.java`
 - Delete: `SeatAndRoom/src/main/java/org/cleancoders/Main.java`
 - Delete: `SystemTask/src/main/java/org/cleancoders/Main.java`
 - Create 12 个包目录（每模块 3 个：domain/outbound/usecase）
 
 **Interfaces:**
+
 - Produces: 空包结构，供后续 Task 引用
 
 - [ ] **Step 1: 删除所有 Main.java 占位文件**
@@ -99,6 +104,7 @@ mkdir -p SystemTask/src/main/java/org/cleancoders/systemtask/usecase
 为每个模块的 domain 包创建 `package-info.java` 说明该层职责（以 UserAndAuth 为例，其他模块同理）：
 
 `UserAndAuth/src/main/java/org/cleancoders/userandauth/domain/package-info.java`:
+
 ```java
 /**
  * UserAndAuth domain layer.
@@ -110,6 +116,7 @@ package org.cleancoders.userandauth.domain;
 
 同理为 outbound：
 `UserAndAuth/src/main/java/org/cleancoders/userandauth/outbound/package-info.java`:
+
 ```java
 /**
  * UserAndAuth outbound layer.
@@ -121,6 +128,7 @@ package org.cleancoders.userandauth.outbound;
 
 同理为 usecase：
 `UserAndAuth/src/main/java/org/cleancoders/userandauth/usecase/package-info.java`:
+
 ```java
 /**
  * UserAndAuth use case layer.
@@ -152,10 +160,12 @@ git commit -m "refactor: 清理占位文件，创建业务模块 domain/outbound
 ### Task 2: 创建 Infrastructure 模块
 
 **Files:**
+
 - Create: `Infrastructure/pom.xml`
 - Create: 包目录及 `package-info.java`
 
 **Interfaces:**
+
 - Produces: Infrastructure 模块可供 WebApi 依赖
 
 - [ ] **Step 1: 创建 Infrastructure 目录结构**
@@ -226,6 +236,7 @@ mkdir -p Infrastructure/src/test/java/org/cleancoders/infrastructure
 - [ ] **Step 4: 创建 package-info.java**
 
 `Infrastructure/src/main/java/org/cleancoders/infrastructure/package-info.java`:
+
 ```java
 /**
  * Infrastructure layer.
@@ -255,10 +266,12 @@ git commit -m "feat: 新建 Infrastructure 模块，依赖所有业务模块"
 ### Task 3: 更新 WebApi 模块依赖和包结构
 
 **Files:**
+
 - Modify: `WebApi/pom.xml`
 - Create: `WebApi/src/main/java/org/cleancoders/web/binder/`
 
 **Interfaces:**
+
 - Consumes: 所有业务模块 + Infrastructure 模块
 - Produces: WebApi 可引用各模块的 usecase/outbound 类
 
@@ -321,9 +334,11 @@ git commit -m "feat: WebApi 添加业务模块和 Infrastructure 依赖"
 ### Task 4: 创建 HK2 AppBinder 骨架
 
 **Files:**
+
 - Create: `WebApi/src/main/java/org/cleancoders/web/binder/AppBinder.java`
 
 **Interfaces:**
+
 - Produces: `AppBinder extends AbstractBinder`，供 AppConfig 注册
 
 - [ ] **Step 1: 创建 AppBinder.java**
@@ -381,15 +396,18 @@ git commit -m "feat: 创建 HK2 AppBinder 绑定骨架"
 ### Task 5: 在 AppConfig 中注册 AppBinder
 
 **Files:**
+
 - Modify: `WebApi/src/main/java/org/cleancoders/web/AppConfig.java`
 
 **Interfaces:**
+
 - Consumes: `AppBinder`
 - Produces: Jersey 启动时自动执行 HK2 绑定
 
 - [ ] **Step 1: 修改 AppConfig.java，注册 AppBinder**
 
 当前 `AppConfig.java`:
+
 ```java
 package org.cleancoders.web;
 
@@ -413,6 +431,7 @@ public class AppConfig extends Application {
 ```
 
 修改后：
+
 ```java
 package org.cleancoders.web;
 
@@ -473,6 +492,7 @@ mvn clean package
 ```
 
 预期：
+
 - 所有模块 BUILD SUCCESS
 - WebApi 测试 2/2 pass
 - `WebApi/target/WebApi-1.0-SNAPSHOT.war` 生成

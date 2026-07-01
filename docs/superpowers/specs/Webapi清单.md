@@ -52,25 +52,25 @@ GET    /api/admin/stats                UC-15  数据统计（管理员）
 
 ## 端点总览
 
-| 方法 | 路径 | 用例 | 权限 |
-|------|------|------|------|
-| POST | `/api/auth/register` | UC-01 | 公开 |
-| POST | `/api/auth/login` | UC-02 | 公开 |
-| GET | `/api/auth/me` | UC-03 | 登录用户 |
-| GET | `/api/rooms` | UC-04 | 公开 |
-| GET | `/api/rooms/{id}/seats` | UC-05 | 公开 |
-| POST | `/api/admin/rooms` | UC-06 | 管理员 |
-| PUT | `/api/admin/rooms/{id}` | UC-06 | 管理员 |
-| DELETE | `/api/admin/rooms/{id}` | UC-06 | 管理员 |
-| POST | `/api/admin/seats` | UC-07 | 管理员 |
-| PUT | `/api/admin/seats/{id}` | UC-07 | 管理员 |
-| DELETE | `/api/admin/seats/{id}` | UC-07 | 管理员 |
-| POST | `/api/reservations` | UC-08 | 学生 |
-| POST | `/api/reservations/{id}/check-in` | UC-09 | 学生 |
-| POST | `/api/reservations/{id}/check-out` | UC-10 | 学生 |
-| DELETE | `/api/reservations/{id}` | UC-11 | 学生 |
-| GET | `/api/reservations/my` | UC-12 | 学生 |
-| GET | `/api/admin/reservations` | UC-13 | 管理员 |
-| GET | `/api/admin/stats` | UC-15 | 管理员 |
+| 方法     | 路径                                 | 用例    | 权限   |
+|--------|------------------------------------|-------|------|
+| POST   | `/api/auth/register`               | UC-01 | 公开   |
+| POST   | `/api/auth/login`                  | UC-02 | 公开   |
+| GET    | `/api/auth/me`                     | UC-03 | 登录用户 |
+| GET    | `/api/rooms`                       | UC-04 | 公开   |
+| GET    | `/api/rooms/{id}/seats`            | UC-05 | 公开   |
+| POST   | `/api/admin/rooms`                 | UC-06 | 管理员  |
+| PUT    | `/api/admin/rooms/{id}`            | UC-06 | 管理员  |
+| DELETE | `/api/admin/rooms/{id}`            | UC-06 | 管理员  |
+| POST   | `/api/admin/seats`                 | UC-07 | 管理员  |
+| PUT    | `/api/admin/seats/{id}`            | UC-07 | 管理员  |
+| DELETE | `/api/admin/seats/{id}`            | UC-07 | 管理员  |
+| POST   | `/api/reservations`                | UC-08 | 学生   |
+| POST   | `/api/reservations/{id}/check-in`  | UC-09 | 学生   |
+| POST   | `/api/reservations/{id}/check-out` | UC-10 | 学生   |
+| DELETE | `/api/reservations/{id}`           | UC-11 | 学生   |
+| GET    | `/api/reservations/my`             | UC-12 | 学生   |
+| GET    | `/api/admin/reservations`          | UC-13 | 管理员  |
+| GET    | `/api/admin/stats`                 | UC-15 | 管理员  |
 
 > 注：UC-14（AutoReleaseUseCase）是系统定时任务，不暴露 HTTP 端点。

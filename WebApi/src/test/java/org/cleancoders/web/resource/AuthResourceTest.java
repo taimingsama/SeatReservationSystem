@@ -11,9 +11,11 @@ import org.cleancoders.web.presenter.WebApiAuthPresenter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class AuthResourceTest {
+class AuthResourceTest
+{
 
     private AuthResource resource;
     private WebApiAuthPresenter presenter;
@@ -25,7 +27,8 @@ class AuthResourceTest {
     private RegisterUseCase.Output registerOutputToReturn;
 
     @BeforeEach
-    void setUp() {
+    void setUp()
+    {
         presenter = new WebApiAuthPresenter();
         loginExecuteCalled = false;
         lastLoginRequest = null;
@@ -34,17 +37,21 @@ class AuthResourceTest {
 
         resource = new AuthResource();
         resource.presenter = presenter;
-        resource.loginUseCase = new LoginUseCase() {
+        resource.loginUseCase = new LoginUseCase()
+        {
             @Override
-            public Output execute(Request request) {
+            public Output execute(Request request)
+            {
                 loginExecuteCalled = true;
                 lastLoginRequest = request;
                 return loginOutputToReturn;
             }
         };
-        resource.registerUseCase = new RegisterUseCase() {
+        resource.registerUseCase = new RegisterUseCase()
+        {
             @Override
-            public Output execute(Request request) {
+            public Output execute(Request request)
+            {
                 registerExecuteCalled = true;
                 lastRegisterRequest = request;
                 return registerOutputToReturn;
@@ -53,7 +60,8 @@ class AuthResourceTest {
     }
 
     @Test
-    void loginShouldDelegateToUseCase() {
+    void loginShouldDelegateToUseCase()
+    {
         loginOutputToReturn = new LoginUseCase.Output("test.jwt.token");
         presenter.success("test.jwt.token",
                 new User("u1", "alice", "pw", UserRole.STUDENT, "Alice", "a@b.com"));
@@ -67,7 +75,8 @@ class AuthResourceTest {
     }
 
     @Test
-    void loginShouldReturn401OnBadCredentials() {
+    void loginShouldReturn401OnBadCredentials()
+    {
         loginOutputToReturn = null;
         presenter.invalidCredentials();
 
@@ -77,7 +86,8 @@ class AuthResourceTest {
     }
 
     @Test
-    void registerShouldDelegateToUseCase() {
+    void registerShouldDelegateToUseCase()
+    {
         registerOutputToReturn = new RegisterUseCase.Output("new-id");
         presenter.success(new User("new-id", "bob", "hashed", UserRole.STUDENT, "Bob", "bob@b.com"));
 
@@ -92,7 +102,8 @@ class AuthResourceTest {
     }
 
     @Test
-    void registerShouldReturn409OnDuplicateUsername() {
+    void registerShouldReturn409OnDuplicateUsername()
+    {
         registerOutputToReturn = null;
         presenter.usernameAlreadyExists("bob");
 

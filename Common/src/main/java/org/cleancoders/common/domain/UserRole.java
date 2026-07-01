@@ -1,6 +1,7 @@
 package org.cleancoders.common.domain;
 
-public enum UserRole {
+public enum UserRole
+{
     STUDENT,
     ADMIN
 }

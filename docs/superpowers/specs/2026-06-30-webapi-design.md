@@ -6,13 +6,13 @@
 
 ## 领域实体
 
-| 实体 | 字段 | 说明 |
-|---|---|---|
-| **User** | id, username, password(hashed), role(STUDENT/ADMIN), name, email | 用户 |
-| **StudyRoom** | id, name, location, capacity, status(OPEN/CLOSED) | 自习室 |
-| **Seat** | id, roomId, seatNumber, status(AVAILABLE/RESERVED/OCCUPIED/MAINTENANCE) | 座位 |
-| **TimeSlot** | id, startTime(08:00/13:00/18:00), endTime(12:00/17:00/22:00) | 固定时段模板 |
-| **Reservation** | id, userId, seatId, timeSlotId, date, status(RESERVED/CHECKED_IN/CHECKED_OUT/CANCELLED/EXPIRED), createdAt, checkInAt, checkOutAt | 预约记录 |
+| 实体              | 字段                                                                                                                                | 说明     |
+|-----------------|-----------------------------------------------------------------------------------------------------------------------------------|--------|
+| **User**        | id, username, password(hashed), role(STUDENT/ADMIN), name, email                                                                  | 用户     |
+| **StudyRoom**   | id, name, location, capacity, status(OPEN/CLOSED)                                                                                 | 自习室    |
+| **Seat**        | id, roomId, seatNumber, status(AVAILABLE/RESERVED/OCCUPIED/MAINTENANCE)                                                           | 座位     |
+| **TimeSlot**    | id, startTime(08:00/13:00/18:00), endTime(12:00/17:00/22:00)                                                                      | 固定时段模板 |
+| **Reservation** | id, userId, seatId, timeSlotId, date, status(RESERVED/CHECKED_IN/CHECKED_OUT/CANCELLED/EXPIRED), createdAt, checkInAt, checkOutAt | 预约记录   |
 
 ### 实体关系
 
@@ -38,11 +38,13 @@ AVAILABLE   ──维护──→ MAINTENANCE
 ## 业务规则
 
 ### 预约冲突检测
+
 1. 座位在目标日期+时段是否为 AVAILABLE 状态
 2. 同一用户在目标日期+时段是否已有预约（一人一座）
 3. 座位在目标日期+时段是否已被他人预约/占用
 
 ### 签到规则
+
 - 预约成功后，若**当前时间不在预约时段内**：需在时段开始后 30 分钟内签到，超时释放
 - 预约成功后，若**当前时间在预约时段内**：从当前时间起 30 分钟内签到，超时释放
 
@@ -50,38 +52,38 @@ AVAILABLE   ──维护──→ MAINTENANCE
 
 ### Auth（UserAndAuth）
 
-| 编号 | 用例 | 描述 | Actor |
-|------|------|------|-------|
-| UC-01 | RegisterUseCase | 注册账号，默认 STUDENT | 公开 |
-| UC-02 | LoginUseCase | 用户名+密码登录，返回 JWT | 公开 |
-| UC-03 | GetMeUseCase | 获取当前登录用户信息 | 所有用户 |
+| 编号    | 用例              | 描述              | Actor |
+|-------|-----------------|-----------------|-------|
+| UC-01 | RegisterUseCase | 注册账号，默认 STUDENT | 公开    |
+| UC-02 | LoginUseCase    | 用户名+密码登录，返回 JWT | 公开    |
+| UC-03 | GetMeUseCase    | 获取当前登录用户信息      | 所有用户  |
 
 ### Room & Seat（SeatAndRoom）
 
-| 编号 | 用例 | 描述 | Actor |
-|------|------|------|-------|
-| UC-04 | ListRoomsUseCase | 获取所有 OPEN 状态的自习室 | 所有用户 |
-| UC-05 | ListSeatsUseCase | 获取某自习室所有座位及状态 | 所有用户 |
-| UC-06 | ManageRoomsUseCase | 自习室 CRUD + 开关状态 | 管理员 |
-| UC-07 | ManageSeatsUseCase | 座位 CRUD + 状态切换（含维护） | 管理员 |
+| 编号    | 用例                 | 描述                  | Actor |
+|-------|--------------------|---------------------|-------|
+| UC-04 | ListRoomsUseCase   | 获取所有 OPEN 状态的自习室    | 所有用户  |
+| UC-05 | ListSeatsUseCase   | 获取某自习室所有座位及状态       | 所有用户  |
+| UC-06 | ManageRoomsUseCase | 自习室 CRUD + 开关状态     | 管理员   |
+| UC-07 | ManageSeatsUseCase | 座位 CRUD + 状态切换（含维护） | 管理员   |
 
 ### Reservation（Reservation）
 
-| 编号 | 用例 | 描述 | Actor |
-|------|------|------|-------|
-| UC-08 | ReserveUseCase | 选择座位+时段+日期，冲突检测通过后创建预约 | 学生 |
-| UC-09 | CheckInUseCase | 按签到规则验证并签到，RESERVED→OCCUPIED | 学生 |
-| UC-10 | CheckOutUseCase | 主动退座，OCCUPIED→AVAILABLE | 学生 |
-| UC-11 | CancelReservationUseCase | 未签到前取消，→CANCELLED，释放座位 | 学生 |
-| UC-12 | ListMyReservationsUseCase | 查看自己的预约（当前+历史） | 学生 |
-| UC-13 | ManageReservationsUseCase | 管理员查看/取消任意预约 | 管理员 |
+| 编号    | 用例                        | 描述                           | Actor |
+|-------|---------------------------|------------------------------|-------|
+| UC-08 | ReserveUseCase            | 选择座位+时段+日期，冲突检测通过后创建预约       | 学生    |
+| UC-09 | CheckInUseCase            | 按签到规则验证并签到，RESERVED→OCCUPIED | 学生    |
+| UC-10 | CheckOutUseCase           | 主动退座，OCCUPIED→AVAILABLE      | 学生    |
+| UC-11 | CancelReservationUseCase  | 未签到前取消，→CANCELLED，释放座位       | 学生    |
+| UC-12 | ListMyReservationsUseCase | 查看自己的预约（当前+历史）               | 学生    |
+| UC-13 | ManageReservationsUseCase | 管理员查看/取消任意预约                 | 管理员   |
 
 ### SystemTask（SystemTask）
 
-| 编号 | 用例 | 描述 | Actor |
-|------|------|------|-------|
-| UC-14 | AutoReleaseUseCase | 定时：扫描超时未签到预约，释放座位 | 系统 |
-| UC-15 | GetStatsUseCase | 座位使用率、时段预约量、热门自习室、签到率/违约率 | 管理员 |
+| 编号    | 用例                 | 描述                        | Actor |
+|-------|--------------------|---------------------------|-------|
+| UC-14 | AutoReleaseUseCase | 定时：扫描超时未签到预约，释放座位         | 系统    |
+| UC-15 | GetStatsUseCase    | 座位使用率、时段预约量、热门自习室、签到率/违约率 | 管理员   |
 
 ## RESTful API 端点
 
@@ -216,7 +218,7 @@ public class ReserveUseCase extends StudentAuthUseCase<ReserveUseCase.Request> {
     @Override
     protected Output doExecute(User user, Request req) {
         // 冲突检测 ...
-        Reservation r = reservationRepo.save(...);
+        Reservation r = reservationRepo.save(...)
         presenter.success(r.getId(), r.getSeatNumber(), r.getTimeSlotLabel());
         return new Output(r.getId());
     }
@@ -306,25 +308,25 @@ public class AppBinder extends AbstractBinder {
 
 ### 模块职责
 
-| 模块 | 层 | 内容 |
-|---|---|---|
-| **UserAndAuth** | domain | User, UserRole |
-| | outbound | UserRepository, TokenValidator |
-| | usecase | RegisterUseCase, LoginUseCase, GetMeUseCase, AuthUseCase(abstract), StudentAuthUseCase, AdminAuthUseCase |
-| **SeatAndRoom** | domain | StudyRoom, Seat, SeatStatus, TimeSlot |
-| | outbound | RoomRepository, SeatRepository, TimeSlotRepository |
-| | usecase | ListRoomsUseCase, ListSeatsUseCase, ManageRoomsUseCase, ManageSeatsUseCase |
-| **Reservation** | domain | Reservation, ReservationStatus |
-| | outbound | ReservationRepository |
-| | usecase | ReserveUseCase, CheckInUseCase, CheckOutUseCase, CancelReservationUseCase, ListMyReservationsUseCase, ManageReservationsUseCase |
-| **SystemTask** | domain | Stats (value object) |
-| | outbound | StatsRepository |
-| | usecase | AutoReleaseUseCase, GetStatsUseCase |
-| **Infrastructure** | | JwtTokenValidator, JdbcUserRepo, JdbcRoomRepo, JdbcSeatRepo, JdbcReservationRepo, JdbcStatsRepo, AutoReleaseScheduler |
-| **WebApi** | resource | AuthResource, RoomResource, SeatResource, ReservationResource, AdminResource, StatsResource |
-| | filter | CorsFilter, AuthFilter |
-| | presenter | WebApiXxxPresenter（各 UseCase 对应的实现） |
-| | binder | AppBinder |
+| 模块                 | 层         | 内容                                                                                                                              |
+|--------------------|-----------|---------------------------------------------------------------------------------------------------------------------------------|
+| **UserAndAuth**    | domain    | User, UserRole                                                                                                                  |
+|                    | outbound  | UserRepository, TokenValidator                                                                                                  |
+|                    | usecase   | RegisterUseCase, LoginUseCase, GetMeUseCase, AuthUseCase(abstract), StudentAuthUseCase, AdminAuthUseCase                        |
+| **SeatAndRoom**    | domain    | StudyRoom, Seat, SeatStatus, TimeSlot                                                                                           |
+|                    | outbound  | RoomRepository, SeatRepository, TimeSlotRepository                                                                              |
+|                    | usecase   | ListRoomsUseCase, ListSeatsUseCase, ManageRoomsUseCase, ManageSeatsUseCase                                                      |
+| **Reservation**    | domain    | Reservation, ReservationStatus                                                                                                  |
+|                    | outbound  | ReservationRepository                                                                                                           |
+|                    | usecase   | ReserveUseCase, CheckInUseCase, CheckOutUseCase, CancelReservationUseCase, ListMyReservationsUseCase, ManageReservationsUseCase |
+| **SystemTask**     | domain    | Stats (value object)                                                                                                            |
+|                    | outbound  | StatsRepository                                                                                                                 |
+|                    | usecase   | AutoReleaseUseCase, GetStatsUseCase                                                                                             |
+| **Infrastructure** |           | JwtTokenValidator, JdbcUserRepo, JdbcRoomRepo, JdbcSeatRepo, JdbcReservationRepo, JdbcStatsRepo, AutoReleaseScheduler           |
+| **WebApi**         | resource  | AuthResource, RoomResource, SeatResource, ReservationResource, AdminResource, StatsResource                                     |
+|                    | filter    | CorsFilter, AuthFilter                                                                                                          |
+|                    | presenter | WebApiXxxPresenter（各 UseCase 对应的实现）                                                                                             |
+|                    | binder    | AppBinder                                                                                                                       |
 
 ## 数据统计指标
 

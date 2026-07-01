@@ -11,14 +11,16 @@ import org.cleancoders.userandauth.usecase.RegisterUseCase;
 import java.util.Map;
 
 @Singleton
-public class WebApiAuthPresenter implements LoginUseCase.Presenter, RegisterUseCase.Presenter, GetMeUseCase.Presenter {
+public class WebApiAuthPresenter implements LoginUseCase.Presenter, RegisterUseCase.Presenter, GetMeUseCase.Presenter
+{
 
     private final ThreadLocal<Response> current = new ThreadLocal<>();
 
     // --- LoginUseCase.Presenter ---
 
     @Override
-    public void success(String token, User user) {
+    public void success(String token, User user)
+    {
         NewCookie authCookie = new NewCookie.Builder("Authorization")
                 .value(token)
                 .path("/api")
@@ -38,14 +40,16 @@ public class WebApiAuthPresenter implements LoginUseCase.Presenter, RegisterUseC
     }
 
     @Override
-    public void invalidCredentials() {
+    public void invalidCredentials()
+    {
         current.set(Response.status(401).entity(Map.of(
                 "error", "Invalid credentials"
         )).build());
     }
 
     @Override
-    public void userNotFound() {
+    public void userNotFound()
+    {
         current.set(Response.status(404).entity(Map.of(
                 "error", "User not found"
         )).build());
@@ -54,7 +58,8 @@ public class WebApiAuthPresenter implements LoginUseCase.Presenter, RegisterUseC
     // --- RegisterUseCase.Presenter ---
 
     @Override
-    public void success(User user) {
+    public void success(User user)
+    {
         current.set(Response.status(201).entity(Map.of(
                 "user", Map.of(
                         "id", user.id(),
@@ -67,7 +72,8 @@ public class WebApiAuthPresenter implements LoginUseCase.Presenter, RegisterUseC
     }
 
     @Override
-    public void usernameAlreadyExists(String username) {
+    public void usernameAlreadyExists(String username)
+    {
         current.set(Response.status(409).entity(Map.of(
                 "error", "Username already exists",
                 "username", username
@@ -77,7 +83,8 @@ public class WebApiAuthPresenter implements LoginUseCase.Presenter, RegisterUseC
     // --- GetMeUseCase.Presenter ---
 
     @Override
-    public void presentUser(User user) {
+    public void presentUser(User user)
+    {
         current.set(Response.ok(Map.of(
                 "user", Map.of(
                         "id", user.id(),
@@ -90,7 +97,8 @@ public class WebApiAuthPresenter implements LoginUseCase.Presenter, RegisterUseC
     }
 
     @Override
-    public void invalidToken() {
+    public void invalidToken()
+    {
         current.set(Response.status(401).entity(Map.of(
                 "error", "Invalid or expired token"
         )).build());
@@ -98,7 +106,8 @@ public class WebApiAuthPresenter implements LoginUseCase.Presenter, RegisterUseC
 
     // ---
 
-    public Response getResponse() {
+    public Response getResponse()
+    {
         return current.get();
     }
 }

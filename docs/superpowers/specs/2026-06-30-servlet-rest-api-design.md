@@ -19,18 +19,20 @@ SeatReservationSystem (pom)
 
 ### 模块职责
 
-- **WebApi**: 唯一的 WAR 模块，作为 API 入口。包含 JAX-RS Application 配置、Resource 类、Filter 类。依赖所有业务模块（jar），调用其 Service/Domain 层。
-- **UserAndAuth / SeatAndRoom / Reservation / SystemTask**: 纯业务模块（jar），不含 Web 层代码。提供 Service、Repository、Domain 类供 WebApi 调用。
+- **WebApi**: 唯一的 WAR 模块，作为 API 入口。包含 JAX-RS Application 配置、Resource 类、Filter 类。依赖所有业务模块（jar），调用其
+  Service/Domain 层。
+- **UserAndAuth / SeatAndRoom / Reservation / SystemTask**: 纯业务模块（jar），不含 Web 层代码。提供
+  Service、Repository、Domain 类供 WebApi 调用。
 
 ### 技术栈
 
-| 组件 | 选型 | 说明 |
-|------|------|------|
-| Servlet 容器 | Tomcat 10.1+ | 通过 `maven-war-plugin` 打包 WAR，开发时用 `tomcat7-maven-plugin` 嵌入式运行 |
-| JAX-RS 实现 | Jersey 3.x (`org.glassfish.jersey`) | Jakarta EE 9+ 版本 |
-| JSON 绑定 | Jackson，通过 `jersey-media-json-jackson` 集成 | JAX-RS 自动序列化 POJO 为 JSON |
-| 依赖注入 | HK2（Jersey 内置） | 轻量 DI，无需额外引入 Spring |
-| Java | 17 | 与父 POM 一致 |
+| 组件         | 选型                                        | 说明                                                             |
+|------------|-------------------------------------------|----------------------------------------------------------------|
+| Servlet 容器 | Tomcat 10.1+                              | 通过 `maven-war-plugin` 打包 WAR，开发时用 `tomcat7-maven-plugin` 嵌入式运行 |
+| JAX-RS 实现  | Jersey 3.x (`org.glassfish.jersey`)       | Jakarta EE 9+ 版本                                               |
+| JSON 绑定    | Jackson，通过 `jersey-media-json-jackson` 集成 | JAX-RS 自动序列化 POJO 为 JSON                                       |
+| 依赖注入       | HK2（Jersey 内置）                            | 轻量 DI，无需额外引入 Spring                                            |
+| Java       | 17                                        | 与父 POM 一致                                                      |
 
 ## 目录结构
 
@@ -117,11 +119,11 @@ public class HealthResource {
 
 `WebApi/pom.xml` 新增依赖：
 
-| GroupId | ArtifactId | Scope |
-|---------|------------|-------|
-| `org.glassfish.jersey.containers` | `jersey-container-servlet` | compile |
-| `org.glassfish.jersey.inject` | `jersey-hk2` | compile |
-| `org.glassfish.jersey.media` | `jersey-media-json-jackson` | compile |
+| GroupId                           | ArtifactId                  | Scope   |
+|-----------------------------------|-----------------------------|---------|
+| `org.glassfish.jersey.containers` | `jersey-container-servlet`  | compile |
+| `org.glassfish.jersey.inject`     | `jersey-hk2`                | compile |
+| `org.glassfish.jersey.media`      | `jersey-media-json-jackson` | compile |
 
 父 POM 已有 `jakarta.servlet-api`（provided），子模块自动继承。
 

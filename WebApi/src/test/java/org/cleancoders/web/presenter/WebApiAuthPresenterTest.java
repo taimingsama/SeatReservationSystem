@@ -6,19 +6,22 @@ import org.cleancoders.common.domain.UserRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class WebApiAuthPresenterTest {
+class WebApiAuthPresenterTest
+{
 
     private WebApiAuthPresenter presenter;
 
     @BeforeEach
-    void setUp() {
+    void setUp()
+    {
         presenter = new WebApiAuthPresenter();
     }
 
     @Test
-    void successShouldReturn200WithTokenAndUserJson() {
+    void successShouldReturn200WithTokenAndUserJson()
+    {
         User user = new User("u1", "alice", "hashed", UserRole.STUDENT, "Alice", "a@b.com");
         presenter.success("jwt.token.here", user);
 
@@ -39,7 +42,8 @@ class WebApiAuthPresenterTest {
     }
 
     @Test
-    void invalidCredentialsShouldReturn401() {
+    void invalidCredentialsShouldReturn401()
+    {
         presenter.invalidCredentials();
 
         Response response = presenter.getResponse();
@@ -51,7 +55,8 @@ class WebApiAuthPresenterTest {
     }
 
     @Test
-    void userNotFoundShouldReturn404() {
+    void userNotFoundShouldReturn404()
+    {
         presenter.userNotFound();
 
         Response response = presenter.getResponse();
@@ -65,7 +70,8 @@ class WebApiAuthPresenterTest {
     // --- RegisterUseCase.Presenter ---
 
     @Test
-    void registerSuccessShouldReturn201WithUserJson() {
+    void registerSuccessShouldReturn201WithUserJson()
+    {
         User user = new User("u1", "alice", "hashed", UserRole.STUDENT, "Alice", "a@b.com");
         presenter.success(user);
 
@@ -83,7 +89,8 @@ class WebApiAuthPresenterTest {
     }
 
     @Test
-    void usernameAlreadyExistsShouldReturn409() {
+    void usernameAlreadyExistsShouldReturn409()
+    {
         presenter.usernameAlreadyExists("alice");
 
         Response response = presenter.getResponse();

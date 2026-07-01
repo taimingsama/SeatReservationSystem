@@ -12,7 +12,8 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-public class JjwtTokenService implements TokenService {
+public class JjwtTokenService implements TokenService
+{
 
     private static final String SECRET = "this-is-a-test-secret-key-for-jwt-signing-256bit!!";
     private static final long EXPIRATION_MS = 24 * 60 * 60 * 1000L;
@@ -20,7 +21,8 @@ public class JjwtTokenService implements TokenService {
     private final SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
 
     @Override
-    public String generate(String userId, String username, String role) {
+    public String generate(String userId, String username, String role)
+    {
         long now = System.currentTimeMillis();
         return Jwts.builder()
                 .subject(userId)
@@ -33,8 +35,10 @@ public class JjwtTokenService implements TokenService {
     }
 
     @Override
-    public TokenPayload validate(String token) {
-        try {
+    public TokenPayload validate(String token)
+    {
+        try
+        {
             Claims claims = Jwts.parser()
                     .verifyWith(key)
                     .build()
@@ -46,7 +50,8 @@ public class JjwtTokenService implements TokenService {
                     claims.get("username", String.class),
                     claims.get("role", String.class)
             );
-        } catch (JwtException | IllegalArgumentException e) {
+        } catch (JwtException | IllegalArgumentException e)
+        {
             throw new TokenValidationException("Invalid or expired token", e);
         }
     }
