@@ -7,6 +7,7 @@ import org.cleancoders.seatandroom.domain.RoomStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.usecase.ListRoomsUseCase;
 import org.cleancoders.seatandroom.usecase.ListSeatsUseCase;
+import org.cleancoders.web.presenter.ResponseContext;
 import org.cleancoders.web.presenter.WebApiRoomPresenter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ class RoomResourceTest
 
     private RoomResource resource;
     private WebApiRoomPresenter presenter;
+    private ResponseContext ctx;
     private boolean listRoomsExecuteCalled;
     private ListRoomsUseCase.Output listRoomsOutput;
     private boolean listSeatsExecuteCalled;
@@ -29,14 +31,16 @@ class RoomResourceTest
     @BeforeEach
     void setUp()
     {
+        ctx = new ResponseContext();
         presenter = new WebApiRoomPresenter();
+        presenter.responseContext = ctx;
         listRoomsExecuteCalled = false;
         listRoomsOutput = null;
         listSeatsExecuteCalled = false;
         lastListSeatsRequest = null;
 
         resource = new RoomResource();
-        resource.presenter = presenter;
+        resource.responseContext = ctx;
         resource.listRoomsUseCase = new ListRoomsUseCase()
         {
             @Override

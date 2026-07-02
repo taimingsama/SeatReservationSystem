@@ -14,7 +14,9 @@ import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.outbound.RoomRepository;
 import org.cleancoders.seatandroom.usecase.ListRoomsUseCase;
 import org.cleancoders.seatandroom.usecase.ListSeatsUseCase;
-import org.cleancoders.web.presenter.WebApiRoomPresenter;
+import org.cleancoders.web.binder.ReservationBinder;
+import org.cleancoders.web.binder.SeatAndRoomBinder;
+import org.cleancoders.web.binder.WebAppBinder;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
@@ -38,10 +40,12 @@ class RoomResourceIntegrationTest extends JerseyTest
     {
         roomRepo = new InMemoryRoomRepo();
         seatRepo = new InMemorySeatRepo();
-        WebApiRoomPresenter presenterInstance = new WebApiRoomPresenter();
 
         ResourceConfig config = new ResourceConfig();
         config.register(RoomResource.class);
+        config.register(WebAppBinder.class);
+        config.register(ReservationBinder.class);
+        config.register(SeatAndRoomBinder.class);
         config.register(new AbstractBinder()
         {
             @Override
@@ -51,9 +55,6 @@ class RoomResourceIntegrationTest extends JerseyTest
                 bind(seatRepo).to(SeatRepository.class);
                 bind(ListRoomsUseCase.class).to(ListRoomsUseCase.class);
                 bind(ListSeatsUseCase.class).to(ListSeatsUseCase.class);
-                bind(presenterInstance).to(WebApiRoomPresenter.class);
-                bind(presenterInstance).to(ListRoomsUseCase.Presenter.class);
-                bind(presenterInstance).to(ListSeatsUseCase.Presenter.class);
             }
         });
         return config;

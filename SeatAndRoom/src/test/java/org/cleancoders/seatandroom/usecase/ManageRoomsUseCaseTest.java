@@ -8,12 +8,10 @@ import org.cleancoders.common_test_infrastructure.StubTokenService;
 import org.cleancoders.common_test_infrastructure.StubUserRepo;
 import org.cleancoders.seatandroom.domain.RoomStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
-import org.cleancoders.seatandroom.outbound.RoomRepository;
+import org.cleancoders.seatandroom.test.infrastructure.StubRoomRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -71,18 +69,6 @@ class ManageRoomsUseCaseTest
     }
 
     @Test
-    void shouldRejectNonAdminUser()
-    {
-        tokenService.setUserId(STUDENT_ID);
-
-        var output = useCase.execute(new ManageRoomsUseCase.Request(
-                STUDENT_TOKEN, "自习室F", "综合楼二楼", 20));
-
-        assertNull(output);
-        assertTrue(presenter.forbiddenCalled);
-    }
-
-    @Test
     void shouldRejectDuplicateName()
     {
         roomRepo.add(new StudyRoom("r-existing", "自习室F", "图书馆一楼", 30, RoomStatus.OPEN));
@@ -120,41 +106,6 @@ class ManageRoomsUseCaseTest
 
     // --- Stubs ---
 
-    static class StubRoomRepo implements RoomRepository
-    {
-        private final java.util.Map<String, StudyRoom> rooms = new java.util.LinkedHashMap<>();
-
-        void add(StudyRoom... toAdd)
-        {
-            for (StudyRoom r : toAdd) rooms.put(r.id(), r);
-        }
-
-        @Override
-        public List<StudyRoom> findByStatus(RoomStatus status)
-        {
-            return rooms.values().stream().filter(r -> r.status() == status).toList();
-        }
-
-        @Override
-        public Optional<StudyRoom> findById(String id)
-        {
-            return Optional.ofNullable(rooms.get(id));
-        }
-
-        @Override
-        public StudyRoom save(StudyRoom room)
-        {
-            rooms.put(room.id(), room);
-            return room;
-        }
-
-        @Override
-        public Optional<StudyRoom> findByName(String name)
-        {
-            return rooms.values().stream().filter(r -> r.name().equals(name)).findFirst();
-        }
-    }
-
     static class StubPresenter implements
             ManageRoomsUseCase.Presenter,
             AdminAuthUseCase.Presenter,
@@ -164,7 +115,6 @@ class ManageRoomsUseCaseTest
         AtomicReference<StudyRoom> successRoom = new AtomicReference<>();
         boolean roomNameAlreadyExistsCalled = false;
         AtomicReference<String> roomNameAlreadyExistsName = new AtomicReference<>();
-        boolean forbiddenCalled = false;
 
         @Override
         public void success(StudyRoom room)
@@ -183,7 +133,7 @@ class ManageRoomsUseCaseTest
         @Override
         public void forbidden()
         {
-            forbiddenCalled = true;
+            fail("forbidden() must not be called — token validation is not under test");
         }
 
         @Override

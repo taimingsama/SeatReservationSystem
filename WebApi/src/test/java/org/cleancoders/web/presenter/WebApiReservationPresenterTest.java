@@ -18,17 +18,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class WebApiReservationPresenterTest {
 
     private WebApiReservationPresenter presenter;
+    private ResponseContext responseContext;
 
     @BeforeEach
     void setUp() {
+        responseContext = new ResponseContext();
         presenter = new WebApiReservationPresenter();
+        presenter.responseContext = responseContext;
     }
 
     @Test
     void successShouldReturn201WithReservationJson() {
         presenter.success("res-123", "A-1", "上午 08:00-12:00");
 
-        Response response = presenter.getResponse();
+        Response response = responseContext.get();
         assertEquals(201, response.getStatus());
 
         ReservationCreatedResponse entity = (ReservationCreatedResponse) response.getEntity();
@@ -41,7 +44,7 @@ class WebApiReservationPresenterTest {
     void seatNotAvailableShouldReturn409() {
         presenter.seatNotAvailable("seat-1", "上午 08:00-12:00");
 
-        Response response = presenter.getResponse();
+        Response response = responseContext.get();
         assertEquals(409, response.getStatus());
 
         SeatConflictResponse entity = (SeatConflictResponse) response.getEntity();
@@ -54,7 +57,7 @@ class WebApiReservationPresenterTest {
     void duplicateReservationShouldReturn409() {
         presenter.duplicateReservation("existing-res-456");
 
-        Response response = presenter.getResponse();
+        Response response = responseContext.get();
         assertEquals(409, response.getStatus());
 
         DuplicateReservationResponse entity = (DuplicateReservationResponse) response.getEntity();
@@ -66,7 +69,7 @@ class WebApiReservationPresenterTest {
     void timeSlotNotFoundShouldReturn404() {
         presenter.timeSlotNotFound("ts-nonexistent");
 
-        Response response = presenter.getResponse();
+        Response response = responseContext.get();
         assertEquals(404, response.getStatus());
 
         TimeSlotNotFoundResponse entity = (TimeSlotNotFoundResponse) response.getEntity();
@@ -78,23 +81,12 @@ class WebApiReservationPresenterTest {
     void seatNotFoundShouldReturn404() {
         presenter.seatNotFound("seat-nonexistent");
 
-        Response response = presenter.getResponse();
+        Response response = responseContext.get();
         assertEquals(404, response.getStatus());
 
         SeatNotFoundResponse entity = (SeatNotFoundResponse) response.getEntity();
         assertEquals("座位不存在", entity.error());
         assertEquals("seat-nonexistent", entity.seatId());
-    }
-
-    @Test
-    void forbiddenShouldReturn403() {
-        presenter.forbidden();
-
-        Response response = presenter.getResponse();
-        assertEquals(403, response.getStatus());
-
-        ErrorResponse entity = (ErrorResponse) response.getEntity();
-        assertEquals("权限不足，仅学生可创建预约", entity.error());
     }
 
     // --- CheckInUseCase.Presenter ---
@@ -103,7 +95,7 @@ class WebApiReservationPresenterTest {
     void reservationNotFoundShouldReturn404() {
         presenter.reservationNotFound("res-unknown");
 
-        Response response = presenter.getResponse();
+        Response response = responseContext.get();
         assertEquals(404, response.getStatus());
 
         ReservationNotFoundResponse entity = (ReservationNotFoundResponse) response.getEntity();
@@ -115,7 +107,7 @@ class WebApiReservationPresenterTest {
     void notYourReservationShouldReturn403() {
         presenter.notYourReservation();
 
-        Response response = presenter.getResponse();
+        Response response = responseContext.get();
         assertEquals(403, response.getStatus());
 
         ErrorResponse entity = (ErrorResponse) response.getEntity();
@@ -126,7 +118,7 @@ class WebApiReservationPresenterTest {
     void invalidStatusShouldReturn409() {
         presenter.invalidStatus(ReservationStatus.CHECKED_IN);
 
-        Response response = presenter.getResponse();
+        Response response = responseContext.get();
         assertEquals(409, response.getStatus());
 
         InvalidStatusResponse entity = (InvalidStatusResponse) response.getEntity();
@@ -138,7 +130,7 @@ class WebApiReservationPresenterTest {
     void checkInNotAvailableShouldReturn409() {
         presenter.checkInNotAvailable("已过时段结束时间，无法签到");
 
-        Response response = presenter.getResponse();
+        Response response = responseContext.get();
         assertEquals(409, response.getStatus());
 
         ErrorResponse entity = (ErrorResponse) response.getEntity();

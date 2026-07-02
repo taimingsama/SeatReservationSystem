@@ -20,7 +20,7 @@ import org.cleancoders.web.dto.auth.RegisterRequest;
 import org.cleancoders.web.dto.auth.RegisterResponse;
 import org.cleancoders.web.dto.auth.UsernameConflictResponse;
 import org.cleancoders.web.dto.common.ErrorResponse;
-import org.cleancoders.web.presenter.WebApiAuthPresenter;
+import org.cleancoders.web.presenter.ResponseContext;
 
 @Path("/auth")
 @Produces(MediaType.APPLICATION_JSON)
@@ -36,7 +36,7 @@ public class AuthResource
     @Inject
     GetMeUseCase getMeUseCase;
     @Inject
-    WebApiAuthPresenter presenter;
+    ResponseContext responseContext;
 
     @POST
     @Path("/login")
@@ -55,7 +55,7 @@ public class AuthResource
     public Response login(LoginRequest request)
     {
         loginUseCase.execute(new LoginUseCase.Request(request.username(), request.password()));
-        return presenter.getResponse();
+        return responseContext.get();
     }
 
     @GET
@@ -73,7 +73,7 @@ public class AuthResource
     public Response me(@CookieParam("Authorization") String authCookie)
     {
         getMeUseCase.execute(new GetMeUseCase.Request(authCookie));
-        return presenter.getResponse();
+        return responseContext.get();
     }
 
     @POST
@@ -92,7 +92,7 @@ public class AuthResource
     {
         registerUseCase.execute(new RegisterUseCase.Request(
                 request.username(), request.password(), request.name(), request.email()));
-        return presenter.getResponse();
+        return responseContext.get();
     }
 
 }

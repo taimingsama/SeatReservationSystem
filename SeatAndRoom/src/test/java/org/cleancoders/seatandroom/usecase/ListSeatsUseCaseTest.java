@@ -2,18 +2,18 @@ package org.cleancoders.seatandroom.usecase;
 
 import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
 import org.cleancoders.common_reservation_seatAndRoom.domain.SeatStatus;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.SeatRepository;
+import org.cleancoders.common_reservation_seatandroom_test_infrastructure.StubSeatRepo;
 import org.cleancoders.seatandroom.domain.RoomStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
-import org.cleancoders.seatandroom.outbound.RoomRepository;
+import org.cleancoders.seatandroom.test.infrastructure.StubRoomRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ListSeatsUseCaseTest
 {
@@ -43,7 +43,9 @@ class ListSeatsUseCaseTest
         Seat s1 = new Seat("seat-1", "room-1", "A-1", SeatStatus.AVAILABLE);
         Seat s2 = new Seat("seat-2", "room-1", "A-2", SeatStatus.RESERVED);
         Seat s3 = new Seat("seat-3", "room-1", "A-3", SeatStatus.OCCUPIED);
-        seatRepo.add(s1, s2, s3);
+        seatRepo.save(s1);
+        seatRepo.save(s2);
+        seatRepo.save(s3);
 
         var output = useCase.execute(new ListSeatsUseCase.Request("room-1"));
 
@@ -81,7 +83,8 @@ class ListSeatsUseCaseTest
         roomRepo.add(room1, room2);
         Seat s1 = new Seat("seat-1", "room-1", "A-1", SeatStatus.AVAILABLE);
         Seat s2 = new Seat("seat-9", "room-2", "B-1", SeatStatus.AVAILABLE);
-        seatRepo.add(s1, s2);
+        seatRepo.save(s1);
+        seatRepo.save(s2);
 
         var output = useCase.execute(new ListSeatsUseCase.Request("room-1"));
 
@@ -98,7 +101,10 @@ class ListSeatsUseCaseTest
         Seat rv = new Seat("s2", "room-3", "C-2", SeatStatus.RESERVED);
         Seat oc = new Seat("s3", "room-3", "C-3", SeatStatus.OCCUPIED);
         Seat mt = new Seat("s4", "room-3", "C-4", SeatStatus.MAINTENANCE);
-        seatRepo.add(av, rv, oc, mt);
+        seatRepo.save(av);
+        seatRepo.save(rv);
+        seatRepo.save(oc);
+        seatRepo.save(mt);
 
         var output = useCase.execute(new ListSeatsUseCase.Request("room-3"));
 
@@ -110,74 +116,6 @@ class ListSeatsUseCaseTest
     }
 
     // --- Stubs ---
-
-    static class StubRoomRepo implements RoomRepository
-    {
-        private final java.util.Map<String, StudyRoom> rooms = new java.util.LinkedHashMap<>();
-
-        void add(StudyRoom... toAdd)
-        {
-            for (StudyRoom r : toAdd)
-            {
-                rooms.put(r.id(), r);
-            }
-        }
-
-        @Override
-        public List<StudyRoom> findByStatus(RoomStatus status)
-        {
-            return rooms.values().stream()
-                    .filter(r -> r.status() == status)
-                    .toList();
-        }
-
-        @Override
-        public Optional<StudyRoom> findById(String id)
-        {
-            return Optional.ofNullable(rooms.get(id));
-        }
-
-        @Override
-        public StudyRoom save(StudyRoom room)
-        {
-            rooms.put(room.id(), room);
-            return room;
-        }
-    }
-
-    static class StubSeatRepo implements SeatRepository
-    {
-        private final java.util.Map<String, Seat> seats = new java.util.LinkedHashMap<>();
-
-        void add(Seat... toAdd)
-        {
-            for (Seat s : toAdd)
-            {
-                seats.put(s.id(), s);
-            }
-        }
-
-        @Override
-        public Optional<Seat> findById(String id)
-        {
-            return Optional.ofNullable(seats.get(id));
-        }
-
-        @Override
-        public Seat save(Seat seat)
-        {
-            seats.put(seat.id(), seat);
-            return seat;
-        }
-
-        @Override
-        public List<Seat> findByRoomId(String roomId)
-        {
-            return seats.values().stream()
-                    .filter(s -> s.roomId().equals(roomId))
-                    .toList();
-        }
-    }
 
     static class StubPresenter implements ListSeatsUseCase.Presenter
     {

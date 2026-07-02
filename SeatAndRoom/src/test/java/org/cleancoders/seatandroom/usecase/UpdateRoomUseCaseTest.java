@@ -8,12 +8,10 @@ import org.cleancoders.common_test_infrastructure.StubTokenService;
 import org.cleancoders.common_test_infrastructure.StubUserRepo;
 import org.cleancoders.seatandroom.domain.RoomStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
-import org.cleancoders.seatandroom.outbound.RoomRepository;
+import org.cleancoders.seatandroom.test.infrastructure.StubRoomRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -128,41 +126,6 @@ class UpdateRoomUseCaseTest
     }
 
     // --- Stubs ---
-
-    static class StubRoomRepo implements RoomRepository
-    {
-        private final java.util.Map<String, StudyRoom> rooms = new java.util.LinkedHashMap<>();
-
-        void add(StudyRoom... toAdd)
-        {
-            for (StudyRoom r : toAdd) rooms.put(r.id(), r);
-        }
-
-        @Override
-        public List<StudyRoom> findByStatus(RoomStatus status)
-        {
-            return rooms.values().stream().filter(r -> r.status() == status).toList();
-        }
-
-        @Override
-        public Optional<StudyRoom> findById(String id)
-        {
-            return Optional.ofNullable(rooms.get(id));
-        }
-
-        @Override
-        public StudyRoom save(StudyRoom room)
-        {
-            rooms.put(room.id(), room);
-            return room;
-        }
-
-        @Override
-        public Optional<StudyRoom> findByName(String name)
-        {
-            return rooms.values().stream().filter(r -> r.name().equals(name)).findFirst();
-        }
-    }
 
     static class StubPresenter implements
             UpdateRoomUseCase.Presenter,

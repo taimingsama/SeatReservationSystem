@@ -9,8 +9,6 @@ import org.cleancoders.common.domain.User;
 import org.cleancoders.common.domain.UserRole;
 import org.cleancoders.common.outbound.TokenService;
 import org.cleancoders.common.outbound.UserRepository;
-import org.cleancoders.common.usecase.AdminAuthUseCase;
-import org.cleancoders.common.usecase.AuthUseCase;
 import org.cleancoders.common_reservation_seatAndRoom.outbound.SeatRepository;
 import org.cleancoders.common_reservation_seatAndRoom.outbound.TimeSlotRepository;
 import org.cleancoders.infrastructure.persistence.InMemoryRoomRepo;
@@ -21,13 +19,14 @@ import org.cleancoders.infrastructure.security.JjwtTokenService;
 import org.cleancoders.seatandroom.domain.RoomStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.outbound.RoomRepository;
-import org.cleancoders.seatandroom.usecase.ListRoomsUseCase;
-import org.cleancoders.seatandroom.usecase.ListSeatsUseCase;
-import org.cleancoders.seatandroom.usecase.DeleteRoomUseCase;
-import org.cleancoders.seatandroom.usecase.ManageRoomsUseCase;
-import org.cleancoders.seatandroom.usecase.UpdateRoomUseCase;
+import org.cleancoders.web.binder.AdminBinder;
+import org.cleancoders.web.binder.SeatAndRoomBinder;
+import org.cleancoders.web.binder.UserAndAuthBinder;
+import org.cleancoders.web.binder.WebAppBinder;
 import org.cleancoders.web.dto.admin.CreateRoomRequest;
+import org.cleancoders.web.presenter.ResponseContext;
 import org.cleancoders.web.presenter.WebApiAdminPresenter;
+import org.cleancoders.web.presenter.WebApiAuthPresenter;
 import org.cleancoders.web.presenter.WebApiRoomPresenter;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -38,7 +37,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class AdminResourceIntegrationTest extends JerseyTest
 {
@@ -50,22 +50,22 @@ class AdminResourceIntegrationTest extends JerseyTest
     protected Application configure()
     {
         roomRepo = new InMemoryRoomRepo();
-        InMemorySeatRepo seatRepo = new InMemorySeatRepo();
-        InMemoryTimeSlotRepo timeSlotRepo = new InMemoryTimeSlotRepo();
-        InMemoryUserRepo userRepo = new InMemoryUserRepo();
+        var seatRepo = new InMemorySeatRepo();
+        var timeSlotRepo = new InMemoryTimeSlotRepo();
+        var userRepo = new InMemoryUserRepo();
         tokenService = new JjwtTokenService();
 
-        // Pre-seed admin user
         userRepo.save(new User("admin-1", "admin", "admin123", UserRole.ADMIN, "Admin", "admin@example.com"));
-        // Pre-seed student user
         userRepo.save(new User("student-1", "alice", "pass123", UserRole.STUDENT, "Alice", "a@b.com"));
 
-        WebApiRoomPresenter roomPresenter = new WebApiRoomPresenter();
-        WebApiAdminPresenter adminPresenter = new WebApiAdminPresenter();
-
-        ResourceConfig config = new ResourceConfig();
+        var config = new ResourceConfig();
         config.register(RoomResource.class);
         config.register(AdminResource.class);
+        config.register(WebAppBinder.class);
+        config.register(SeatAndRoomBinder.class);
+        config.register(UserAndAuthBinder.class);
+        config.register(AdminBinder.class);
+
         config.register(new AbstractBinder()
         {
             @Override
@@ -75,21 +75,6 @@ class AdminResourceIntegrationTest extends JerseyTest
                 bind(seatRepo).to(SeatRepository.class);
                 bind(timeSlotRepo).to(TimeSlotRepository.class);
                 bind(userRepo).to(UserRepository.class);
-                bind(tokenService).to(TokenService.class);
-
-                bind(ListRoomsUseCase.class).to(ListRoomsUseCase.class);
-                bind(ListSeatsUseCase.class).to(ListSeatsUseCase.class);
-                bind(ManageRoomsUseCase.class).to(ManageRoomsUseCase.class);
-                bind(UpdateRoomUseCase.class).to(UpdateRoomUseCase.class);
-                bind(DeleteRoomUseCase.class).to(DeleteRoomUseCase.class);
-
-                bind(roomPresenter).to(ListRoomsUseCase.Presenter.class);
-                bind(roomPresenter).to(ListSeatsUseCase.Presenter.class);
-                bind(adminPresenter).to(ManageRoomsUseCase.Presenter.class);
-                bind(adminPresenter).to(UpdateRoomUseCase.Presenter.class);
-                bind(adminPresenter).to(DeleteRoomUseCase.Presenter.class);
-                bind(adminPresenter).to(AdminAuthUseCase.Presenter.class);
-                bind(adminPresenter).to(AuthUseCase.Presenter.class);
             }
         });
         return config;

@@ -24,7 +24,7 @@ import org.cleancoders.seatandroom.usecase.UpdateRoomUseCase;
 import org.cleancoders.web.dto.admin.CreateRoomRequest;
 import org.cleancoders.web.dto.common.ErrorResponse;
 import org.cleancoders.web.dto.room.RoomResponse;
-import org.cleancoders.web.presenter.WebApiAdminPresenter;
+import org.cleancoders.web.presenter.ResponseContext;
 
 @Path("/admin")
 @Produces(MediaType.APPLICATION_JSON)
@@ -43,7 +43,7 @@ public class AdminResource
     DeleteRoomUseCase deleteRoomUseCase;
 
     @Inject
-    WebApiAdminPresenter presenter;
+    ResponseContext responseContext;
 
     @POST
     @Path("/rooms")
@@ -64,7 +64,7 @@ public class AdminResource
     {
         manageRoomsUseCase.execute(new ManageRoomsUseCase.Request(
                 authCookie, input.name(), input.location(), input.capacity()));
-        return presenter.getResponse();
+        return responseContext.get();
     }
 
     @PUT
@@ -89,7 +89,7 @@ public class AdminResource
     {
         updateRoomUseCase.execute(new UpdateRoomUseCase.Request(
                 authCookie, roomId, input.name(), input.location(), input.capacity()));
-        return presenter.getResponse();
+        return responseContext.get();
     }
 
     @DELETE
@@ -110,6 +110,6 @@ public class AdminResource
             @PathParam("id") String roomId)
     {
         deleteRoomUseCase.execute(new DeleteRoomUseCase.Request(authCookie, roomId));
-        return presenter.getResponse();
+        return responseContext.get();
     }
 }

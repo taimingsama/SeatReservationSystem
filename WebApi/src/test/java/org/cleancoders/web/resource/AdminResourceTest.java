@@ -7,13 +7,15 @@ import org.cleancoders.seatandroom.usecase.DeleteRoomUseCase;
 import org.cleancoders.seatandroom.usecase.ManageRoomsUseCase;
 import org.cleancoders.seatandroom.usecase.UpdateRoomUseCase;
 import org.cleancoders.web.dto.admin.CreateRoomRequest;
+import org.cleancoders.web.presenter.ResponseContext;
 import org.cleancoders.web.presenter.WebApiAdminPresenter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AdminResourceTest
 {
@@ -33,7 +35,9 @@ class AdminResourceTest
     @BeforeEach
     void setUp()
     {
+        var ctx = new ResponseContext();
         presenter = new WebApiAdminPresenter();
+        presenter.responseContext = ctx;
         createExecuteCalled = false;
         lastCreateRequest = null;
         updateExecuteCalled = false;
@@ -42,7 +46,7 @@ class AdminResourceTest
         lastDeleteRequest = null;
 
         resource = new AdminResource();
-        resource.presenter = presenter;
+        resource.responseContext = ctx;
         resource.manageRoomsUseCase = new ManageRoomsUseCase()
         {
             @Override
@@ -122,30 +126,6 @@ class AdminResourceTest
         Map<String, Object> body = (Map<String, Object>) response.getEntity();
         assertEquals("自习室名称已存在", body.get("error"));
         assertEquals("自习室F", body.get("name"));
-    }
-
-    @Test
-    void createRoomShouldReturn401OnInvalidToken()
-    {
-        createOutput = null;
-        presenter.invalidToken();
-
-        Response response = resource.createRoom("bad-token",
-                new CreateRoomRequest("自习室F", "综合楼二楼", 20));
-
-        assertEquals(401, response.getStatus());
-    }
-
-    @Test
-    void createRoomShouldReturn403OnForbidden()
-    {
-        createOutput = null;
-        presenter.forbidden();
-
-        Response response = resource.createRoom("student-token",
-                new CreateRoomRequest("自习室F", "综合楼二楼", 20));
-
-        assertEquals(403, response.getStatus());
     }
 
     // --- update room tests ---

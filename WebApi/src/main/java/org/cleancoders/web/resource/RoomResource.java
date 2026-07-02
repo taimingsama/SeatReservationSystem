@@ -18,7 +18,7 @@ import org.cleancoders.seatandroom.usecase.ListRoomsUseCase;
 import org.cleancoders.seatandroom.usecase.ListSeatsUseCase;
 import org.cleancoders.web.dto.room.RoomListResponse;
 import org.cleancoders.web.dto.seat.SeatListResponse;
-import org.cleancoders.web.presenter.WebApiRoomPresenter;
+import org.cleancoders.web.presenter.ResponseContext;
 
 @Path("/rooms")
 @Produces(MediaType.APPLICATION_JSON)
@@ -33,7 +33,7 @@ public class RoomResource
     ListSeatsUseCase listSeatsUseCase;
 
     @Inject
-    WebApiRoomPresenter presenter;
+    ResponseContext responseContext;
 
     @GET
     @Operation(summary = "获取所有 OPEN 状态的自习室 (UC-04)", description = "公开接口,返回当前状态为 OPEN 的全部自习室。")
@@ -45,7 +45,7 @@ public class RoomResource
     public Response listRooms()
     {
         listRoomsUseCase.execute(new ListRoomsUseCase.Request());
-        return presenter.getResponse();
+        return responseContext.get();
     }
 
     @GET
@@ -62,6 +62,6 @@ public class RoomResource
             @PathParam("id") String roomId)
     {
         listSeatsUseCase.execute(new ListSeatsUseCase.Request(roomId));
-        return presenter.getResponse();
+        return responseContext.get();
     }
 }

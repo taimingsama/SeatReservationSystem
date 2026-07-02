@@ -1,5 +1,6 @@
 package org.cleancoders.web.presenter;
 
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
 import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
@@ -17,7 +18,7 @@ import java.util.Map;
 /**
  * WebApi presenter for {@link ListRoomsUseCase} and {@link ListSeatsUseCase}.
  * Public use cases — no auth branches, so extends {@link WebApiPresenter}
- * directly rather than {@link WebApiCommonPresenter}.
+ * directly rather than {@link WebApiPresenter}.
  */
 @Singleton
 public class WebApiRoomPresenter extends WebApiPresenter implements
@@ -31,7 +32,7 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
         List<RoomResponse> dtos = rooms.stream()
                 .map(r -> new RoomResponse(r.id(), r.name(), r.location(), r.capacity(), r.status()))
                 .toList();
-        current.set(Response.ok(new RoomListResponse(dtos)).build());
+        responseContext.set(Response.ok(new RoomListResponse(dtos)).build());
     }
 
     @Override
@@ -40,13 +41,13 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
         List<SeatResponse> dtos = seats.stream()
                 .map(s -> new SeatResponse(s.id(), s.seatNumber(), s.status()))
                 .toList();
-        current.set(Response.ok(new SeatListResponse(room.id(), room.name(), dtos)).build());
+        responseContext.set(Response.ok(new SeatListResponse(room.id(), room.name(), dtos)).build());
     }
 
     @Override
     public void roomNotFound(String roomId)
     {
-        current.set(Response.status(404).entity(Map.of(
+        responseContext.set(Response.status(404).entity(Map.of(
                 "error", "自习室不存在",
                 "roomId", roomId
         )).build());

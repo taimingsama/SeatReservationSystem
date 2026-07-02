@@ -12,11 +12,11 @@ import org.cleancoders.web.dto.reservation.*;
  * WebApi presenter implementation for {@link ReserveUseCase.Presenter}
  * and {@link CheckInUseCase.Presenter}.
  * <p>
- * Uses {@link ThreadLocal} to store the current request's {@link Response},
+ * Uses {@link ResponseContext} to store the current request's {@link Response},
  * allowing the singleton presenter to serve concurrent HTTP requests safely.
  */
 @Singleton
-public class WebApiReservationPresenter extends WebApiCommonPresenter implements
+public class WebApiReservationPresenter extends WebApiPresenter implements
         ReserveUseCase.Presenter,
         CheckInUseCase.Presenter
 {
@@ -26,45 +26,36 @@ public class WebApiReservationPresenter extends WebApiCommonPresenter implements
     @Override
     public void success(String reservationId, String seatNumber, String timeSlot)
     {
-        current.set(Response.status(201).entity(new ReservationCreatedResponse(
+        responseContext.set(Response.status(201).entity(new ReservationCreatedResponse(
                 reservationId, seatNumber, timeSlot)).build());
     }
 
     @Override
     public void seatNotAvailable(String seatId, String timeSlot)
     {
-        current.set(Response.status(409).entity(new SeatConflictResponse(
+        responseContext.set(Response.status(409).entity(new SeatConflictResponse(
                 "座位已被预约", seatId, timeSlot)).build());
     }
 
     @Override
     public void duplicateReservation(String existingId)
     {
-        current.set(Response.status(409).entity(new DuplicateReservationResponse(
+        responseContext.set(Response.status(409).entity(new DuplicateReservationResponse(
                 "该时段已有预约", existingId)).build());
     }
 
     @Override
     public void timeSlotNotFound(String timeSlotId)
     {
-        current.set(Response.status(404).entity(new TimeSlotNotFoundResponse(
+        responseContext.set(Response.status(404).entity(new TimeSlotNotFoundResponse(
                 "时段不存在", timeSlotId)).build());
     }
 
     @Override
     public void seatNotFound(String seatId)
     {
-        current.set(Response.status(404).entity(new SeatNotFoundResponse(
+        responseContext.set(Response.status(404).entity(new SeatNotFoundResponse(
                 "座位不存在", seatId)).build());
-    }
-
-    // --- StudentAuthUseCase.Presenter (override default 403 message) ---
-
-    @Override
-    public void forbidden()
-    {
-        current.set(Response.status(403).entity(new ErrorResponse(
-                "权限不足，仅学生可创建预约")).build());
     }
 
     // --- CheckInUseCase.Presenter ---
@@ -72,27 +63,27 @@ public class WebApiReservationPresenter extends WebApiCommonPresenter implements
     @Override
     public void reservationNotFound(String reservationId)
     {
-        current.set(Response.status(404).entity(new ReservationNotFoundResponse(
+        responseContext.set(Response.status(404).entity(new ReservationNotFoundResponse(
                 "预约不存在", reservationId)).build());
     }
 
     @Override
     public void notYourReservation()
     {
-        current.set(Response.status(403).entity(new ErrorResponse(
+        responseContext.set(Response.status(403).entity(new ErrorResponse(
                 "只能签到自己的预约")).build());
     }
 
     @Override
     public void invalidStatus(ReservationStatus currentStatus)
     {
-        current.set(Response.status(409).entity(new InvalidStatusResponse(
+        responseContext.set(Response.status(409).entity(new InvalidStatusResponse(
                 "当前状态不允许签到", currentStatus)).build());
     }
 
     @Override
     public void checkInNotAvailable(String reason)
     {
-        current.set(Response.status(409).entity(new ErrorResponse(reason)).build());
+        responseContext.set(Response.status(409).entity(new ErrorResponse(reason)).build());
     }
 }

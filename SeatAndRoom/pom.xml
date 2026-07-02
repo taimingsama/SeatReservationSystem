@@ -28,6 +28,12 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.cleancoders</groupId>
+            <artifactId>Common_Reservation_SeatAndRoom_Test_Infrastructure</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>
