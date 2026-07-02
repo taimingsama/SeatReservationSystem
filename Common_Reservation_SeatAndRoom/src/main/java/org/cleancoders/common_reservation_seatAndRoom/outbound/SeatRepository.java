@@ -1,6 +1,6 @@
-package org.cleancoders.seatandroom.outbound;
+package outbound;
 
-import org.cleancoders.seatandroom.domain.Seat;
+import domain.Seat;
 
 import java.util.List;
 import java.util.Optional;
