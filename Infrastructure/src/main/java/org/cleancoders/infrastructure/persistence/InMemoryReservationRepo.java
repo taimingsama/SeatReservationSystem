@@ -6,6 +6,7 @@ import org.cleancoders.reservation.domain.ReservationStatus;
 import org.cleancoders.reservation.outbound.ReservationRepository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -51,5 +52,17 @@ public class InMemoryReservationRepo implements ReservationRepository {
                 .filter(r -> r.timeSlotId().equals(timeSlotId))
                 .filter(r -> statuses.contains(r.status()))
                 .findFirst();
+    }
+
+    @Override
+    public List<Reservation> findByUserId(String userId) {
+        return store.values().stream()
+                .filter(r -> r.userId().equals(userId))
+                .toList();
+    }
+
+    @Override
+    public List<Reservation> findAll() {
+        return List.copyOf(store.values());
     }
 }

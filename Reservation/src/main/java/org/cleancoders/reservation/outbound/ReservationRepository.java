@@ -4,6 +4,7 @@ import org.cleancoders.reservation.domain.Reservation;
 import org.cleancoders.reservation.domain.ReservationStatus;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -29,4 +30,11 @@ public interface ReservationRepository {
      */
     Optional<Reservation> findBySeatIdAndDateAndTimeSlotIdAndStatusIn(
             String seatId, LocalDate date, String timeSlotId, Set<ReservationStatus> statuses);
+
+    /**
+     * Finds all reservations for a given user.
+     */
+    List<Reservation> findByUserId(String userId);
+
+    List<Reservation> findAll();
 }

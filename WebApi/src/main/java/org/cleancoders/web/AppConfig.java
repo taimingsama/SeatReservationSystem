@@ -5,6 +5,7 @@ import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import jakarta.ws.rs.core.Application;
 import org.cleancoders.web.binder.AppBinder;
 import org.cleancoders.web.filter.CorsFilter;
+import org.cleancoders.web.resource.AdminResource;
 import org.cleancoders.web.resource.AuthResource;
 import org.cleancoders.web.resource.HealthResource;
 import org.cleancoders.web.resource.ReservationResource;
@@ -28,6 +29,7 @@ public class AppConfig extends Application
         classes.add(HealthResource.class);
         classes.add(AuthResource.class);
         classes.add(ReservationResource.class);
+        classes.add(AdminResource.class);
         // Swagger / OpenAPI endpoints (served under /api/ prefix per web.xml mapping)
         classes.add(OpenApiConfig.class);
         classes.add(OpenApiResource.class);

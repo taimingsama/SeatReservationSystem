@@ -10,7 +10,10 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.cleancoders.reservation.usecase.CancelReservationUseCase;
 import org.cleancoders.reservation.usecase.CheckInUseCase;
+import org.cleancoders.reservation.usecase.CheckOutUseCase;
+import org.cleancoders.reservation.usecase.ListMyReservationsUseCase;
 import org.cleancoders.reservation.usecase.ReserveUseCase;
 import org.cleancoders.web.dto.common.ErrorResponse;
 import org.cleancoders.web.dto.reservation.InvalidDateResponse;
@@ -35,6 +38,15 @@ public class ReservationResource {
 
     @Inject
     CheckInUseCase checkInUseCase;
+
+    @Inject
+    CheckOutUseCase checkOutUseCase;
+
+    @Inject
+    CancelReservationUseCase cancelReservationUseCase;
+
+    @Inject
+    ListMyReservationsUseCase listMyReservationsUseCase;
 
     @Inject
     WebApiReservationPresenter presenter;
@@ -88,6 +100,64 @@ public class ReservationResource {
     })
     public Response checkIn(@CookieParam("Authorization") String authCookie, @PathParam("id") String reservationId) {
         checkInUseCase.execute(new CheckInUseCase.Request(authCookie, reservationId));
+        return presenter.getResponse();
+    }
+
+    @POST
+    @Path("/{id}/check-out")
+    @Operation(summary = "退座 (UC-10)", description = "学生对已签到的座位进行退座操作，释放座位供他人使用。")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "退座成功",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = ReservationCreatedResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Token 无效或已过期",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "权限不足（非学生角色 / 非本人预约）",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "预约不存在",
+                    content = @Content(schema = @Schema(implementation = ReservationNotFoundResponse.class))),
+            @ApiResponse(responseCode = "409", description = "当前状态不允许退座",
+                    content = @Content(schema = @Schema(implementation = InvalidStatusResponse.class)))
+    })
+    public Response checkOut(@CookieParam("Authorization") String authCookie, @PathParam("id") String reservationId) {
+        checkOutUseCase.execute(new CheckOutUseCase.Request(authCookie, reservationId));
+        return presenter.getResponse();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    @Operation(summary = "取消预约 (UC-11)", description = "学生对未签到的预约进行取消操作。")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "取消成功",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = ReservationCreatedResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Token 无效或已过期",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "权限不足（非学生角色 / 非本人预约）",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "预约不存在",
+                    content = @Content(schema = @Schema(implementation = ReservationNotFoundResponse.class))),
+            @ApiResponse(responseCode = "409", description = "当前状态不允许取消",
+                    content = @Content(schema = @Schema(implementation = InvalidStatusResponse.class)))
+    })
+    public Response cancel(@CookieParam("Authorization") String authCookie, @PathParam("id") String reservationId) {
+        cancelReservationUseCase.execute(new CancelReservationUseCase.Request(authCookie, reservationId));
+        return presenter.getResponse();
+    }
+
+    @GET
+    @Path("/my")
+    @Operation(summary = "我的预约 (UC-12)", description = "学生查看自己的所有预约记录（当前+历史），包含座位和时段信息。")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "成功返回预约列表",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @ApiResponse(responseCode = "401", description = "Token 无效或已过期",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "权限不足（非学生角色）",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public Response myReservations(@CookieParam("Authorization") String authCookie) {
+        listMyReservationsUseCase.execute(new ListMyReservationsUseCase.Request(authCookie));
         return presenter.getResponse();
     }
 }
