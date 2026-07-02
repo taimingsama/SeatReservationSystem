@@ -88,6 +88,16 @@ Infrastructure `persistence` 包,`@Singleton`,实现 `RoomRepository`,内部 `Co
   - presenter 收到正确的 OPEN 列表
   - 无 OPEN 房间时返回空列表(不报错)
 - **`InMemoryRoomRepoTest`**(Infrastructure 模块):验证 `findByStatus` 过滤正确、`findById`/`save` 行为。
+- **`RoomResourceTest`**(WebApi 模块,单元测试):直接 `new RoomResource()`,注入匿名 `ListRoomsUseCase` 子类(记录 `execute` 调用、返回预设 `Output`),验证:
+  - Resource 正确委托给 UseCase(传空 `Request`)
+  - UseCase 返回房间列表时 → 200 + JSON body 含 DTO 列表
+  - UseCase 返回空列表时 → 200 + `[]`
+  - 风格对齐 `ReservationResourceTest`(无 Jersey 容器,纯 Resource 单元测试)。
+- **`RoomResourceIntegrationTest`**(WebApi 模块,集成测试):`extends JerseyTest`,用 `ResourceConfig` 注册 `RoomResource` + 内联 `AbstractBinder` 绑定真实 `InMemoryRoomRepo` / `ListRoomsUseCase` / `WebApiRoomPresenter`,验证:
+  - `GET /api/rooms` 端到端返回 200
+  - 预置的 OPEN 房间出现在响应体,CLOSED/MAINTENANCE 不出现
+  - 无房间时返回 200 + `[]`
+  - 风格对齐 `AuthResourceIntegrationTest`(Jersey 测试容器 + 真实 DI)。
 
 ## 文件清单
 
@@ -105,6 +115,9 @@ WebApi/src/main/java/org/cleancoders/web/
   presenter/WebApiRoomPresenter.java ← 新增
   dto/room/RoomResponse.java        ← 新增
   binder/AppBinder.java             ← 追加绑定
+WebApi/src/test/java/org/cleancoders/web/
+  resource/RoomResourceTest.java          ← 新增(单元测试)
+  resource/RoomResourceIntegrationTest.java ← 新增(集成测试)
 ```
 
 ## 依赖链
