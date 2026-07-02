@@ -1,4 +1,4 @@
-package org.cleancoders.userandauth.outbound;
+package org.cleancoders.common.outbound;
 
 /**
  * Thrown when a JWT token is invalid, expired, or malformed.

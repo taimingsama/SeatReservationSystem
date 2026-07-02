@@ -1,4 +1,4 @@
-package org.cleancoders.userandauth.outbound;
+package org.cleancoders.common.outbound;
 
 public interface TokenService
 {

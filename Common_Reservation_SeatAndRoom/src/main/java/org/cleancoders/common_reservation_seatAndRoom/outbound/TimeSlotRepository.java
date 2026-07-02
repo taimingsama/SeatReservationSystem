@@ -1,4 +1,4 @@
-package org.cleancoders.seatandroom.outbound;
+package outbound;
 
 import org.cleancoders.seatandroom.domain.TimeSlot;
 

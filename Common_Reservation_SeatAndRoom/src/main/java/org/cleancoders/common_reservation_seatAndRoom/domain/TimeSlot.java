@@ -1,4 +1,4 @@
-package org.cleancoders.seatandroom.domain;
+package domain;
 
 /**
  * A fixed time slot template for reservations.

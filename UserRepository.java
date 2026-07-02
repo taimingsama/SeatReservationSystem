@@ -1,4 +1,4 @@
-package org.cleancoders.userandauth.outbound;
+package org.cleancoders.common.outbound;
 
 import org.cleancoders.common.domain.User;
 

@@ -1,4 +1,4 @@
-package org.cleancoders.userandauth.outbound;
+package org.cleancoders.common.outbound;
 
 /**
  * Holds the claims extracted from a validated JWT token.
