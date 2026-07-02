@@ -23,6 +23,7 @@ import org.cleancoders.web.binder.SeatAndRoomBinder;
 import org.cleancoders.web.binder.UserAndAuthBinder;
 import org.cleancoders.web.binder.WebAppBinder;
 import org.cleancoders.web.dto.admin.CreateRoomRequest;
+import org.cleancoders.web.dto.admin.CreateSeatRequest;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
@@ -243,6 +244,93 @@ class AdminResourceIntegrationTest extends JerseyTest
                 .put(Entity.json(new CreateRoomRequest("自习室F", "综合楼二楼", 20)));
 
         assertEquals(403, response.getStatus());
+    }
+
+    // --- create seat tests ---
+
+    @Test
+    void shouldReturn201WhenAdminCreatesSeat()
+    {
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
+        String adminToken = tokenService.generate("admin-1");
+
+        Response response = target("/admin/seats")
+                .request(MediaType.APPLICATION_JSON)
+                .cookie("Authorization", adminToken)
+                .post(Entity.json(new CreateSeatRequest("room-1", "A-9")));
+
+        assertEquals(201, response.getStatus());
+        Map<String, Object> body = response.readEntity(new GenericType<>()
+        {
+        });
+        assertNotNull(body.get("id"));
+        assertEquals("A-9", body.get("seatNumber"));
+        assertEquals("AVAILABLE", body.get("status"));
+    }
+
+    @Test
+    void shouldReturn404WhenRoomNotFoundForSeat()
+    {
+        String adminToken = tokenService.generate("admin-1");
+
+        Response response = target("/admin/seats")
+                .request(MediaType.APPLICATION_JSON)
+                .cookie("Authorization", adminToken)
+                .post(Entity.json(new CreateSeatRequest("nonexistent", "A-9")));
+
+        assertEquals(404, response.getStatus());
+        Map<String, Object> body = response.readEntity(new GenericType<>()
+        {
+        });
+        assertEquals("自习室不存在", body.get("error"));
+        assertEquals("nonexistent", body.get("roomId"));
+    }
+
+    @Test
+    void shouldReturn409WhenSeatNumberAlreadyExists()
+    {
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
+        // InMemorySeatRepo pre-seeds seat-1 ("A-1") in room-1
+        String adminToken = tokenService.generate("admin-1");
+
+        Response response = target("/admin/seats")
+                .request(MediaType.APPLICATION_JSON)
+                .cookie("Authorization", adminToken)
+                .post(Entity.json(new CreateSeatRequest("room-1", "A-1")));
+
+        assertEquals(409, response.getStatus());
+        Map<String, Object> body = response.readEntity(new GenericType<>()
+        {
+        });
+        assertEquals("座位编号已存在", body.get("error"));
+        assertEquals("room-1", body.get("roomId"));
+        assertEquals("A-1", body.get("seatNumber"));
+    }
+
+    @Test
+    void shouldReturn403WhenStudentCreatesSeat()
+    {
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
+        String studentToken = tokenService.generate("student-1");
+
+        Response response = target("/admin/seats")
+                .request(MediaType.APPLICATION_JSON)
+                .cookie("Authorization", studentToken)
+                .post(Entity.json(new CreateSeatRequest("room-1", "A-9")));
+
+        assertEquals(403, response.getStatus());
+    }
+
+    @Test
+    void shouldReturn401WhenNoTokenForSeat()
+    {
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
+
+        Response response = target("/admin/seats")
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.json(new CreateSeatRequest("room-1", "A-9")));
+
+        assertEquals(401, response.getStatus());
     }
 
     // --- delete room tests ---

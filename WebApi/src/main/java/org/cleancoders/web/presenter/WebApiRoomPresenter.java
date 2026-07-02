@@ -14,9 +14,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * WebApi presenter for {@link ListRoomsUseCase} and {@link ListSeatsUseCase}.
- * Public use cases — no auth branches, so extends {@link WebApiPresenter}
- * directly rather than {@link WebApiPresenter}.
+ * WebApi presenter for {@link ListRoomsUseCase}, {@link ListSeatsUseCase},
+ * {@link ManageRoomsUseCase}, {@link UpdateRoomUseCase}, {@link DeleteRoomUseCase}
+ * and {@link ManageSeatsUseCase}.
+ * <p>
+ * Implements each use case's own {@code Presenter} (success / business-error
+ * branches). Auth-related branches (401 invalid token, 404 user not found,
+ * 403 forbidden) are handled by {@link WebApiAuthPresenter}, which is bound
+ * to {@link org.cleancoders.common.usecase.AuthUseCase.Presenter} /
+ * {@link org.cleancoders.common.usecase.AdminAuthUseCase.Presenter} and
+ * injected into the base-class presenter fields.
  */
 @Singleton
 public class WebApiRoomPresenter extends WebApiPresenter implements
@@ -24,7 +31,8 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
         ListSeatsUseCase.Presenter,
         ManageRoomsUseCase.Presenter,
         UpdateRoomUseCase.Presenter,
-        DeleteRoomUseCase.Presenter
+        DeleteRoomUseCase.Presenter,
+        ManageSeatsUseCase.Presenter
 {
 
     @Override
@@ -94,6 +102,26 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
         responseContext.set(Response.status(409).entity(Map.of(
                 "error", "自习室已处于关闭状态",
                 "roomId", roomId
+        )).build());
+    }
+
+    // --- ManageSeatsUseCase (UC-07 create seat) ---
+
+    @Override
+    public void success(Seat seat)
+    {
+        responseContext.set(Response.status(201).entity(
+                new SeatResponse(seat.id(), seat.seatNumber(), seat.status())
+        ).build());
+    }
+
+    @Override
+    public void seatNumberAlreadyExists(String roomId, String seatNumber)
+    {
+        responseContext.set(Response.status(409).entity(Map.of(
+                "error", "座位编号已存在",
+                "roomId", roomId,
+                "seatNumber", seatNumber
         )).build());
     }
 }

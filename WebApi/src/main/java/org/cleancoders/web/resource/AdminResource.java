@@ -14,10 +14,13 @@ import jakarta.ws.rs.core.Response;
 import org.cleancoders.reservation.usecase.ManageReservationsUseCase;
 import org.cleancoders.seatandroom.usecase.DeleteRoomUseCase;
 import org.cleancoders.seatandroom.usecase.ManageRoomsUseCase;
+import org.cleancoders.seatandroom.usecase.ManageSeatsUseCase;
 import org.cleancoders.seatandroom.usecase.UpdateRoomUseCase;
 import org.cleancoders.web.dto.admin.CreateRoomRequest;
+import org.cleancoders.web.dto.admin.CreateSeatRequest;
 import org.cleancoders.web.dto.common.ErrorResponse;
 import org.cleancoders.web.dto.room.RoomResponse;
+import org.cleancoders.web.dto.seat.SeatResponse;
 import org.cleancoders.web.presenter.ResponseContext;
 
 @Path("/admin")
@@ -38,6 +41,9 @@ public class AdminResource
 
     @Inject
     ManageReservationsUseCase manageReservationsUseCase;
+
+    @Inject
+    ManageSeatsUseCase manageSeatsUseCase;
 
     @Inject
     ResponseContext responseContext;
@@ -77,6 +83,29 @@ public class AdminResource
     {
         manageRoomsUseCase.execute(new ManageRoomsUseCase.Request(
                 authCookie, input.name(), input.location(), input.capacity()));
+        return responseContext.get();
+    }
+
+    @POST
+    @Path("/seats")
+    @Operation(summary = "创建座位 (UC-07)", description = "管理员在指定自习室下创建一个座位，状态默认为 AVAILABLE。同一自习室内座位编号不可重复。")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "创建成功",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = SeatResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Token 无效或已过期",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "权限不足（非管理员角色）",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "所属自习室不存在"),
+            @ApiResponse(responseCode = "409", description = "座位编号已存在")
+    })
+    public Response createSeat(
+            @CookieParam("Authorization") String authCookie,
+            CreateSeatRequest input)
+    {
+        manageSeatsUseCase.execute(new ManageSeatsUseCase.Request(
+                authCookie, input.roomId(), input.seatNumber()));
         return responseContext.get();
     }
 
