@@ -12,6 +12,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.cleancoders.seatandroom.usecase.ListRoomsUseCase;
@@ -20,6 +21,8 @@ import org.cleancoders.web.dto.room.RoomListResponse;
 import org.cleancoders.web.dto.room.RoomNotFoundResponse;
 import org.cleancoders.web.dto.seat.SeatListResponse;
 import org.cleancoders.web.presenter.ResponseContext;
+
+import java.time.LocalDate;
 
 @Path("/rooms")
 @Produces(MediaType.APPLICATION_JSON)
@@ -51,7 +54,7 @@ public class RoomResource
 
     @GET
     @Path("/{id}/seats")
-    @Operation(summary = "获取某自习室所有座位及状态 (UC-05)", description = "公开接口,返回指定自习室的全部座位及其当前状态。自习室不存在时返回 404。")
+    @Operation(summary = "获取某自习室所有座位及状态 (UC-05)", description = "公开接口,返回指定自习室的全部座位及其当前状态。可选传入时段和日期,根据预约情况返回对应时段的实际可用状态。自习室不存在时返回 404。")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "返回座位列表(可为空)",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -61,9 +64,18 @@ public class RoomResource
     })
     public Response listSeats(
             @Parameter(description = "自习室ID", required = true, example = "room-1")
-            @PathParam("id") String roomId)
+            @PathParam("id") String roomId,
+            @Parameter(description = "时段ID（可选，传入后返回该时段的实际可用状态）", example = "ts-1")
+            @QueryParam("timeSlotId") String timeSlotId,
+            @Parameter(description = "日期（可选，与 timeSlotId 配合使用，格式 YYYY-MM-DD）", example = "2026-07-03")
+            @QueryParam("date") String dateStr)
     {
-        listSeatsUseCase.execute(new ListSeatsUseCase.Request(roomId));
+        LocalDate date = null;
+        if (dateStr != null && !dateStr.isBlank())
+        {
+            date = LocalDate.parse(dateStr);
+        }
+        listSeatsUseCase.execute(new ListSeatsUseCase.Request(roomId, timeSlotId, date));
         return responseContext.get();
     }
 }

@@ -194,4 +194,33 @@ class RoomResourceIntegrationTest extends JerseyTest
         List<?> seats = (List<?>) body.get("seats");
         assertTrue(seats.isEmpty());
     }
+
+    @Test
+    void shouldReturnEffectiveStatusWhenTimeSlotProvided()
+    {
+        // Given: a room with seats, and a reservation for seat 1 at ts-1
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
+
+        // Query without timeSlotId — all pre-seeded seats are AVAILABLE
+        Response response = target("/rooms/room-1/seats").request(MediaType.APPLICATION_JSON).get();
+        assertEquals(200, response.getStatus());
+        Map<String, Object> body = response.readEntity(new GenericType<>() {});
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> seats = (List<Map<String, Object>>) body.get("seats");
+        assertFalse(seats.isEmpty());
+        // All pre-seeded seats should be AVAILABLE
+        assertTrue(seats.stream().allMatch(s -> "AVAILABLE".equals(s.get("status"))));
+
+        // Query with a specific timeSlotId (no reservations exist yet for this slot)
+        Response response2 = target("/rooms/room-1/seats")
+                .queryParam("timeSlotId", "ts-1")
+                .queryParam("date", "2026-07-03")
+                .request(MediaType.APPLICATION_JSON).get();
+        assertEquals(200, response2.getStatus());
+        Map<String, Object> body2 = response2.readEntity(new GenericType<>() {});
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> seats2 = (List<Map<String, Object>>) body2.get("seats");
+        // Without any reservations, all AVAILABLE seats stay AVAILABLE
+        assertTrue(seats2.stream().allMatch(s -> "AVAILABLE".equals(s.get("status"))));
+    }
 }

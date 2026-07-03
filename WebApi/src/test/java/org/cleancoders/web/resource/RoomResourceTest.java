@@ -101,7 +101,7 @@ class RoomResourceTest
     @Test
     void listSeatsShouldDelegateToUseCaseWithRoomId()
     {
-        resource.listSeats("room-1");
+        resource.listSeats("room-1", null, null);
 
         assertTrue(listSeatsExecuteCalled);
         assertEquals("room-1", lastListSeatsRequest.roomId());
@@ -117,7 +117,7 @@ class RoomResourceTest
         );
         presenter.presentSeats(room, seats);
 
-        Response response = resource.listSeats("room-1");
+        Response response = resource.listSeats("room-1", null, null);
 
         assertEquals(200, response.getStatus());
         assertNotNull(response.getEntity());
@@ -128,7 +128,7 @@ class RoomResourceTest
     {
         presenter.roomNotFound("nonexistent");
 
-        Response response = resource.listSeats("nonexistent");
+        Response response = resource.listSeats("nonexistent", null, null);
 
         assertEquals(404, response.getStatus());
         @SuppressWarnings("unchecked")

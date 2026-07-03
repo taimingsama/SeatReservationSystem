@@ -1,15 +1,17 @@
 package org.cleancoders.seatandroom.usecase;
 
-import org.cleancoders.seatandroom.domain.RoomStatus;
 import org.cleancoders.seatandroom.domain.RoomLayout;
+import org.cleancoders.seatandroom.domain.RoomStatus;
 import org.cleancoders.seatandroom.domain.Seat;
 import org.cleancoders.seatandroom.domain.SeatStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
+import org.cleancoders.seatandroom.outbound.ActiveReservationChecker;
 import org.cleancoders.seatandroom.test.infrastructure.StubRoomRepo;
 import org.cleancoders.seatandroom.test.infrastructure.StubSeatRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -33,6 +35,7 @@ class ListSeatsUseCaseTest
         useCase = new ListSeatsUseCase();
         useCase.roomRepo = roomRepo;
         useCase.seatRepo = seatRepo;
+        useCase.activeReservationChecker = new StubActiveReservationChecker();
         useCase.presenter = presenter;
     }
 
@@ -116,7 +119,57 @@ class ListSeatsUseCaseTest
         assertTrue(output.seats().stream().anyMatch(s -> s.status() == SeatStatus.MAINTENANCE));
     }
 
+    @Test
+    void shouldMarkAvailableSeatAsReservedWhenTimeSlotProvided()
+    {
+        StudyRoom room = new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN);
+        roomRepo.add(room);
+        Seat s1 = new Seat(1, "room-1", SeatStatus.AVAILABLE);
+        Seat s2 = new Seat(2, "room-1", SeatStatus.AVAILABLE);
+        Seat s3 = new Seat(3, "room-1", SeatStatus.MAINTENANCE);
+        seatRepo.save(s1);
+        seatRepo.save(s2);
+        seatRepo.save(s3);
+
+        // s1 is reserved for ts-1, s2 is not
+        var checker = (StubActiveReservationChecker) useCase.activeReservationChecker;
+        checker.markReserved("room-1", 1, "ts-1", LocalDate.of(2026, 7, 3));
+
+        var output = useCase.execute(new ListSeatsUseCase.Request(
+                "room-1", "ts-1", LocalDate.of(2026, 7, 3)));
+
+        assertEquals(3, output.seats().size());
+        // s1: AVAILABLE → RESERVED (has active booking)
+        assertEquals(SeatStatus.RESERVED, output.seats().get(0).status());
+        // s2: stays AVAILABLE (no booking)
+        assertEquals(SeatStatus.AVAILABLE, output.seats().get(1).status());
+        // s3: stays MAINTENANCE (non-AVAILABLE unaffected)
+        assertEquals(SeatStatus.MAINTENANCE, output.seats().get(2).status());
+    }
+
     // --- Stubs ---
+
+    static class StubActiveReservationChecker implements ActiveReservationChecker
+    {
+        private final java.util.Set<String> reserved = new java.util.HashSet<>();
+
+        void markReserved(String roomId, int seatId, String timeSlotId, LocalDate date)
+        {
+            reserved.add(roomId + ":" + seatId + ":" + timeSlotId + ":" + date);
+        }
+
+        @Override
+        public boolean hasActiveForSeat(String roomId, int seatId)
+        {
+            return false;
+        }
+
+        @Override
+        public boolean isReservedForTimeSlot(String roomId, int seatId, String timeSlotId, LocalDate date)
+        {
+            return reserved.contains(roomId + ":" + seatId + ":" + timeSlotId + ":" + date);
+        }
+    }
 
     static class StubPresenter implements ListSeatsUseCase.Presenter
     {
