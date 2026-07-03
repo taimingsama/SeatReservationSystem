@@ -6,14 +6,14 @@ import java.time.LocalDateTime;
 /**
  * A seat reservation made by a student for a specific seat, date, and time slot.
  * <p>
- * Mutable class — status transitions are domain operations that validate
- * the current state before allowing the change.
+ * The seat is identified by the composite key (roomId, seatId).
  */
 public class Reservation {
 
     private String id;
     private final String userId;
-    private final String seatId;
+    private final String roomId;
+    private final int seatId;
     private final String timeSlotId;
     private final LocalDate date;
     private ReservationStatus status;
@@ -21,12 +21,10 @@ public class Reservation {
     private LocalDateTime checkInAt;
     private LocalDateTime checkOutAt;
 
-    /**
-     * Creates a new reservation in {@link ReservationStatus#RESERVED} status.
-     */
-    public Reservation(String id, String userId, String seatId, String timeSlotId, LocalDate date) {
+    public Reservation(String id, String userId, String roomId, int seatId, String timeSlotId, LocalDate date) {
         this.id = id;
         this.userId = userId;
+        this.roomId = roomId;
         this.seatId = seatId;
         this.timeSlotId = timeSlotId;
         this.date = date;
@@ -36,11 +34,6 @@ public class Reservation {
 
     // --- domain business logic ---
 
-    /**
-     * Cancels this reservation.
-     *
-     * @throws IllegalStateException if not in {@link ReservationStatus#RESERVED} status
-     */
     public void cancel() {
         if (status != ReservationStatus.RESERVED) {
             throw new IllegalStateException(
@@ -49,11 +42,6 @@ public class Reservation {
         this.status = ReservationStatus.CANCELLED;
     }
 
-    /**
-     * Checks in for this reservation.
-     *
-     * @throws IllegalStateException if not in {@link ReservationStatus#RESERVED} status
-     */
     public void checkIn() {
         if (status != ReservationStatus.RESERVED) {
             throw new IllegalStateException(
@@ -63,11 +51,6 @@ public class Reservation {
         this.checkInAt = LocalDateTime.now();
     }
 
-    /**
-     * Checks out from this reservation.
-     *
-     * @throws IllegalStateException if not in {@link ReservationStatus#CHECKED_IN} status
-     */
     public void checkOut() {
         if (status != ReservationStatus.CHECKED_IN) {
             throw new IllegalStateException(
@@ -77,11 +60,6 @@ public class Reservation {
         this.checkOutAt = LocalDateTime.now();
     }
 
-    /**
-     * Marks this reservation as expired (no-show).
-     *
-     * @throws IllegalStateException if not in {@link ReservationStatus#RESERVED} status
-     */
     public void expire() {
         if (status != ReservationStatus.RESERVED) {
             throw new IllegalStateException(
@@ -100,7 +78,11 @@ public class Reservation {
         return userId;
     }
 
-    public String seatId() {
+    public String roomId() {
+        return roomId;
+    }
+
+    public int seatId() {
         return seatId;
     }
 

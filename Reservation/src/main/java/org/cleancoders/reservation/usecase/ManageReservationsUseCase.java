@@ -3,9 +3,7 @@ package org.cleancoders.reservation.usecase;
 import jakarta.inject.Inject;
 import org.cleancoders.reservation.domain.Reservation;
 import org.cleancoders.reservation.outbound.ReservationRepository;
-import org.cleancoders.seatandroom.domain.Seat;
 import org.cleancoders.seatandroom.domain.TimeSlot;
-import org.cleancoders.seatandroom.outbound.SeatRepository;
 import org.cleancoders.seatandroom.outbound.TimeSlotRepository;
 import org.cleancoders.userandauth.domain.User;
 import org.cleancoders.userandauth.usecase.AdminAuthUseCase;
@@ -29,9 +27,6 @@ public class ManageReservationsUseCase extends AdminAuthUseCase<ManageReservatio
     protected ReservationRepository reservationRepo;
 
     @Inject
-    protected SeatRepository seatRepo;
-
-    @Inject
     protected TimeSlotRepository timeSlotRepo;
 
     // --- Presenter ---
@@ -53,8 +48,8 @@ public class ManageReservationsUseCase extends AdminAuthUseCase<ManageReservatio
             String reservationId,
             String userId,
             String username,
-            String seatId,
-            String seatNumber,
+            String roomId,
+            int seatId,
             String timeSlotId,
             String timeSlotLabel,
             LocalDate date,
@@ -75,14 +70,12 @@ public class ManageReservationsUseCase extends AdminAuthUseCase<ManageReservatio
                 .map(r -> {
                     String username = userRepo.findById(r.userId())
                             .map(User::username).orElse("未知");
-                    String seatNumber = seatRepo.findById(r.seatId())
-                            .map(Seat::seatNumber).orElse("未知");
                     String timeSlotLabel = timeSlotRepo.findById(r.timeSlotId())
                             .map(TimeSlot::label).orElse("未知");
 
                     return new ReservationItem(
                             r.id(), r.userId(), username,
-                            r.seatId(), seatNumber,
+                            r.roomId(), r.seatId(),
                             r.timeSlotId(), timeSlotLabel,
                             r.date(), r.status().name(),
                             r.createdAt(), r.checkInAt(), r.checkOutAt()

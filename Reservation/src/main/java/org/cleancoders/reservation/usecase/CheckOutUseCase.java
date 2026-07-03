@@ -72,14 +72,14 @@ public class CheckOutUseCase extends StudentAuthUseCase<CheckOutUseCase.Request,
         reservationRepo.save(reservation);
 
         // 5. Release the seat
-        var seatOpt = seatRepo.findById(reservation.seatId());
+        var seatOpt = seatRepo.findByRoomIdAndSeatId(reservation.roomId(), reservation.seatId());
         String seatNumber = "未知";
         if (seatOpt.isPresent())
         {
             Seat seat = seatOpt.get();
             seat.release();
             seatRepo.save(seat);
-            seatNumber = seat.seatNumber();
+            seatNumber = String.valueOf(seat.id());
         }
 
         // 6. Look up time slot for response

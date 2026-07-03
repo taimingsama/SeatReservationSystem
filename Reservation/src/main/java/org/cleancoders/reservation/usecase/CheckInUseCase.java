@@ -116,8 +116,8 @@ public class CheckInUseCase extends StudentAuthUseCase<CheckInUseCase.Request, C
         reservationRepo.save(reservation);
 
         // 7. Look up seat for response
-        var seatOpt = seatRepo.findById(reservation.seatId());
-        String seatNumber = seatOpt.map(Seat::seatNumber).orElse("未知");
+        var seatOpt = seatRepo.findByRoomIdAndSeatId(reservation.roomId(), reservation.seatId());
+        String seatNumber = seatOpt.map(s -> String.valueOf(s.id())).orElse("未知");
 
         presenter.success(reservation.id(), seatNumber, timeSlot.label());
         return new Output(reservation.id());

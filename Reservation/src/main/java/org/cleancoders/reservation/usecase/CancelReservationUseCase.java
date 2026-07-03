@@ -87,8 +87,8 @@ public class CancelReservationUseCase extends StudentAuthUseCase<CancelReservati
         reservationRepo.save(reservation);
 
         // 5. Look up seat and time slot for response
-        var seatOpt = seatRepo.findById(reservation.seatId());
-        String seatNumber = seatOpt.map(Seat::seatNumber).orElse("未知");
+        var seatOpt = seatRepo.findByRoomIdAndSeatId(reservation.roomId(), reservation.seatId());
+        String seatNumber = seatOpt.map(s -> String.valueOf(s.id())).orElse("未知");
 
         var timeSlotOpt = timeSlotRepo.findById(reservation.timeSlotId());
         String timeSlotLabel = timeSlotOpt.map(TimeSlot::label).orElse("未知");

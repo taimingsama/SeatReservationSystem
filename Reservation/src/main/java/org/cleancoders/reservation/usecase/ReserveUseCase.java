@@ -3,7 +3,6 @@ package org.cleancoders.reservation.usecase;
 import jakarta.inject.Inject;
 import org.cleancoders.reservation.domain.Reservation;
 import org.cleancoders.reservation.domain.ReservationStatus;
-import org.cleancoders.reservation.outbound.ReservationRepository;
 import org.cleancoders.seatandroom.domain.SeatStatus;
 import org.cleancoders.seatandroom.outbound.SeatRepository;
 import org.cleancoders.seatandroom.outbound.TimeSlotRepository;
@@ -17,14 +16,7 @@ import java.util.Set;
 /**
  * UC-08: 创建预约。
  * <p>
- * 学生选择座位 + 时段 + 日期，通过冲突检测后创建预约记录。
- * <p>
- * 冲突检测（三项检查）：
- * <ol>
- *   <li>座位是否存在且非维护状态</li>
- *   <li>同一用户在同一日期+时段是否已有预约（一人一座）</li>
- *   <li>座位在同一日期+时段是否已被他人预约</li>
- * </ol>
+ * 学生选择座位 (roomId + seatId) + 时段 + 日期，通过冲突检测后创建预约记录。
  */
 public class ReserveUseCase extends StudentAuthUseCase<ReserveUseCase.Request, ReserveUseCase.Output>
 {
@@ -52,10 +44,10 @@ public class ReserveUseCase extends StudentAuthUseCase<ReserveUseCase.Request, R
         }
 
         // 2. Validate seat exists
-        var seatOpt = seatRepo.findById(req.seatId());
+        var seatOpt = seatRepo.findByRoomIdAndSeatId(req.roomId(), req.seatId());
         if (seatOpt.isEmpty())
         {
-            presenter.seatNotFound(req.seatId());
+            presenter.seatNotFound(req.roomId(), req.seatId());
             return null;
         }
 
@@ -64,7 +56,7 @@ public class ReserveUseCase extends StudentAuthUseCase<ReserveUseCase.Request, R
         // 3. Check seat is not in MAINTENANCE
         if (seat.status() == SeatStatus.MAINTENANCE)
         {
-            presenter.seatNotAvailable(req.seatId(), timeSlot.get().label());
+            presenter.seatNotAvailable(req.roomId(), req.seatId(), timeSlot.get().label());
             return null;
         }
 
@@ -79,47 +71,39 @@ public class ReserveUseCase extends StudentAuthUseCase<ReserveUseCase.Request, R
 
         // 5. Check seat not already reserved for same date+timeslot
         var existingSeatReservation = reservationRepo.findBySeatIdAndDateAndTimeSlotIdAndStatusIn(
-                req.seatId(), req.date(), req.timeSlotId(), ACTIVE_STATUSES);
+                req.roomId(), req.seatId(), req.date(), req.timeSlotId(), ACTIVE_STATUSES);
         if (existingSeatReservation.isPresent())
         {
-            presenter.seatNotAvailable(req.seatId(), timeSlot.get().label());
+            presenter.seatNotAvailable(req.roomId(), req.seatId(), timeSlot.get().label());
             return null;
         }
 
         // 6. Create and save the reservation
-        Reservation reservation = new Reservation(null, user.id(), req.seatId(), req.timeSlotId(), req.date());
+        Reservation reservation = new Reservation(null, user.id(), req.roomId(), req.seatId(), req.timeSlotId(), req.date());
         Reservation saved = reservationRepo.save(reservation);
 
         // 7. Present success
-        presenter.success(saved.id(), seat.seatNumber(), timeSlot.get().label());
+        presenter.success(saved.id(), String.valueOf(req.seatId()), timeSlot.get().label());
         return new Output(saved.id());
     }
 
-    // --- Request / Output ---
-
-    /**
-     * Presenter interface for UC-08 output branches.
-     * Extends {@link StudentAuthUseCase.Presenter} to inherit auth error branches.
-     */
     public interface Presenter
     {
         void success(String reservationId, String seatNumber, String timeSlot);
 
-        void seatNotAvailable(String seatId, String timeSlot);
+        void seatNotAvailable(String roomId, int seatId, String timeSlot);
 
         void duplicateReservation(String existingId);
 
         void timeSlotNotFound(String timeSlotId);
 
-        void seatNotFound(String seatId);
+        void seatNotFound(String roomId, int seatId);
     }
 
-    public record Request(String token, String seatId, String timeSlotId, LocalDate date)
+    public record Request(String token, String roomId, int seatId, String timeSlotId, LocalDate date)
             implements AuthUseCase.Request
     {
     }
-
-    // --- Business Logic ---
 
     public record Output(String reservationId)
     {
