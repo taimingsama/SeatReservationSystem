@@ -104,6 +104,7 @@ public class WebApiReservationPresenter extends WebApiPresenter implements
                 .map(item -> new ReservationItemResponse(
                         item.reservationId(),
                         item.roomId(),
+                        item.roomName(),
                         item.seatId(),
                         item.timeSlotId(),
                         item.timeSlotLabel(),

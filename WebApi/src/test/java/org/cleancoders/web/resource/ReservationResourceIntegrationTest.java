@@ -463,6 +463,8 @@ class ReservationResourceIntegrationTest extends JerseyTest
         // Verify common fields on one reservation
         Map<String, Object> first = list.get(0);
         assertNotNull(first.get("reservationId"));
+        assertEquals("room-1", first.get("roomId"));
+        assertEquals("自习室A", first.get("roomName"));
         assertNotNull(first.get("timeSlotLabel"));
         assertEquals("2026-07-03", first.get("date"));
         assertEquals("RESERVED", first.get("status"));
@@ -521,6 +523,8 @@ class ReservationResourceIntegrationTest extends JerseyTest
         var list = (List<Map<String, Object>>) entity.get("reservations");
         assertEquals(1, list.size());
         assertEquals(1, list.get(0).get("seatId"));
+        assertEquals("room-1", list.get(0).get("roomId"));
+        assertEquals("自习室A", list.get(0).get("roomName"));
     }
 
     // ================================================================
