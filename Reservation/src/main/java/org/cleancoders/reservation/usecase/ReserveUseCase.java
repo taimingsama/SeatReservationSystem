@@ -33,9 +33,29 @@ public class ReserveUseCase extends StudentAuthUseCase<ReserveUseCase.Request, R
     @Inject
     TimeSlotRepository timeSlotRepo;
 
+    private static final int MAX_ACTIVE_RESERVATIONS = 6;
+
     @Override
     protected Output doExecute(User user, Request req)
     {
+        // 0. Check credit score
+        if (user.creditScore() <= 0)
+        {
+            presenter.creditScoreInsufficient();
+            return null;
+        }
+
+        // 0b. Check active reservation limit (max 6)
+        long activeCount = reservationRepo.findByUserId(user.id()).stream()
+                .filter(r -> r.status() == ReservationStatus.RESERVED
+                        || r.status() == ReservationStatus.CHECKED_IN)
+                .count();
+        if (activeCount >= MAX_ACTIVE_RESERVATIONS)
+        {
+            presenter.maxReservationsReached(MAX_ACTIVE_RESERVATIONS);
+            return null;
+        }
+
         // 1. Validate time slot exists
         var timeSlot = timeSlotRepo.findById(req.timeSlotId());
         if (timeSlot.isEmpty())
@@ -105,6 +125,10 @@ public class ReserveUseCase extends StudentAuthUseCase<ReserveUseCase.Request, R
         void timeSlotNotFound(String timeSlotId);
 
         void seatNotFound(String roomId, int seatId);
+
+        void creditScoreInsufficient();
+
+        void maxReservationsReached(int max);
     }
 
     public record Request(String token, String roomId, int seatId, String timeSlotId, LocalDate date)

@@ -66,6 +66,20 @@ public class WebApiReservationPresenter extends WebApiPresenter implements
                 "座位不存在", roomId + ":" + seatId)).build());
     }
 
+    @Override
+    public void creditScoreInsufficient()
+    {
+        responseContext.set(Response.status(403).entity(new ErrorResponse(
+                "信用分不足，无法预约")).build());
+    }
+
+    @Override
+    public void maxReservationsReached(int max)
+    {
+        responseContext.set(Response.status(409).entity(new ErrorResponse(
+                "每人最多同时存在 " + max + " 个预约")).build());
+    }
+
     // --- CheckInUseCase.Presenter ---
 
     @Override

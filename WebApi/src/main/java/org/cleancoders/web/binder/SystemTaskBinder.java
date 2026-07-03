@@ -16,6 +16,7 @@ public class SystemTaskBinder extends AbstractBinder
         bind(GetPopularRoomsStatsUseCase.class).to(GetPopularRoomsStatsUseCase.class);
         bind(GetCheckInRateStatsUseCase.class).to(GetCheckInRateStatsUseCase.class);
         bind(GetNoShowRateStatsUseCase.class).to(GetNoShowRateStatsUseCase.class);
+        bind(ProcessExpiredReservationsUseCase.class).to(ProcessExpiredReservationsUseCase.class);
 
         // === Presenters ===
         bind(WebApiStatsPresenter.class)
@@ -24,6 +25,7 @@ public class SystemTaskBinder extends AbstractBinder
                 .to(GetPopularRoomsStatsUseCase.Presenter.class)
                 .to(GetCheckInRateStatsUseCase.Presenter.class)
                 .to(GetNoShowRateStatsUseCase.Presenter.class)
+                .to(ProcessExpiredReservationsUseCase.Presenter.class)
                 .in(Singleton.class);
     }
 }

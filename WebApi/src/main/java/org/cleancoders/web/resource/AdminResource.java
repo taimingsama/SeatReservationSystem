@@ -16,9 +16,12 @@ import org.cleancoders.seatandroom.usecase.DeleteRoomUseCase;
 import org.cleancoders.seatandroom.usecase.ManageRoomsUseCase;
 import org.cleancoders.seatandroom.usecase.UpdateRoomUseCase;
 import org.cleancoders.seatandroom.usecase.UpdateSeatUseCase;
+import org.cleancoders.userandauth.usecase.ManageUserCreditUseCase;
 import org.cleancoders.web.dto.admin.CreateRoomRequest;
 import org.cleancoders.web.dto.admin.UpdateSeatRequest;
+import org.cleancoders.web.dto.admin.UpdateCreditRequest;
 import org.cleancoders.web.dto.common.ErrorResponse;
+import org.cleancoders.web.dto.common.UserResponse;
 import org.cleancoders.web.dto.reservation.AdminReservationListResponse;
 import org.cleancoders.web.dto.room.*;
 import org.cleancoders.web.dto.seat.*;
@@ -47,7 +50,36 @@ public class AdminResource
     UpdateSeatUseCase updateSeatUseCase;
 
     @Inject
+    ManageUserCreditUseCase manageUserCreditUseCase;
+
+    @Inject
     ResponseContext responseContext;
+
+    @POST
+    @Path("/users/{userId}/credit")
+    @Operation(summary = "管理用户信用分", description = "管理员设置指定用户的信用分（如重置为 60）。")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "更新成功",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = UserResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Token 无效或已过期",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "权限不足（非管理员角色）",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "用户不存在",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public Response updateUserCredit(
+            @Parameter(description = "JWT 认证 token", required = true)
+            @CookieParam("Authorization") String authCookie,
+            @Parameter(description = "用户ID", required = true, example = "u1")
+            @PathParam("userId") String userId,
+            UpdateCreditRequest input)
+    {
+        manageUserCreditUseCase.execute(new ManageUserCreditUseCase.Request(
+                authCookie, userId, input.creditScore()));
+        return responseContext.get();
+    }
 
     @GET
     @Path("/reservations")

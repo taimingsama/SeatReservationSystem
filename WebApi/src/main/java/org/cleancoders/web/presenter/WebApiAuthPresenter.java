@@ -17,6 +17,7 @@ public class WebApiAuthPresenter extends WebApiPresenter implements
         LoginUseCase.Presenter,
         RegisterUseCase.Presenter,
         GetMeUseCase.Presenter,
+        ManageUserCreditUseCase.Presenter,
         StudentAuthUseCase.Presenter,
         AdminAuthUseCase.Presenter,
         AuthUseCase.Presenter
@@ -70,6 +71,23 @@ public class WebApiAuthPresenter extends WebApiPresenter implements
     {
         return new UserResponse(user.id(), user.username(), user.role(), user.name(), user.email(),
                 user.reservationCount(), user.studyHours(), user.checkInCount(), user.creditScore());
+    }
+
+    // --- ManageUserCreditUseCase.Presenter ---
+
+    @Override
+    public void creditUpdated(User user)
+    {
+        responseContext.set(Response.ok(new UserResponse(user.id(), user.username(), user.role(),
+                user.name(), user.email(), user.reservationCount(), user.studyHours(),
+                user.checkInCount(), user.creditScore())).build());
+    }
+
+    @Override
+    public void userNotFound(String userId)
+    {
+        responseContext.set(Response.status(404).entity(
+                new ErrorResponse("用户不存在: " + userId)).build());
     }
 
     // --- AuthUseCase.Presenterr ---

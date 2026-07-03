@@ -239,6 +239,24 @@ class ReserveUseCaseTest
             seatNotFoundSeatId.set(seatId);
         }
 
+        boolean creditScoreInsufficientCalled = false;
+
+        @Override
+        public void creditScoreInsufficient()
+        {
+            creditScoreInsufficientCalled = true;
+        }
+
+        boolean maxReservationsReachedCalled = false;
+        int maxReservationsReachedValue = 0;
+
+        @Override
+        public void maxReservationsReached(int max)
+        {
+            maxReservationsReachedCalled = true;
+            maxReservationsReachedValue = max;
+        }
+
         @Override public void forbidden() { fail("forbidden() must not be called"); }
         @Override public void invalidToken() { fail("invalidToken() must not be called"); }
         @Override public void userNotFound() { fail("userNotFound() must not be called"); }
