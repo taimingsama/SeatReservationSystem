@@ -535,4 +535,165 @@ class AdminResourceIntegrationTest extends JerseyTest
 
         assertEquals(403, response.getStatus());
     }
+
+    // --- delete seat tests ---
+
+    @Test
+    void shouldReturn200WhenAdminDeletesAvailableSeat()
+    {
+        seatRepo.save(new Seat("seat-del-av", "room-1", "X-A", SeatStatus.AVAILABLE));
+        String adminToken = tokenService.generate("admin-1");
+
+        Response response = target("/admin/seats/seat-del-av")
+                .request(MediaType.APPLICATION_JSON)
+                .cookie("Authorization", adminToken)
+                .delete();
+
+        assertEquals(200, response.getStatus());
+        Map<String, Object> body = response.readEntity(new GenericType<>()
+        {
+        });
+        assertEquals("座位已删除", body.get("message"));
+        assertEquals("seat-del-av", body.get("seatId"));
+
+        // Verify seat is now REMOVED
+        Seat seat = seatRepo.findById("seat-del-av").get();
+        assertEquals(SeatStatus.REMOVED, seat.status());
+    }
+
+    @Test
+    void shouldReturn200WhenAdminDeletesMaintenanceSeat()
+    {
+        seatRepo.save(new Seat("seat-del-mt", "room-1", "X-M", SeatStatus.MAINTENANCE));
+        String adminToken = tokenService.generate("admin-1");
+
+        Response response = target("/admin/seats/seat-del-mt")
+                .request(MediaType.APPLICATION_JSON)
+                .cookie("Authorization", adminToken)
+                .delete();
+
+        assertEquals(200, response.getStatus());
+        assertEquals(SeatStatus.REMOVED, seatRepo.findById("seat-del-mt").get().status());
+    }
+
+    @Test
+    void shouldReturn404WhenDeletingNonexistentSeat()
+    {
+        String adminToken = tokenService.generate("admin-1");
+
+        Response response = target("/admin/seats/nonexistent")
+                .request(MediaType.APPLICATION_JSON)
+                .cookie("Authorization", adminToken)
+                .delete();
+
+        assertEquals(404, response.getStatus());
+        Map<String, Object> body = response.readEntity(new GenericType<>()
+        {
+        });
+        assertEquals("座位不存在", body.get("error"));
+        assertEquals("nonexistent", body.get("seatId"));
+    }
+
+    @Test
+    void shouldReturn409WhenSeatAlreadyRemoved()
+    {
+        seatRepo.save(new Seat("seat-removed", "room-1", "Z-1", SeatStatus.REMOVED));
+        String adminToken = tokenService.generate("admin-1");
+
+        Response response = target("/admin/seats/seat-removed")
+                .request(MediaType.APPLICATION_JSON)
+                .cookie("Authorization", adminToken)
+                .delete();
+
+        assertEquals(409, response.getStatus());
+        Map<String, Object> body = response.readEntity(new GenericType<>()
+        {
+        });
+        assertEquals("座位已处于删除状态", body.get("error"));
+        assertEquals("seat-removed", body.get("seatId"));
+    }
+
+    @Test
+    void shouldReturn409WhenSeatReserved()
+    {
+        seatRepo.save(new Seat("seat-del-rs", "room-1", "X-R", SeatStatus.RESERVED));
+        String adminToken = tokenService.generate("admin-1");
+
+        Response response = target("/admin/seats/seat-del-rs")
+                .request(MediaType.APPLICATION_JSON)
+                .cookie("Authorization", adminToken)
+                .delete();
+
+        assertEquals(409, response.getStatus());
+        Map<String, Object> body = response.readEntity(new GenericType<>()
+        {
+        });
+        assertEquals("座位正在使用中，无法删除", body.get("error"));
+        assertEquals("seat-del-rs", body.get("seatId"));
+        assertEquals("RESERVED", body.get("currentStatus"));
+    }
+
+    @Test
+    void shouldReturn409WhenSeatHasActiveReservations()
+    {
+        // seat-1: AVAILABLE but TestDataReservationRepo has RESERVED res-1
+        String adminToken = tokenService.generate("admin-1");
+
+        Response response = target("/admin/seats/seat-1")
+                .request(MediaType.APPLICATION_JSON)
+                .cookie("Authorization", adminToken)
+                .delete();
+
+        assertEquals(409, response.getStatus());
+        Map<String, Object> body = response.readEntity(new GenericType<>()
+        {
+        });
+        assertEquals("座位存在活跃预约，无法删除", body.get("error"));
+        assertEquals("seat-1", body.get("seatId"));
+    }
+
+    @Test
+    void shouldReturn200WhenSeatOnlyHasCancelledReservations()
+    {
+        // seat-2: AVAILABLE, res-6 is CANCELLED (not active)
+        String adminToken = tokenService.generate("admin-1");
+
+        Response response = target("/admin/seats/seat-2")
+                .request(MediaType.APPLICATION_JSON)
+                .cookie("Authorization", adminToken)
+                .delete();
+
+        assertEquals(200, response.getStatus());
+        Map<String, Object> body = response.readEntity(new GenericType<>()
+        {
+        });
+        assertEquals("座位已删除", body.get("message"));
+        assertEquals("seat-2", body.get("seatId"));
+    }
+
+    @Test
+    void shouldReturn403WhenStudentDeletesSeat()
+    {
+        seatRepo.save(new Seat("seat-del-st", "room-1", "X-S", SeatStatus.AVAILABLE));
+        String studentToken = tokenService.generate("student-1");
+
+        Response response = target("/admin/seats/seat-del-st")
+                .request(MediaType.APPLICATION_JSON)
+                .cookie("Authorization", studentToken)
+                .delete();
+
+        assertEquals(403, response.getStatus());
+    }
+
+    @Test
+    void shouldReturn401WhenNoTokenForSeatDelete()
+    {
+        seatRepo.save(new Seat("seat-del-no", "room-1", "X-N", SeatStatus.AVAILABLE));
+
+        Response response = target("/admin/seats/seat-del-no")
+                .request(MediaType.APPLICATION_JSON)
+                .delete();
+
+        assertEquals(401, response.getStatus());
+    }
 }

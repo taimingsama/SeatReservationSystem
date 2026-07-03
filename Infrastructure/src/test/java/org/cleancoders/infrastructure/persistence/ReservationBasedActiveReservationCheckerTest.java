@@ -1,6 +1,5 @@
 package org.cleancoders.infrastructure.persistence;
 
-import org.cleancoders.common_reservation_seatAndRoom.outbound.ActiveReservationChecker;
 import org.cleancoders.reservation.domain.Reservation;
 import org.cleancoders.reservation.domain.ReservationStatus;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ReservationBasedActiveReservationCheckerTest
 {
     private InMemoryReservationRepo repo;
-    private ActiveReservationChecker checker;
+    private ReservationBasedActiveReservationChecker checker;
 
     @BeforeEach
     void setUp()
