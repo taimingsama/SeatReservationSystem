@@ -4,6 +4,7 @@ import jakarta.inject.Inject;
 import org.cleancoders.seatandroom.domain.RoomStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.outbound.RoomRepository;
+import org.cleancoders.seatandroom.outbound.SeatRepository;
 import org.cleancoders.userandauth.domain.User;
 import org.cleancoders.userandauth.usecase.AdminAuthUseCase;
 import org.cleancoders.userandauth.usecase.AuthUseCase;
@@ -11,7 +12,7 @@ import org.cleancoders.userandauth.usecase.AuthUseCase;
 /**
  * UC-06: 删除自习室（管理员）。
  * <p>
- * 将自习室状态标记为 CLOSED（软删除），不真正移除数据。
+ * 将自习室状态标记为 CLOSED（软删除），同时级联删除所有座位。
  */
 public class DeleteRoomUseCase extends AdminAuthUseCase<DeleteRoomUseCase.Request, DeleteRoomUseCase.Output>
 {
@@ -21,6 +22,9 @@ public class DeleteRoomUseCase extends AdminAuthUseCase<DeleteRoomUseCase.Reques
 
     @Inject
     RoomRepository roomRepo;
+
+    @Inject
+    SeatRepository seatRepo;
 
     @Override
     protected Output doExecute(User user, Request req)
@@ -39,8 +43,12 @@ public class DeleteRoomUseCase extends AdminAuthUseCase<DeleteRoomUseCase.Reques
             return null;
         }
 
-        StudyRoom closed = new StudyRoom(room.id(), room.name(), room.location(), room.capacity(), RoomStatus.CLOSED);
+        StudyRoom closed = new StudyRoom(room.id(), room.name(), room.location(), room.layout(), RoomStatus.CLOSED);
         roomRepo.save(closed);
+
+        // Cascade delete seats
+        seatRepo.deleteByRoomId(req.roomId());
+
         presenter.deleteSuccess(req.roomId());
         return new Output(req.roomId());
     }

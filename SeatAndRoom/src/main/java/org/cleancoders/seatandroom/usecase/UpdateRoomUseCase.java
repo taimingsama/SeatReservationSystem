@@ -9,6 +9,7 @@ import org.cleancoders.userandauth.usecase.AuthUseCase;
 
 /**
  * UC-06: 更新自习室信息（管理员）。
+ * 仅允许修改名称和位置，布局不可变更。
  */
 public class UpdateRoomUseCase extends AdminAuthUseCase<UpdateRoomUseCase.Request, UpdateRoomUseCase.Output>
 {
@@ -38,7 +39,7 @@ public class UpdateRoomUseCase extends AdminAuthUseCase<UpdateRoomUseCase.Reques
         }
 
         StudyRoom old = existing.get();
-        StudyRoom updated = new StudyRoom(old.id(), req.name(), req.location(), req.capacity(), old.status());
+        StudyRoom updated = new StudyRoom(old.id(), req.name(), req.location(), old.layout(), old.status());
         StudyRoom saved = roomRepo.save(updated);
         presenter.updateSuccess(saved);
         return new Output(saved.id());
@@ -53,7 +54,7 @@ public class UpdateRoomUseCase extends AdminAuthUseCase<UpdateRoomUseCase.Reques
         void roomNameAlreadyExists(String name);
     }
 
-    public record Request(String token, String roomId, String name, String location, int capacity)
+    public record Request(String token, String roomId, String name, String location)
             implements AuthUseCase.Request
     {
     }
