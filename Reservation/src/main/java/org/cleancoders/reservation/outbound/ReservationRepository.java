@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Set;
 
 /**
  * Repository interface for {@link Reservation} persistence.
@@ -37,4 +38,13 @@ public interface ReservationRepository {
     List<Reservation> findByUserId(String userId);
 
     List<Reservation> findAll();
+
+    /**
+     * Finds all reservations for a seat with any of the given statuses.
+     * <p>
+     * Unlike the date/time-slot-specific variant, this searches across all dates
+     * and time slots — used for cross-cutting checks such as "does this seat have
+     * any active reservation?" before deletion.
+     */
+    List<Reservation> findBySeatIdAndStatusIn(String seatId, Set<ReservationStatus> statuses);
 }

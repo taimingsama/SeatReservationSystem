@@ -215,6 +215,14 @@ class CancelReservationUseCaseTest {
         }
 
         @Override
+        public List<Reservation> findBySeatIdAndStatusIn(String seatId, Set<ReservationStatus> statuses) {
+            return m.values().stream()
+                    .filter(r -> r.seatId().equals(seatId))
+                    .filter(r -> statuses.contains(r.status()))
+                    .toList();
+        }
+
+        @Override
         public List<Reservation> findAll() {
             return List.copyOf(m.values());
         }
