@@ -83,7 +83,13 @@ public class ReserveUseCase extends StudentAuthUseCase<ReserveUseCase.Request, R
         Reservation reservation = new Reservation(null, user.id(), req.roomId(), req.seatId(), req.timeSlotId(), req.date());
         Reservation saved = reservationRepo.save(reservation);
 
-        // 7. Present success
+        // 7. Update user stats: reservationCount + 1
+        User updatedUser = new User(
+                user.id(), user.username(), user.password(), user.role(), user.name(), user.email(),
+                user.reservationCount() + 1, user.studyHours(), user.checkInCount(), user.creditScore());
+        userRepo.save(updatedUser);
+
+        // 8. Present success
         presenter.success(saved.id(), String.valueOf(req.seatId()), timeSlot.get().label());
         return new Output(saved.id());
     }

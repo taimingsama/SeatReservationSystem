@@ -86,7 +86,14 @@ public class CancelReservationUseCase extends StudentAuthUseCase<CancelReservati
         reservation.cancel();
         reservationRepo.save(reservation);
 
-        // 5. Look up seat and time slot for response
+        // 5. Update user stats: creditScore - 5 (min 0)
+        int newCreditScore = Math.max(0, user.creditScore() - 5);
+        User updatedUser = new User(
+                user.id(), user.username(), user.password(), user.role(), user.name(), user.email(),
+                user.reservationCount(), user.studyHours(), user.checkInCount(), newCreditScore);
+        userRepo.save(updatedUser);
+
+        // 6. Look up seat and time slot for response
         var seatOpt = seatRepo.findByRoomIdAndSeatId(reservation.roomId(), reservation.seatId());
         String seatNumber = seatOpt.map(s -> String.valueOf(s.id())).orElse("未知");
 

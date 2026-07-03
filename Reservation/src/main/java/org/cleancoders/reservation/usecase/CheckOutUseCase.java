@@ -12,6 +12,9 @@ import org.cleancoders.userandauth.domain.User;
 import org.cleancoders.userandauth.usecase.AuthUseCase;
 import org.cleancoders.userandauth.usecase.StudentAuthUseCase;
 
+import java.time.Duration;
+import java.time.LocalTime;
+
 /**
  * UC-10: 退座。
  * <p>
@@ -82,9 +85,23 @@ public class CheckOutUseCase extends StudentAuthUseCase<CheckOutUseCase.Request,
             seatNumber = String.valueOf(seat.id());
         }
 
-        // 6. Look up time slot for response
+        // 6. Look up time slot for response and calculate study hours
         var timeSlotOpt = timeSlotRepo.findById(reservation.timeSlotId());
         String timeSlotLabel = timeSlotOpt.map(TimeSlot::label).orElse("未知");
+        int studyHoursToAdd = 0;
+        if (timeSlotOpt.isPresent())
+        {
+            LocalTime start = LocalTime.parse(timeSlotOpt.get().startTime());
+            LocalTime end = LocalTime.parse(timeSlotOpt.get().endTime());
+            studyHoursToAdd = (int) Duration.between(start, end).toHours();
+        }
+
+        // 7. Update user stats: studyHours + slot duration
+        User updatedUser = new User(
+                user.id(), user.username(), user.password(), user.role(), user.name(), user.email(),
+                user.reservationCount(), user.studyHours() + studyHoursToAdd,
+                user.checkInCount(), user.creditScore());
+        userRepo.save(updatedUser);
 
         presenter.success(reservation.id(), seatNumber, timeSlotLabel);
         return new Output(reservation.id());
