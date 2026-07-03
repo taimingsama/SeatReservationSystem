@@ -23,6 +23,7 @@ public class SeatAndRoomBinder extends AbstractBinder
         bind(UpdateRoomUseCase.class).to(UpdateRoomUseCase.class);
         bind(DeleteRoomUseCase.class).to(DeleteRoomUseCase.class);
         bind(ManageSeatsUseCase.class).to(ManageSeatsUseCase.class);
+        bind(UpdateSeatUseCase.class).to(UpdateSeatUseCase.class);
 
         // === Presenters ===
         bind(WebApiRoomPresenter.class)
@@ -32,6 +33,7 @@ public class SeatAndRoomBinder extends AbstractBinder
                 .to(UpdateRoomUseCase.Presenter.class)
                 .to(DeleteRoomUseCase.Presenter.class)
                 .to(ManageSeatsUseCase.Presenter.class)
+                .to(UpdateSeatUseCase.Presenter.class)
                 .in(Singleton.class);
 
         // === Infrastructure ===

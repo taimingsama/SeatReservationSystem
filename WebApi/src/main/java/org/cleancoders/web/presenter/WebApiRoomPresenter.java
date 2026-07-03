@@ -3,6 +3,7 @@ package org.cleancoders.web.presenter;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
 import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
+import org.cleancoders.common_reservation_seatAndRoom.domain.SeatStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.usecase.*;
 import org.cleancoders.web.dto.room.RoomListResponse;
@@ -32,7 +33,8 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
         ManageRoomsUseCase.Presenter,
         UpdateRoomUseCase.Presenter,
         DeleteRoomUseCase.Presenter,
-        ManageSeatsUseCase.Presenter
+        ManageSeatsUseCase.Presenter,
+        UpdateSeatUseCase.Presenter
 {
 
     @Override
@@ -122,6 +124,46 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
                 "error", "座位编号已存在",
                 "roomId", roomId,
                 "seatNumber", seatNumber
+        )).build());
+    }
+
+    // --- UpdateSeatUseCase (UC-07 update seat status) ---
+
+    @Override
+    public void updateSuccess(Seat seat)
+    {
+        responseContext.set(Response.ok(
+                new SeatResponse(seat.id(), seat.seatNumber(), seat.status())
+        ).build());
+    }
+
+    @Override
+    public void seatNotFound(String seatId)
+    {
+        responseContext.set(Response.status(404).entity(Map.of(
+                "error", "座位不存在",
+                "seatId", seatId
+        )).build());
+    }
+
+    @Override
+    public void invalidStatusTransition(String seatId, SeatStatus current, SeatStatus target)
+    {
+        responseContext.set(Response.status(409).entity(Map.of(
+                "error", "非法状态转换",
+                "seatId", seatId,
+                "currentStatus", current.name(),
+                "targetStatus", target.name()
+        )).build());
+    }
+
+    @Override
+    public void invalidStatus(String seatId, String status)
+    {
+        responseContext.set(Response.status(400).entity(Map.of(
+                "error", "非法座位状态",
+                "seatId", seatId,
+                "status", status == null ? "null" : status
         )).build());
     }
 }

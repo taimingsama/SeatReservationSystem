@@ -8,6 +8,8 @@ import jakarta.ws.rs.core.Response;
 import org.cleancoders.common.domain.User;
 import org.cleancoders.common.domain.UserRole;
 import org.cleancoders.common.outbound.UserRepository;
+import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
+import org.cleancoders.common_reservation_seatAndRoom.domain.SeatStatus;
 import org.cleancoders.common_reservation_seatAndRoom.outbound.SeatRepository;
 import org.cleancoders.common_reservation_seatAndRoom.outbound.TimeSlotRepository;
 import org.cleancoders.infrastructure.persistence.InMemoryRoomRepo;
@@ -24,6 +26,7 @@ import org.cleancoders.web.binder.UserAndAuthBinder;
 import org.cleancoders.web.binder.WebAppBinder;
 import org.cleancoders.web.dto.admin.CreateRoomRequest;
 import org.cleancoders.web.dto.admin.CreateSeatRequest;
+import org.cleancoders.web.dto.admin.UpdateSeatRequest;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
@@ -40,13 +43,14 @@ class AdminResourceIntegrationTest extends JerseyTest
 {
 
     private InMemoryRoomRepo roomRepo;
+    private InMemorySeatRepo seatRepo;
     private JjwtTokenService tokenService;
 
     @Override
     protected Application configure()
     {
         roomRepo = new InMemoryRoomRepo();
-        var seatRepo = new InMemorySeatRepo();
+        seatRepo = new InMemorySeatRepo();
         var timeSlotRepo = new InMemoryTimeSlotRepo();
         var userRepo = new InMemoryUserRepo();
         tokenService = new JjwtTokenService();
@@ -329,6 +333,139 @@ class AdminResourceIntegrationTest extends JerseyTest
         Response response = target("/admin/seats")
                 .request(MediaType.APPLICATION_JSON)
                 .post(Entity.json(new CreateSeatRequest("room-1", "A-9")));
+
+        assertEquals(401, response.getStatus());
+    }
+
+    // --- update seat tests ---
+
+    @Test
+    void shouldReturn200WhenAdminMarksSeatMaintenance()
+    {
+        // InMemorySeatRepo 预置 seat-1 (A-1, AVAILABLE) 在 room-1
+        String adminToken = tokenService.generate("admin-1");
+
+        Response response = target("/admin/seats/seat-1")
+                .request(MediaType.APPLICATION_JSON)
+                .cookie("Authorization", adminToken)
+                .put(Entity.json(new UpdateSeatRequest("MAINTENANCE")));
+
+        assertEquals(200, response.getStatus());
+        Map<String, Object> body = response.readEntity(new GenericType<>()
+        {
+        });
+        assertEquals("seat-1", body.get("id"));
+        assertEquals("A-1", body.get("seatNumber"));
+        assertEquals("MAINTENANCE", body.get("status"));
+    }
+
+    @Test
+    void shouldReturn200WhenAdminMarksSeatAvailable()
+    {
+        seatRepo.save(new Seat("seat-m", "room-1", "A-9", SeatStatus.MAINTENANCE));
+        String adminToken = tokenService.generate("admin-1");
+
+        Response response = target("/admin/seats/seat-m")
+                .request(MediaType.APPLICATION_JSON)
+                .cookie("Authorization", adminToken)
+                .put(Entity.json(new UpdateSeatRequest("AVAILABLE")));
+
+        assertEquals(200, response.getStatus());
+        Map<String, Object> body = response.readEntity(new GenericType<>()
+        {
+        });
+        assertEquals("seat-m", body.get("id"));
+        assertEquals("AVAILABLE", body.get("status"));
+    }
+
+    @Test
+    void shouldReturn404WhenUpdatingNonexistentSeat()
+    {
+        String adminToken = tokenService.generate("admin-1");
+
+        Response response = target("/admin/seats/nonexistent")
+                .request(MediaType.APPLICATION_JSON)
+                .cookie("Authorization", adminToken)
+                .put(Entity.json(new UpdateSeatRequest("MAINTENANCE")));
+
+        assertEquals(404, response.getStatus());
+        Map<String, Object> body = response.readEntity(new GenericType<>()
+        {
+        });
+        assertEquals("座位不存在", body.get("error"));
+        assertEquals("nonexistent", body.get("seatId"));
+    }
+
+    @Test
+    void shouldReturn400WhenStatusInvalid()
+    {
+        String adminToken = tokenService.generate("admin-1");
+
+        Response response = target("/admin/seats/seat-1")
+                .request(MediaType.APPLICATION_JSON)
+                .cookie("Authorization", adminToken)
+                .put(Entity.json(new UpdateSeatRequest("BROKEN")));
+
+        assertEquals(400, response.getStatus());
+        Map<String, Object> body = response.readEntity(new GenericType<>()
+        {
+        });
+        assertEquals("非法座位状态", body.get("error"));
+        assertEquals("BROKEN", body.get("status"));
+    }
+
+    @Test
+    void shouldReturn400WhenStatusNotAdminControllable()
+    {
+        String adminToken = tokenService.generate("admin-1");
+
+        Response response = target("/admin/seats/seat-1")
+                .request(MediaType.APPLICATION_JSON)
+                .cookie("Authorization", adminToken)
+                .put(Entity.json(new UpdateSeatRequest("RESERVED")));
+
+        assertEquals(400, response.getStatus());
+    }
+
+    @Test
+    void shouldReturn409WhenIllegalTransition()
+    {
+        seatRepo.save(new Seat("seat-r", "room-1", "A-9", SeatStatus.RESERVED));
+        String adminToken = tokenService.generate("admin-1");
+
+        Response response = target("/admin/seats/seat-r")
+                .request(MediaType.APPLICATION_JSON)
+                .cookie("Authorization", adminToken)
+                .put(Entity.json(new UpdateSeatRequest("MAINTENANCE")));
+
+        assertEquals(409, response.getStatus());
+        Map<String, Object> body = response.readEntity(new GenericType<>()
+        {
+        });
+        assertEquals("非法状态转换", body.get("error"));
+        assertEquals("RESERVED", body.get("currentStatus"));
+        assertEquals("MAINTENANCE", body.get("targetStatus"));
+    }
+
+    @Test
+    void shouldReturn403WhenStudentUpdatesSeat()
+    {
+        String studentToken = tokenService.generate("student-1");
+
+        Response response = target("/admin/seats/seat-1")
+                .request(MediaType.APPLICATION_JSON)
+                .cookie("Authorization", studentToken)
+                .put(Entity.json(new UpdateSeatRequest("MAINTENANCE")));
+
+        assertEquals(403, response.getStatus());
+    }
+
+    @Test
+    void shouldReturn401WhenNoTokenForSeatUpdate()
+    {
+        Response response = target("/admin/seats/seat-1")
+                .request(MediaType.APPLICATION_JSON)
+                .put(Entity.json(new UpdateSeatRequest("MAINTENANCE")));
 
         assertEquals(401, response.getStatus());
     }

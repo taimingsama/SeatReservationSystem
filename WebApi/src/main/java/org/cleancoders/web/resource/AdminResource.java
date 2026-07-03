@@ -16,8 +16,10 @@ import org.cleancoders.seatandroom.usecase.DeleteRoomUseCase;
 import org.cleancoders.seatandroom.usecase.ManageRoomsUseCase;
 import org.cleancoders.seatandroom.usecase.ManageSeatsUseCase;
 import org.cleancoders.seatandroom.usecase.UpdateRoomUseCase;
+import org.cleancoders.seatandroom.usecase.UpdateSeatUseCase;
 import org.cleancoders.web.dto.admin.CreateRoomRequest;
 import org.cleancoders.web.dto.admin.CreateSeatRequest;
+import org.cleancoders.web.dto.admin.UpdateSeatRequest;
 import org.cleancoders.web.dto.common.ErrorResponse;
 import org.cleancoders.web.dto.room.RoomResponse;
 import org.cleancoders.web.dto.seat.SeatResponse;
@@ -44,6 +46,9 @@ public class AdminResource
 
     @Inject
     ManageSeatsUseCase manageSeatsUseCase;
+
+    @Inject
+    UpdateSeatUseCase updateSeatUseCase;
 
     @Inject
     ResponseContext responseContext;
@@ -106,6 +111,35 @@ public class AdminResource
     {
         manageSeatsUseCase.execute(new ManageSeatsUseCase.Request(
                 authCookie, input.roomId(), input.seatNumber()));
+        return responseContext.get();
+    }
+
+    @PUT
+    @Path("/seats/{id}")
+    @Operation(summary = "更新座位状态 (UC-07)", description = "管理员切换座位状态(AVAILABLE↔MAINTENANCE)。座位不存在返回 404,非法状态值返回 400,非法转换返回 409。")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "更新成功",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = SeatResponse.class))),
+            @ApiResponse(responseCode = "400", description = "非法座位状态",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Token 无效或已过期",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "权限不足（非管理员角色）",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "座位不存在",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "非法状态转换",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public Response updateSeat(
+            @CookieParam("Authorization") String authCookie,
+            @Parameter(description = "座位ID", required = true, example = "seat-1")
+            @PathParam("id") String seatId,
+            UpdateSeatRequest input)
+    {
+        updateSeatUseCase.execute(new UpdateSeatUseCase.Request(
+                authCookie, seatId, input.status()));
         return responseContext.get();
     }
 
