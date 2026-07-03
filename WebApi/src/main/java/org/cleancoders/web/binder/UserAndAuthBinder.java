@@ -21,12 +21,16 @@ public class UserAndAuthBinder extends AbstractBinder
         bind(RegisterUseCase.class).to(RegisterUseCase.class);
         bind(GetMeUseCase.class).to(GetMeUseCase.class);
         bind(ManageUserCreditUseCase.class).to(ManageUserCreditUseCase.class);
+        bind(ChangePasswordUseCase.class).to(ChangePasswordUseCase.class);
+        bind(ResetPasswordUseCase.class).to(ResetPasswordUseCase.class);
         // === Presenters ===
         bind(WebApiAuthPresenter.class)
                 .to(LoginUseCase.Presenter.class)
                 .to(RegisterUseCase.Presenter.class)
                 .to(GetMeUseCase.Presenter.class)
                 .to(ManageUserCreditUseCase.Presenter.class)
+                .to(ChangePasswordUseCase.Presenter.class)
+                .to(ResetPasswordUseCase.Presenter.class)
                 .to(StudentAuthUseCase.Presenter.class)
                 .to(AdminAuthUseCase.Presenter.class)
                 .to(AuthUseCase.Presenter.class)

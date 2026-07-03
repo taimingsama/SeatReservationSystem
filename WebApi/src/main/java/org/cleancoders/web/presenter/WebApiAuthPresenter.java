@@ -8,6 +8,7 @@ import org.cleancoders.userandauth.usecase.*;
 import org.cleancoders.web.dto.auth.LoginResponse;
 import org.cleancoders.web.dto.auth.MeResponse;
 import org.cleancoders.web.dto.auth.RegisterResponse;
+import org.cleancoders.web.dto.auth.ResetPasswordResponse;
 import org.cleancoders.web.dto.auth.UsernameConflictResponse;
 import org.cleancoders.web.dto.common.ErrorResponse;
 import org.cleancoders.web.dto.common.UserResponse;
@@ -18,6 +19,8 @@ public class WebApiAuthPresenter extends WebApiPresenter implements
         RegisterUseCase.Presenter,
         GetMeUseCase.Presenter,
         ManageUserCreditUseCase.Presenter,
+        ChangePasswordUseCase.Presenter,
+        ResetPasswordUseCase.Presenter,
         StudentAuthUseCase.Presenter,
         AdminAuthUseCase.Presenter,
         AuthUseCase.Presenter
@@ -88,6 +91,38 @@ public class WebApiAuthPresenter extends WebApiPresenter implements
     {
         responseContext.set(Response.status(404).entity(
                 new ErrorResponse("用户不存在: " + userId)).build());
+    }
+
+    // --- ChangePasswordUseCase.Presenter ---
+
+    @Override
+    public void passwordChanged()
+    {
+        responseContext.set(Response.ok(
+                new ErrorResponse("密码修改成功")).build());
+    }
+
+    @Override
+    public void wrongPassword()
+    {
+        responseContext.set(Response.status(400).entity(
+                new ErrorResponse("旧密码错误")).build());
+    }
+
+    @Override
+    public void sameAsOldPassword()
+    {
+        responseContext.set(Response.status(400).entity(
+                new ErrorResponse("新密码不能与旧密码相同")).build());
+    }
+
+    // --- ResetPasswordUseCase.Presenter ---
+
+    @Override
+    public void passwordReset(String username, String newPassword)
+    {
+        responseContext.set(Response.ok(
+                new ResetPasswordResponse(username, newPassword)).build());
     }
 
     // --- AuthUseCase.Presenterr ---

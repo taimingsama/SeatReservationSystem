@@ -11,9 +11,11 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.cleancoders.userandauth.usecase.ChangePasswordUseCase;
 import org.cleancoders.userandauth.usecase.GetMeUseCase;
 import org.cleancoders.userandauth.usecase.LoginUseCase;
 import org.cleancoders.userandauth.usecase.RegisterUseCase;
+import org.cleancoders.web.dto.auth.ChangePasswordRequest;
 import org.cleancoders.web.dto.auth.LoginRequest;
 import org.cleancoders.web.dto.auth.LoginResponse;
 import org.cleancoders.web.dto.auth.MeResponse;
@@ -37,7 +39,29 @@ public class AuthResource
     @Inject
     GetMeUseCase getMeUseCase;
     @Inject
+    ChangePasswordUseCase changePasswordUseCase;
+    @Inject
     ResponseContext responseContext;
+
+    @PUT
+    @Path("/password")
+    @Operation(summary = "修改密码", description = "学生输入旧密码和新密码修改自己的密码。")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "密码修改成功"),
+            @ApiResponse(responseCode = "400", description = "旧密码错误或新旧密码相同",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Token 无效或已过期",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public Response changePassword(
+            @Parameter(description = "JWT 认证 token", required = true)
+            @CookieParam("Authorization") String authCookie,
+            ChangePasswordRequest request)
+    {
+        changePasswordUseCase.execute(new ChangePasswordUseCase.Request(
+                authCookie, request.oldPassword(), request.newPassword()));
+        return responseContext.get();
+    }
 
     @POST
     @Path("/login")

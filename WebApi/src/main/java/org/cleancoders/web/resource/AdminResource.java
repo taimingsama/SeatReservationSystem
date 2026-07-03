@@ -17,9 +17,11 @@ import org.cleancoders.seatandroom.usecase.ManageRoomsUseCase;
 import org.cleancoders.seatandroom.usecase.UpdateRoomUseCase;
 import org.cleancoders.seatandroom.usecase.UpdateSeatUseCase;
 import org.cleancoders.userandauth.usecase.ManageUserCreditUseCase;
+import org.cleancoders.userandauth.usecase.ResetPasswordUseCase;
 import org.cleancoders.web.dto.admin.CreateRoomRequest;
 import org.cleancoders.web.dto.admin.UpdateSeatRequest;
 import org.cleancoders.web.dto.admin.UpdateCreditRequest;
+import org.cleancoders.web.dto.auth.ResetPasswordResponse;
 import org.cleancoders.web.dto.common.ErrorResponse;
 import org.cleancoders.web.dto.common.UserResponse;
 import org.cleancoders.web.dto.reservation.AdminReservationListResponse;
@@ -53,7 +55,34 @@ public class AdminResource
     ManageUserCreditUseCase manageUserCreditUseCase;
 
     @Inject
+    ResetPasswordUseCase resetPasswordUseCase;
+
+    @Inject
     ResponseContext responseContext;
+
+    @POST
+    @Path("/users/{userId}/reset-password")
+    @Operation(summary = "重置用户密码", description = "管理员为用户生成随机密码并返回明文。")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "重置成功，返回新密码",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = ResetPasswordResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Token 无效或已过期",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "权限不足（非管理员角色）",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "用户不存在",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public Response resetPassword(
+            @Parameter(description = "JWT 认证 token", required = true)
+            @CookieParam("Authorization") String authCookie,
+            @Parameter(description = "用户ID", required = true, example = "u1")
+            @PathParam("userId") String userId)
+    {
+        resetPasswordUseCase.execute(new ResetPasswordUseCase.Request(authCookie, userId));
+        return responseContext.get();
+    }
 
     @POST
     @Path("/users/{userId}/credit")
