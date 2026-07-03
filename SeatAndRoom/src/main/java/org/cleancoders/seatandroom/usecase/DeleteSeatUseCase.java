@@ -61,13 +61,13 @@ public class DeleteSeatUseCase extends AdminAuthUseCase<DeleteSeatUseCase.Reques
 
         seat.markRemoved();
         Seat saved = seatRepo.save(seat);
-        presenter.deleteSuccess(saved.id());
+        presenter.deleteSeatSuccess(saved.id());
         return new Output(saved.id());
     }
 
     public interface Presenter
     {
-        void deleteSuccess(String seatId);
+        void deleteSeatSuccess(String seatId);
 
         void seatNotFound(String seatId);
 

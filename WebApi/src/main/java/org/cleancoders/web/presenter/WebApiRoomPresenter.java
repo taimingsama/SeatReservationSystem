@@ -34,7 +34,8 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
         UpdateRoomUseCase.Presenter,
         DeleteRoomUseCase.Presenter,
         ManageSeatsUseCase.Presenter,
-        UpdateSeatUseCase.Presenter
+        UpdateSeatUseCase.Presenter,
+        DeleteSeatUseCase.Presenter
 {
 
     @Override
@@ -164,6 +165,45 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
                 "error", "非法座位状态",
                 "seatId", seatId,
                 "status", status == null ? "null" : status
+        )).build());
+    }
+
+    // --- DeleteSeatUseCase (UC-07 delete seat) ---
+
+    @Override
+    public void deleteSeatSuccess(String seatId)
+    {
+        responseContext.set(Response.status(200).entity(Map.of(
+                "message", "座位已删除",
+                "seatId", seatId
+        )).build());
+    }
+
+    @Override
+    public void seatAlreadyRemoved(String seatId)
+    {
+        responseContext.set(Response.status(409).entity(Map.of(
+                "error", "座位已处于删除状态",
+                "seatId", seatId
+        )).build());
+    }
+
+    @Override
+    public void seatInUse(String seatId, SeatStatus current)
+    {
+        responseContext.set(Response.status(409).entity(Map.of(
+                "error", "座位正在使用中，无法删除",
+                "seatId", seatId,
+                "currentStatus", current.name()
+        )).build());
+    }
+
+    @Override
+    public void seatHasActiveReservations(String seatId)
+    {
+        responseContext.set(Response.status(409).entity(Map.of(
+                "error", "座位存在活跃预约，无法删除",
+                "seatId", seatId
         )).build());
     }
 }

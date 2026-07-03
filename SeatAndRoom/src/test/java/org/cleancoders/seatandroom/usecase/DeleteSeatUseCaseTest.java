@@ -64,8 +64,8 @@ class DeleteSeatUseCaseTest
 
         assertNotNull(output);
         assertEquals("seat-1", output.seatId());
-        assertTrue(presenter.deleteSuccessCalled);
-        assertEquals("seat-1", presenter.deleteSuccessSeatId.get());
+        assertTrue(presenter.deleteSeatSuccessCalled);
+        assertEquals("seat-1", presenter.deleteSeatSuccessSeatId.get());
         assertEquals(SeatStatus.REMOVED, seatRepo.findById("seat-1").get().status());
     }
 
@@ -78,7 +78,7 @@ class DeleteSeatUseCaseTest
 
         assertNotNull(output);
         assertEquals("seat-m", output.seatId());
-        assertTrue(presenter.deleteSuccessCalled);
+        assertTrue(presenter.deleteSeatSuccessCalled);
         assertEquals(SeatStatus.REMOVED, seatRepo.findById("seat-m").get().status());
     }
 
@@ -153,7 +153,7 @@ class DeleteSeatUseCaseTest
         var output = useCase.execute(new DeleteSeatUseCase.Request(ADMIN_TOKEN, "seat-1"));
 
         assertNotNull(output);
-        assertTrue(presenter.deleteSuccessCalled);
+        assertTrue(presenter.deleteSeatSuccessCalled);
     }
 
     @Test
@@ -175,8 +175,8 @@ class DeleteSeatUseCaseTest
             AdminAuthUseCase.Presenter,
             AuthUseCase.Presenter
     {
-        boolean deleteSuccessCalled = false;
-        AtomicReference<String> deleteSuccessSeatId = new AtomicReference<>();
+        boolean deleteSeatSuccessCalled = false;
+        AtomicReference<String> deleteSeatSuccessSeatId = new AtomicReference<>();
         boolean seatNotFoundCalled = false;
         AtomicReference<String> seatNotFoundId = new AtomicReference<>();
         boolean seatAlreadyRemovedCalled = false;
@@ -189,10 +189,10 @@ class DeleteSeatUseCaseTest
         boolean forbiddenCalled = false;
 
         @Override
-        public void deleteSuccess(String seatId)
+        public void deleteSeatSuccess(String seatId)
         {
-            deleteSuccessCalled = true;
-            deleteSuccessSeatId.set(seatId);
+            deleteSeatSuccessCalled = true;
+            deleteSeatSuccessSeatId.set(seatId);
         }
 
         @Override
