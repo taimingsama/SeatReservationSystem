@@ -59,7 +59,7 @@ public class GetSeatUsageStatsUseCase
         Set<String> usedSeatIds = todayReservations.stream()
                 .filter(r -> r.status() == ReservationStatus.RESERVED
                         || r.status() == ReservationStatus.CHECKED_IN)
-                .map(Reservation::seatId)
+                .map(r -> r.roomId() + ":" + r.seatId())
                 .collect(Collectors.toSet());
         int usedSeats = usedSeatIds.size();
 

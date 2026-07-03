@@ -92,7 +92,7 @@ class CheckOutUseCaseTest {
         assertEquals(ReservationStatus.CHECKED_OUT, updated.status());
 
         // Verify seat is released
-        Seat seat = seatRepo.findById(SEAT_ID).get();
+        Seat seat = seatRepo.findByRoomIdAndSeatId("room-1", 1).get();
         assertEquals(SeatStatus.AVAILABLE, seat.status());
     }
 
@@ -238,7 +238,7 @@ class CheckOutUseCaseTest {
         public Optional<Reservation> findBySeatIdAndDateAndTimeSlotIdAndStatusIn(
                 String seatId, LocalDate date, String timeSlotId, Set<ReservationStatus> statuses) {
             return reservations.values().stream()
-                    .filter(r -> r.seatId().equals(seatId) && r.date().equals(date)
+                    .filter(r -> r.roomId().equals(roomId) && r.seatId() == seatId && r.date().equals(date)
                             && r.timeSlotId().equals(timeSlotId) && statuses.contains(r.status()))
                     .findFirst();
         }

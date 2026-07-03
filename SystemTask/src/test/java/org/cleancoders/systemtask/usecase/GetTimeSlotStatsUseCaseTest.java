@@ -61,9 +61,9 @@ class GetTimeSlotStatsUseCaseTest
     void shouldCountReservationsPerTimeSlot()
     {
         LocalDate today = LocalDate.now();
-        reservationRepo.save(new Reservation("r1", "u1", "s1", "ts-1", today));
-        reservationRepo.save(new Reservation("r2", "u2", "s2", "ts-1", today));
-        reservationRepo.save(new Reservation("r3", "u3", "s3", "ts-2", today));
+        reservationRepo.save(new Reservation("r1", "u1", "room-1", 1, "ts-1", today));
+        reservationRepo.save(new Reservation("r2", "u2", "room-1", 1, "ts-1", today));
+        reservationRepo.save(new Reservation("r3", "u3", "room-1", 1, "ts-2", today));
 
         GetTimeSlotStatsUseCase.Output output = useCase.execute(
                 new GetTimeSlotStatsUseCase.Request("valid-token"));
@@ -78,7 +78,7 @@ class GetTimeSlotStatsUseCaseTest
     @Test
     void shouldReturnZeroWhenNoTodayReservations()
     {
-        reservationRepo.save(new Reservation("r-old", "u1", "s1", "ts-1",
+        reservationRepo.save(new Reservation("r-old", "u1", "room-1", 1, "ts-1",
                 LocalDate.now().minusDays(1)));
 
         GetTimeSlotStatsUseCase.Output output = useCase.execute(

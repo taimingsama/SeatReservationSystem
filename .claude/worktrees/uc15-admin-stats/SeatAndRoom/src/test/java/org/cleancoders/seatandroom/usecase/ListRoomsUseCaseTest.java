@@ -1,6 +1,7 @@
 package org.cleancoders.seatandroom.usecase;
 
 import org.cleancoders.seatandroom.domain.RoomStatus;
+import org.cleancoders.seatandroom.domain.RoomLayout;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.test.infrastructure.StubRoomRepo;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,10 +33,10 @@ class ListRoomsUseCaseTest
     @Test
     void shouldReturnOnlyOpenRoomsAndPresentThem()
     {
-        StudyRoom open1 = new StudyRoom("r1", "A", "L1", 10, RoomStatus.OPEN);
-        StudyRoom closed = new StudyRoom("r2", "B", "L2", 10, RoomStatus.CLOSED);
-        StudyRoom maint = new StudyRoom("r3", "C", "L3", 10, RoomStatus.MAINTENANCE);
-        StudyRoom open2 = new StudyRoom("r4", "D", "L4", 10, RoomStatus.OPEN);
+        StudyRoom open1 = new StudyRoom("r1", "A", "L1", RoomLayout.SMALL, RoomStatus.OPEN);
+        StudyRoom closed = new StudyRoom("r2", "B", "L2", RoomLayout.SMALL, RoomStatus.CLOSED);
+        StudyRoom maint = new StudyRoom("r3", "C", "L3", RoomLayout.SMALL, RoomStatus.MAINTENANCE);
+        StudyRoom open2 = new StudyRoom("r4", "D", "L4", RoomLayout.SMALL, RoomStatus.OPEN);
         roomRepo.add(open1, closed, maint, open2);
 
         var output = useCase.execute(new ListRoomsUseCase.Request());
@@ -47,7 +48,7 @@ class ListRoomsUseCaseTest
     @Test
     void shouldReturnEmptyListWhenNoOpenRooms()
     {
-        roomRepo.add(new StudyRoom("r1", "A", "L1", 10, RoomStatus.CLOSED));
+        roomRepo.add(new StudyRoom("r1", "A", "L1", RoomLayout.SMALL, RoomStatus.CLOSED));
 
         var output = useCase.execute(new ListRoomsUseCase.Request());
 
@@ -58,7 +59,7 @@ class ListRoomsUseCaseTest
     @Test
     void shouldQueryRepoWithOpenStatusOnly()
     {
-        roomRepo.add(new StudyRoom("r1", "A", "L1", 10, RoomStatus.OPEN));
+        roomRepo.add(new StudyRoom("r1", "A", "L1", RoomLayout.SMALL, RoomStatus.OPEN));
 
         useCase.execute(new ListRoomsUseCase.Request());
 

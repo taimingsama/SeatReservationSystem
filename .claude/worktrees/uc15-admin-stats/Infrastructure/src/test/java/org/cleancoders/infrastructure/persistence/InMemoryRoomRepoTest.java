@@ -1,6 +1,7 @@
 package org.cleancoders.infrastructure.persistence;
 
 import org.cleancoders.seatandroom.domain.RoomStatus;
+import org.cleancoders.seatandroom.domain.RoomLayout;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +24,7 @@ class InMemoryRoomRepoTest
     @Test
     void saveShouldStoreAndReturnRoom()
     {
-        StudyRoom room = new StudyRoom("r1", "A", "L1", 10, RoomStatus.OPEN);
+        StudyRoom room = new StudyRoom("r1", "A", "L1", RoomLayout.SMALL, RoomStatus.OPEN);
 
         StudyRoom saved = repo.save(room);
 
@@ -40,9 +41,9 @@ class InMemoryRoomRepoTest
     @Test
     void findByStatusShouldFilterByStatus()
     {
-        StudyRoom open = new StudyRoom("r1", "A", "L1", 10, RoomStatus.OPEN);
-        StudyRoom closed = new StudyRoom("r2", "B", "L2", 10, RoomStatus.CLOSED);
-        StudyRoom open2 = new StudyRoom("r3", "C", "L3", 10, RoomStatus.OPEN);
+        StudyRoom open = new StudyRoom("r1", "A", "L1", RoomLayout.SMALL, RoomStatus.OPEN);
+        StudyRoom closed = new StudyRoom("r2", "B", "L2", RoomLayout.SMALL, RoomStatus.CLOSED);
+        StudyRoom open2 = new StudyRoom("r3", "C", "L3", RoomLayout.SMALL, RoomStatus.OPEN);
         repo.save(open);
         repo.save(closed);
         repo.save(open2);
@@ -58,7 +59,7 @@ class InMemoryRoomRepoTest
     @Test
     void findByStatusShouldReturnEmptyWhenNoMatch()
     {
-        repo.save(new StudyRoom("r1", "A", "L1", 10, RoomStatus.CLOSED));
+        repo.save(new StudyRoom("r1", "A", "L1", RoomLayout.SMALL, RoomStatus.CLOSED));
 
         assertTrue(repo.findByStatus(RoomStatus.OPEN).isEmpty());
     }

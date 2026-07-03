@@ -79,7 +79,7 @@ class ListMyReservationsUseCaseTest {
         assertEquals(2, output.items().size());
         assertEquals(2, presenter.items.size());
         assertEquals("res-1", presenter.items.get(0).reservationId());
-        assertEquals("A-1", presenter.items.get(0).seatNumber());
+        assertEquals("A-1", presenter.items.get(0)String.valueOf(.id()));
     }
 
     @Test
@@ -175,7 +175,7 @@ class ListMyReservationsUseCaseTest {
         @Override
         public Optional<Reservation> findBySeatIdAndDateAndTimeSlotIdAndStatusIn(
                 String sid, LocalDate d, String ts, Set<ReservationStatus> ss) {
-            return m.values().stream().filter(r -> r.seatId().equals(sid) && r.date().equals(d)
+            return m.values().stream().filter(r -> r.roomId().equals(roomId) && r.seatId() == seatId && r.date().equals(d)
                     && r.timeSlotId().equals(ts) && ss.contains(r.status())).findFirst();
         }
 

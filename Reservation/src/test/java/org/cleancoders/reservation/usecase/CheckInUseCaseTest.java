@@ -28,7 +28,8 @@ class CheckInUseCaseTest
     private static final String STUDENT_ID = "student-1";
     private static final String STUDENT_TOKEN = "student-1";
     private static final String OTHER_STUDENT_ID = "student-2";
-    private static final String SEAT_ID = "seat-1";
+    private static final String ROOM_ID = "room-1";
+    private static final int SEAT_ID = 1;
     private static final String TIME_SLOT_ID = "ts-1";
     private static final LocalDate DATE = LocalDate.of(2026, 7, 2);
     // Time slot: 08:00-12:00
@@ -69,14 +70,14 @@ class CheckInUseCaseTest
         // Seed data
         userRepo.addUser(new User(STUDENT_ID, "alice", "hashed", UserRole.STUDENT, "Alice", "a@b.com"));
         userRepo.addUser(new User(OTHER_STUDENT_ID, "charlie", "hashed", UserRole.STUDENT, "Charlie", "c@c.com"));
-        seatRepo.addSeat(new Seat(SEAT_ID, "room-1", "A-1", SeatStatus.AVAILABLE));
+        seatRepo.addSeat(new Seat(SEAT_ID, ROOM_ID, SeatStatus.AVAILABLE));
         timeSlotRepo.addTimeSlot(new TimeSlot(TIME_SLOT_ID, "08:00", "12:00", "上午 08:00-12:00"));
     }
 
     @Test
     void shouldCheckInSuccessfully()
     {
-        Reservation res = new Reservation("res-1", STUDENT_ID, SEAT_ID, TIME_SLOT_ID, DATE);
+        Reservation res = new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         reservationRepo.addReservation(res);
 
         var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "res-1"));
@@ -84,7 +85,7 @@ class CheckInUseCaseTest
         assertNotNull(output);
         assertEquals("res-1", output.reservationId());
         assertEquals("res-1", presenter.successReservationId.get());
-        assertEquals("A-1", presenter.successSeatNumber.get());
+        assertEquals("1", presenter.successSeatNumber.get());
         assertEquals(ReservationStatus.CHECKED_IN, reservationRepo.findById("res-1").get().status());
     }
 
@@ -101,7 +102,7 @@ class CheckInUseCaseTest
     @Test
     void shouldRejectNotYourReservation()
     {
-        Reservation res = new Reservation("res-1", OTHER_STUDENT_ID, SEAT_ID, TIME_SLOT_ID, DATE);
+        Reservation res = new Reservation("res-1", OTHER_STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         reservationRepo.addReservation(res);
 
         var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "res-1"));
@@ -113,7 +114,7 @@ class CheckInUseCaseTest
     @Test
     void shouldRejectAlreadyCheckedIn()
     {
-        Reservation res = new Reservation("res-1", STUDENT_ID, SEAT_ID, TIME_SLOT_ID, DATE);
+        Reservation res = new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         res.checkIn(); // already checked in
         reservationRepo.addReservation(res);
 
@@ -127,7 +128,7 @@ class CheckInUseCaseTest
     @Test
     void shouldRejectCancelledReservation()
     {
-        Reservation res = new Reservation("res-1", STUDENT_ID, SEAT_ID, TIME_SLOT_ID, DATE);
+        Reservation res = new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         res.cancel();
         reservationRepo.addReservation(res);
 
@@ -144,7 +145,7 @@ class CheckInUseCaseTest
         // Set current time to before the slot (07:00, slot starts at 08:00)
         useCase.setCurrentTime(LocalDateTime.of(DATE, LocalTime.of(7, 0)));
 
-        Reservation res = new Reservation("res-1", STUDENT_ID, SEAT_ID, TIME_SLOT_ID, DATE);
+        Reservation res = new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         reservationRepo.addReservation(res);
 
         var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "res-1"));
@@ -160,7 +161,7 @@ class CheckInUseCaseTest
         // Set current time to after the slot (14:00, slot ends at 12:00)
         useCase.setCurrentTime(LocalDateTime.of(DATE, LocalTime.of(14, 0)));
 
-        Reservation res = new Reservation("res-1", STUDENT_ID, SEAT_ID, TIME_SLOT_ID, DATE);
+        Reservation res = new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         reservationRepo.addReservation(res);
 
         var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "res-1"));
@@ -176,7 +177,7 @@ class CheckInUseCaseTest
         // Edge case: exactly at slot start time
         useCase.setCurrentTime(LocalDateTime.of(DATE, SLOT_START));
 
-        Reservation res = new Reservation("res-1", STUDENT_ID, SEAT_ID, TIME_SLOT_ID, DATE);
+        Reservation res = new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         reservationRepo.addReservation(res);
 
         var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "res-1"));

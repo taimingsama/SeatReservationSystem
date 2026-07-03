@@ -48,12 +48,12 @@ class GetCheckInRateStatsUseCaseTest
     void shouldReturnCorrectCheckInRate()
     {
         LocalDate today = LocalDate.now();
-        reservationRepo.save(new Reservation("r1", "u1", "s1", "ts-1", today));
-        reservationRepo.save(new Reservation("r2", "u2", "s2", "ts-1", today));
-        Reservation r3 = new Reservation("r3", "u3", "s3", "ts-1", today);
+        reservationRepo.save(new Reservation("r1", "u1", "room-1", 1, "ts-1", today));
+        reservationRepo.save(new Reservation("r2", "u2", "room-1", 1, "ts-1", today));
+        Reservation r3 = new Reservation("r3", "u3", "room-1", 1, "ts-1", today);
         reservationRepo.save(r3);
         r3.checkIn();
-        Reservation r4 = new Reservation("r4", "u4", "s4", "ts-2", today);
+        Reservation r4 = new Reservation("r4", "u4", "room-1", 1, "ts-2", today);
         reservationRepo.save(r4);
         r4.checkIn();
 
@@ -70,7 +70,7 @@ class GetCheckInRateStatsUseCaseTest
     void shouldCountCheckedOutAsCheckedIn()
     {
         LocalDate today = LocalDate.now();
-        Reservation r = new Reservation("r1", "u1", "s1", "ts-1", today);
+        Reservation r = new Reservation("r1", "u1", "room-1", 1, "ts-1", today);
         reservationRepo.save(r);
         r.checkIn();
         r.checkOut();

@@ -2,6 +2,7 @@ package org.cleancoders.web.resource;
 
 import jakarta.ws.rs.core.Response;
 import org.cleancoders.seatandroom.domain.RoomStatus;
+import org.cleancoders.seatandroom.domain.RoomLayout;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.usecase.DeleteRoomUseCase;
 import org.cleancoders.seatandroom.usecase.ManageRoomsUseCase;
@@ -84,7 +85,7 @@ class AdminResourceTest
     @Test
     void createRoomShouldDelegateToUseCase()
     {
-        StudyRoom room = new StudyRoom("r-new", "自习室F", "综合楼二楼", 20, RoomStatus.OPEN);
+        StudyRoom room = new StudyRoom("r-new", "自习室F", "综合楼二楼", RoomLayout.SMALL, RoomStatus.OPEN);
         createOutput = new ManageRoomsUseCase.Output("r-new");
         presenter.success(room);
 
@@ -102,7 +103,7 @@ class AdminResourceTest
     @Test
     void createRoomShouldReturn201OnSuccess()
     {
-        StudyRoom room = new StudyRoom("r-new", "自习室G", "图书馆四楼", 15, RoomStatus.OPEN);
+        StudyRoom room = new StudyRoom("r-new", "自习室G", "图书馆四楼", RoomLayout.SMALL, RoomStatus.OPEN);
         createOutput = new ManageRoomsUseCase.Output("r-new");
         presenter.success(room);
 
@@ -133,7 +134,7 @@ class AdminResourceTest
     @Test
     void updateRoomShouldDelegateToUseCase()
     {
-        StudyRoom room = new StudyRoom("room-1", "自习室A-改", "图书馆一楼东", 35, RoomStatus.OPEN);
+        StudyRoom room = new StudyRoom("room-1", "自习室A-改", "图书馆一楼东", RoomLayout.SMALL, RoomStatus.OPEN);
         updateOutput = new UpdateRoomUseCase.Output("room-1");
         presenter.updateSuccess(room);
 
@@ -152,7 +153,7 @@ class AdminResourceTest
     @Test
     void updateRoomShouldReturn200OnSuccess()
     {
-        StudyRoom room = new StudyRoom("room-1", "自习室B", "新位置", 25, RoomStatus.OPEN);
+        StudyRoom room = new StudyRoom("room-1", "自习室B", "新位置", RoomLayout.SMALL, RoomStatus.OPEN);
         updateOutput = new UpdateRoomUseCase.Output("room-1");
         presenter.updateSuccess(room);
 

@@ -206,7 +206,7 @@ class CancelReservationUseCaseTest {
         @Override
         public Optional<Reservation> findBySeatIdAndDateAndTimeSlotIdAndStatusIn(
                 String sid, LocalDate d, String ts, Set<ReservationStatus> ss) {
-            return m.values().stream().filter(r -> r.seatId().equals(sid) && r.date().equals(d) && r.timeSlotId().equals(ts) && ss.contains(r.status())).findFirst();
+            return m.values().stream().filter(r -> r.roomId().equals(roomId) && r.seatId() == seatId && r.date().equals(d) && r.timeSlotId().equals(ts) && ss.contains(r.status())).findFirst();
         }
 
         @Override

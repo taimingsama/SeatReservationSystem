@@ -1,6 +1,7 @@
 package org.cleancoders.seatandroom.usecase;
 
 import org.cleancoders.seatandroom.domain.RoomStatus;
+import org.cleancoders.seatandroom.domain.RoomLayout;
 import org.cleancoders.seatandroom.domain.Seat;
 import org.cleancoders.seatandroom.domain.SeatStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
@@ -38,11 +39,11 @@ class ListSeatsUseCaseTest
     @Test
     void shouldReturnSeatsAndPresentThem()
     {
-        StudyRoom room = new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN);
+        StudyRoom room = new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN);
         roomRepo.add(room);
-        Seat s1 = new Seat("seat-1", "room-1", "A-1", SeatStatus.AVAILABLE);
-        Seat s2 = new Seat("seat-2", "room-1", "A-2", SeatStatus.RESERVED);
-        Seat s3 = new Seat("seat-3", "room-1", "A-3", SeatStatus.OCCUPIED);
+        Seat s1 = new Seat(1, "room-1", SeatStatus.AVAILABLE);
+        Seat s2 = new Seat(2, "room-1", SeatStatus.RESERVED);
+        Seat s3 = new Seat(3, "room-1", SeatStatus.OCCUPIED);
         seatRepo.save(s1);
         seatRepo.save(s2);
         seatRepo.save(s3);
@@ -57,7 +58,7 @@ class ListSeatsUseCaseTest
     @Test
     void shouldReturnEmptyListWhenRoomHasNoSeats()
     {
-        StudyRoom room = new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN);
+        StudyRoom room = new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN);
         roomRepo.add(room);
 
         var output = useCase.execute(new ListSeatsUseCase.Request("room-1"));
@@ -78,11 +79,11 @@ class ListSeatsUseCaseTest
     @Test
     void shouldReturnSeatsForCorrectRoomOnly()
     {
-        StudyRoom room1 = new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN);
-        StudyRoom room2 = new StudyRoom("room-2", "自习室B", "图书馆二楼", 20, RoomStatus.OPEN);
+        StudyRoom room1 = new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN);
+        StudyRoom room2 = new StudyRoom("room-2", "自习室B", "图书馆二楼", RoomLayout.SMALL, RoomStatus.OPEN);
         roomRepo.add(room1, room2);
-        Seat s1 = new Seat("seat-1", "room-1", "A-1", SeatStatus.AVAILABLE);
-        Seat s2 = new Seat("seat-9", "room-2", "B-1", SeatStatus.AVAILABLE);
+        Seat s1 = new Seat(1, "room-1", SeatStatus.AVAILABLE);
+        Seat s2 = new Seat(9, "room-2", SeatStatus.AVAILABLE);
         seatRepo.save(s1);
         seatRepo.save(s2);
 
@@ -95,12 +96,12 @@ class ListSeatsUseCaseTest
     @Test
     void shouldIncludeAllSeatStatuses()
     {
-        StudyRoom room = new StudyRoom("room-3", "自习室C", "教学楼三楼", 15, RoomStatus.OPEN);
+        StudyRoom room = new StudyRoom("room-3", "自习室C", "教学楼三楼", RoomLayout.SMALL, RoomStatus.OPEN);
         roomRepo.add(room);
-        Seat av = new Seat("s1", "room-3", "C-1", SeatStatus.AVAILABLE);
-        Seat rv = new Seat("s2", "room-3", "C-2", SeatStatus.RESERVED);
-        Seat oc = new Seat("s3", "room-3", "C-3", SeatStatus.OCCUPIED);
-        Seat mt = new Seat("s4", "room-3", "C-4", SeatStatus.MAINTENANCE);
+        Seat av = new Seat(1, "room-3", SeatStatus.AVAILABLE);
+        Seat rv = new Seat(2, "room-3", SeatStatus.RESERVED);
+        Seat oc = new Seat(3, "room-3", SeatStatus.OCCUPIED);
+        Seat mt = new Seat(4, "room-3", SeatStatus.MAINTENANCE);
         seatRepo.save(av);
         seatRepo.save(rv);
         seatRepo.save(oc);

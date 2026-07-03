@@ -7,6 +7,7 @@ import jakarta.ws.rs.core.Response;
 import org.cleancoders.infrastructure.persistence.InMemoryRoomRepo;
 import org.cleancoders.infrastructure.persistence.InMemorySeatRepo;
 import org.cleancoders.seatandroom.domain.RoomStatus;
+import org.cleancoders.seatandroom.domain.RoomLayout;
 import org.cleancoders.seatandroom.domain.Seat;
 import org.cleancoders.seatandroom.domain.SeatStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
@@ -77,10 +78,10 @@ class RoomResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn200WithOnlyOpenRooms()
     {
-        roomRepo.save(new StudyRoom("r1", "A", "L1", 10, RoomStatus.OPEN));
-        roomRepo.save(new StudyRoom("r2", "B", "L2", 10, RoomStatus.CLOSED));
-        roomRepo.save(new StudyRoom("r3", "C", "L3", 10, RoomStatus.OPEN));
-        roomRepo.save(new StudyRoom("r4", "D", "L4", 10, RoomStatus.MAINTENANCE));
+        roomRepo.save(new StudyRoom("r1", "A", "L1", RoomLayout.SMALL, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("r2", "B", "L2", RoomLayout.SMALL, RoomStatus.CLOSED));
+        roomRepo.save(new StudyRoom("r3", "C", "L3", RoomLayout.SMALL, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("r4", "D", "L4", RoomLayout.SMALL, RoomStatus.MAINTENANCE));
 
         Response response = target("/rooms").request(MediaType.APPLICATION_JSON).get();
 
@@ -101,7 +102,7 @@ class RoomResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn200WithEmptyArrayWhenNoOpenRooms()
     {
-        roomRepo.save(new StudyRoom("r1", "A", "L1", 10, RoomStatus.CLOSED));
+        roomRepo.save(new StudyRoom("r1", "A", "L1", RoomLayout.SMALL, RoomStatus.CLOSED));
 
         Response response = target("/rooms").request(MediaType.APPLICATION_JSON).get();
 
@@ -119,7 +120,7 @@ class RoomResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn200WithSeatsForExistingRoom()
     {
-        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
 
         Response response = target("/rooms/room-1/seats").request(MediaType.APPLICATION_JSON).get();
 
@@ -154,11 +155,11 @@ class RoomResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn200WithSeatsOfAllStatuses()
     {
-        roomRepo.save(new StudyRoom("room-3", "自习室C", "教学楼三楼", 15, RoomStatus.OPEN));
-        seatRepo.save(new Seat("s1", "room-3", "C-1", SeatStatus.AVAILABLE));
-        seatRepo.save(new Seat("s2", "room-3", "C-2", SeatStatus.RESERVED));
-        seatRepo.save(new Seat("s3", "room-3", "C-3", SeatStatus.OCCUPIED));
-        seatRepo.save(new Seat("s4", "room-3", "C-4", SeatStatus.MAINTENANCE));
+        roomRepo.save(new StudyRoom("room-3", "自习室C", "教学楼三楼", RoomLayout.SMALL, RoomStatus.OPEN));
+        seatRepo.save(new Seat(1, "room-3", SeatStatus.AVAILABLE));
+        seatRepo.save(new Seat(2, "room-3", SeatStatus.RESERVED));
+        seatRepo.save(new Seat(3, "room-3", SeatStatus.OCCUPIED));
+        seatRepo.save(new Seat(4, "room-3", SeatStatus.MAINTENANCE));
 
         Response response = target("/rooms/room-3/seats").request(MediaType.APPLICATION_JSON).get();
 
@@ -180,7 +181,7 @@ class RoomResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn200WithEmptySeatsForRoomWithNoSeats()
     {
-        roomRepo.save(new StudyRoom("room-empty", "空自习室", "综合楼五楼", 10, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("room-empty", "空自习室", "综合楼五楼", RoomLayout.SMALL, RoomStatus.OPEN));
 
         Response response = target("/rooms/room-empty/seats").request(MediaType.APPLICATION_JSON).get();
 

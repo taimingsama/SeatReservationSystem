@@ -10,6 +10,7 @@ import org.cleancoders.infrastructure.security.JjwtTokenService;
 import org.cleancoders.reservation.domain.Reservation;
 import org.cleancoders.reservation.domain.ReservationStatus;
 import org.cleancoders.reservation.outbound.ReservationRepository;
+import org.cleancoders.seatandroom.domain.RoomLayout;
 import org.cleancoders.seatandroom.domain.RoomStatus;
 import org.cleancoders.seatandroom.domain.Seat;
 import org.cleancoders.seatandroom.domain.SeatStatus;
@@ -69,9 +70,9 @@ class AdminResourceIntegrationTest extends JerseyTest
         studentId = "student-1";
 
         Reservation r1 = reservationRepo.save(
-                new Reservation(null, studentId, "seat-1", "ts-1", LocalDate.of(2026, 7, 3)));
+                new Reservation(null, studentId, "seat-1", 1, "ts-1", LocalDate.of(2026, 7, 3)));
         Reservation r2 = reservationRepo.save(
-                new Reservation(null, studentId, "seat-2", "ts-2", LocalDate.of(2026, 7, 3)));
+                new Reservation(null, studentId, "seat-2", 1, "ts-2", LocalDate.of(2026, 7, 3)));
 
 
         reservationRepo.save(r1);
@@ -234,7 +235,7 @@ class AdminResourceIntegrationTest extends JerseyTest
         Response response = target("/admin/rooms")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", adminToken)
-                .post(Entity.json(new CreateRoomRequest("自习室F", "综合楼二楼", 20)));
+                .post(Entity.json(new CreateRoomRequest("自习室F", "综合楼二楼", "SMALL")));
 
         assertEquals(201, response.getStatus());
         Map<String, Object> body = response.readEntity(new GenericType<>()
@@ -253,7 +254,7 @@ class AdminResourceIntegrationTest extends JerseyTest
         Response response = target("/admin/rooms")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", studentToken)
-                .post(Entity.json(new CreateRoomRequest("自习室F", "综合楼二楼", 20)));
+                .post(Entity.json(new CreateRoomRequest("自习室F", "综合楼二楼", "SMALL")));
 
         assertEquals(403, response.getStatus());
     }
@@ -261,12 +262,12 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn409WhenNameAlreadyExists()
     {
-        roomRepo.save(new StudyRoom("r-existing", "自习室F", "图书馆一楼", 30, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("r-existing", "自习室F", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
 
         Response response = target("/admin/rooms")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", adminToken)
-                .post(Entity.json(new CreateRoomRequest("自习室F", "综合楼二楼", 20)));
+                .post(Entity.json(new CreateRoomRequest("自习室F", "综合楼二楼", "SMALL")));
 
         assertEquals(409, response.getStatus());
         Map<String, Object> body = response.readEntity(new GenericType<>()
@@ -280,7 +281,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     {
         Response response = target("/admin/rooms")
                 .request(MediaType.APPLICATION_JSON)
-                .post(Entity.json(new CreateRoomRequest("自习室F", "综合楼二楼", 20)));
+                .post(Entity.json(new CreateRoomRequest("自习室F", "综合楼二楼", "SMALL")));
 
         assertEquals(401, response.getStatus());
     }
@@ -290,12 +291,12 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn200WhenAdminUpdatesRoom()
     {
-        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
 
         Response response = target("/admin/rooms/room-1")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", adminToken)
-                .put(Entity.json(new CreateRoomRequest("自习室A-改", "图书馆一楼东", 35)));
+                .put(Entity.json(new CreateRoomRequest("自习室A-改", "图书馆一楼东", "SMALL")));
 
         assertEquals(200, response.getStatus());
         Map<String, Object> body = response.readEntity(new GenericType<>()
@@ -314,7 +315,7 @@ class AdminResourceIntegrationTest extends JerseyTest
         Response response = target("/admin/rooms/nonexistent")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", adminToken)
-                .put(Entity.json(new CreateRoomRequest("自习室X", "一楼", 10)));
+                .put(Entity.json(new CreateRoomRequest("自习室X", "一楼", "SMALL")));
 
         assertEquals(404, response.getStatus());
         Map<String, Object> body = response.readEntity(new GenericType<>()
@@ -327,13 +328,13 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn409WhenUpdatingToExistingName()
     {
-        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
-        roomRepo.save(new StudyRoom("room-2", "自习室B", "图书馆二楼", 20, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("room-2", "自习室B", "图书馆二楼", RoomLayout.SMALL, RoomStatus.OPEN));
 
         Response response = target("/admin/rooms/room-1")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", adminToken)
-                .put(Entity.json(new CreateRoomRequest("自习室B", "新位置", 25)));
+                .put(Entity.json(new CreateRoomRequest("自习室B", "新位置", "SMALL")));
 
         assertEquals(409, response.getStatus());
         Map<String, Object> body = response.readEntity(new GenericType<>()
@@ -345,12 +346,12 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldAllowUpdatingRoomWithSameName()
     {
-        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
 
         Response response = target("/admin/rooms/room-1")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", adminToken)
-                .put(Entity.json(new CreateRoomRequest("自习室A", "图书馆一楼东", 40)));
+                .put(Entity.json(new CreateRoomRequest("自习室A", "图书馆一楼东", "SMALL")));
 
         assertEquals(200, response.getStatus());
         Map<String, Object> body = response.readEntity(new GenericType<>()
@@ -364,12 +365,12 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn403WhenStudentUpdatesRoom()
     {
-        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
 
         Response response = target("/admin/rooms/room-1")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", studentToken)
-                .put(Entity.json(new CreateRoomRequest("自习室F", "综合楼二楼", 20)));
+                .put(Entity.json(new CreateRoomRequest("自习室F", "综合楼二楼", "SMALL")));
 
         assertEquals(403, response.getStatus());
     }
@@ -379,7 +380,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn201WhenAdminCreatesSeat()
     {
-        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
         String adminToken = tokenService.generate("admin-1");
 
         Response response = target("/admin/seats")
@@ -417,7 +418,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn409WhenSeatNumberAlreadyExists()
     {
-        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
         // InMemorySeatRepo pre-seeds seat-1 ("A-1") in room-1
         String adminToken = tokenService.generate("admin-1");
 
@@ -438,7 +439,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn403WhenStudentCreatesSeat()
     {
-        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
         String studentToken = tokenService.generate("student-1");
 
         Response response = target("/admin/seats")
@@ -452,7 +453,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn401WhenNoTokenForSeat()
     {
-        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
 
         Response response = target("/admin/seats")
                 .request(MediaType.APPLICATION_JSON)
@@ -486,7 +487,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn200WhenAdminMarksSeatAvailable()
     {
-        seatRepo.save(new Seat("seat-m", "room-1", "A-9", SeatStatus.MAINTENANCE));
+        seatRepo.save(new Seat(1, "room-1", SeatStatus.MAINTENANCE));
         String adminToken = tokenService.generate("admin-1");
 
         Response response = target("/admin/seats/seat-m")
@@ -554,7 +555,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn409WhenIllegalTransition()
     {
-        seatRepo.save(new Seat("seat-r", "room-1", "A-9", SeatStatus.RESERVED));
+        seatRepo.save(new Seat(1, "room-1", SeatStatus.RESERVED));
         String adminToken = tokenService.generate("admin-1");
 
         Response response = target("/admin/seats/seat-r")
@@ -599,7 +600,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn200WhenAdminDeletesRoom()
     {
-        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
 
         Response response = target("/admin/rooms/room-1")
                 .request(MediaType.APPLICATION_JSON)
@@ -632,7 +633,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn409WhenDeletingAlreadyClosedRoom()
     {
-        roomRepo.save(new StudyRoom("room-closed", "已关闭", "三楼", 10, RoomStatus.CLOSED));
+        roomRepo.save(new StudyRoom("room-closed", "已关闭", "三楼", RoomLayout.SMALL, RoomStatus.CLOSED));
 
         Response response = target("/admin/rooms/room-closed")
                 .request(MediaType.APPLICATION_JSON)
@@ -645,7 +646,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn403WhenStudentDeletesRoom()
     {
-        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
 
         Response response = target("/admin/rooms/room-1")
                 .request(MediaType.APPLICATION_JSON)
@@ -660,7 +661,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn200WhenAdminDeletesAvailableSeat()
     {
-        seatRepo.save(new Seat("seat-del-av", "room-1", "X-A", SeatStatus.AVAILABLE));
+        seatRepo.save(new Seat(1, "room-1", SeatStatus.AVAILABLE));
         String adminToken = tokenService.generate("admin-1");
 
         Response response = target("/admin/seats/seat-del-av")
@@ -676,14 +677,14 @@ class AdminResourceIntegrationTest extends JerseyTest
         assertEquals("seat-del-av", body.get("seatId"));
 
         // Verify seat is now REMOVED
-        Seat seat = seatRepo.findById("seat-del-av").get();
+        Seat seat = seatRepo.findByRoomIdAndSeatId("room-1", 1).get();
         assertEquals(SeatStatus.REMOVED, seat.status());
     }
 
     @Test
     void shouldReturn200WhenAdminDeletesMaintenanceSeat()
     {
-        seatRepo.save(new Seat("seat-del-mt", "room-1", "X-M", SeatStatus.MAINTENANCE));
+        seatRepo.save(new Seat(1, "room-1", SeatStatus.MAINTENANCE));
         String adminToken = tokenService.generate("admin-1");
 
         Response response = target("/admin/seats/seat-del-mt")
@@ -692,7 +693,7 @@ class AdminResourceIntegrationTest extends JerseyTest
                 .delete();
 
         assertEquals(200, response.getStatus());
-        assertEquals(SeatStatus.REMOVED, seatRepo.findById("seat-del-mt").get().status());
+        assertEquals(SeatStatus.REMOVED, seatRepo.findByRoomIdAndSeatId("room-1", 1).get().status());
     }
 
     @Test
@@ -716,7 +717,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn409WhenSeatAlreadyRemoved()
     {
-        seatRepo.save(new Seat("seat-removed", "room-1", "Z-1", SeatStatus.REMOVED));
+        seatRepo.save(new Seat(1, "room-1", SeatStatus.REMOVED));
         String adminToken = tokenService.generate("admin-1");
 
         Response response = target("/admin/seats/seat-removed")
@@ -735,7 +736,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn409WhenSeatReserved()
     {
-        seatRepo.save(new Seat("seat-del-rs", "room-1", "X-R", SeatStatus.RESERVED));
+        seatRepo.save(new Seat(1, "room-1", SeatStatus.RESERVED));
         String adminToken = tokenService.generate("admin-1");
 
         Response response = target("/admin/seats/seat-del-rs")
@@ -774,7 +775,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     void shouldReturn200WhenSeatOnlyHasCancelledReservations()
     {
         // seat-2: AVAILABLE, res-6 is CANCELLED (not active)
-        var reat = reservationRepo.findBySeatIdAndStatusIn("seat-2", Set.of(ReservationStatus.RESERVED)).get(0);
+        var reat = reservationRepo.findBySeatIdAndStatusIn("seat-2", 1, Set.of(ReservationStatus.RESERVED)).get(0);
         reat.cancel();
 
         Response response = target("/admin/seats/seat-2")
@@ -793,7 +794,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn403WhenStudentDeletesSeat()
     {
-        seatRepo.save(new Seat("seat-del-st", "room-1", "X-S", SeatStatus.AVAILABLE));
+        seatRepo.save(new Seat(1, "room-1", SeatStatus.AVAILABLE));
 
         Response response = target("/admin/seats/seat-del-st")
                 .request(MediaType.APPLICATION_JSON)
@@ -806,7 +807,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn401WhenNoTokenForSeatDelete()
     {
-        seatRepo.save(new Seat("seat-del-no", "room-1", "X-N", SeatStatus.AVAILABLE));
+        seatRepo.save(new Seat(1, "room-1", SeatStatus.AVAILABLE));
 
         Response response = target("/admin/seats/seat-del-no")
                 .request(MediaType.APPLICATION_JSON)

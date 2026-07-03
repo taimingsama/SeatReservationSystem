@@ -1,5 +1,6 @@
 package org.cleancoders.seatandroom.usecase;
 
+import org.cleancoders.seatandroom.domain.RoomLayout;
 import org.cleancoders.seatandroom.domain.RoomStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.test.infrastructure.StubRoomRepo;
@@ -50,35 +51,34 @@ class UpdateRoomUseCaseTest
         userRepo.addUser(new User(ADMIN_ID, "admin", "hashed", UserRole.ADMIN, "Admin", "a@b.com"));
         userRepo.addUser(new User(STUDENT_ID, "alice", "hashed", UserRole.STUDENT, "Alice", "a@b.com"));
 
-        roomRepo.add(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
-        roomRepo.add(new StudyRoom("room-2", "自习室B", "图书馆二楼", 20, RoomStatus.OPEN));
+        roomRepo.add(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
+        roomRepo.add(new StudyRoom("room-2", "自习室B", "图书馆二楼", RoomLayout.SMALL, RoomStatus.OPEN));
     }
 
     @Test
     void shouldUpdateRoomSuccessfully()
     {
         var output = useCase.execute(new UpdateRoomUseCase.Request(
-                ADMIN_TOKEN, "room-1", "自习室A-改", "图书馆一楼东", 35));
+                ADMIN_TOKEN, "room-1", "自习室A-改", "图书馆一楼东"));
 
         assertNotNull(output);
         assertEquals("room-1", output.roomId());
         assertTrue(presenter.updateSuccessCalled);
         assertEquals("自习室A-改", presenter.updatedRoom.get().name());
         assertEquals("图书馆一楼东", presenter.updatedRoom.get().location());
-        assertEquals(35, presenter.updatedRoom.get().capacity());
+        assertEquals(RoomLayout.SMALL, presenter.updatedRoom.get().layout());
     }
 
     @Test
     void shouldKeepSameNameWhenOnlyUpdatingOtherFields()
     {
         var output = useCase.execute(new UpdateRoomUseCase.Request(
-                ADMIN_TOKEN, "room-1", "自习室A", "新位置", 40));
+                ADMIN_TOKEN, "room-1", "自习室A", "新位置"));
 
         assertNotNull(output);
         assertTrue(presenter.updateSuccessCalled);
         assertEquals("自习室A", presenter.updatedRoom.get().name());
         assertEquals("新位置", presenter.updatedRoom.get().location());
-        assertEquals(40, presenter.updatedRoom.get().capacity());
     }
 
     @Test
@@ -87,7 +87,7 @@ class UpdateRoomUseCaseTest
         tokenService.setUserId(STUDENT_ID);
 
         var output = useCase.execute(new UpdateRoomUseCase.Request(
-                STUDENT_TOKEN, "room-1", "自习室F", "综合楼二楼", 20));
+                STUDENT_TOKEN, "room-1", "自习室F", "综合楼二楼"));
 
         assertNull(output);
         assertTrue(presenter.forbiddenCalled);
@@ -97,7 +97,7 @@ class UpdateRoomUseCaseTest
     void shouldReturnRoomNotFound()
     {
         var output = useCase.execute(new UpdateRoomUseCase.Request(
-                ADMIN_TOKEN, "nonexistent", "自习室X", "一楼", 10));
+                ADMIN_TOKEN, "nonexistent", "自习室X", "一楼"));
 
         assertNull(output);
         assertTrue(presenter.roomNotFoundCalled);
@@ -108,7 +108,7 @@ class UpdateRoomUseCaseTest
     void shouldRejectDuplicateNameOnDifferentRoom()
     {
         var output = useCase.execute(new UpdateRoomUseCase.Request(
-                ADMIN_TOKEN, "room-1", "自习室B", "图书馆一楼", 30));
+                ADMIN_TOKEN, "room-1", "自习室B", "图书馆一楼"));
 
         assertNull(output);
         assertTrue(presenter.roomNameAlreadyExistsCalled);
@@ -119,7 +119,7 @@ class UpdateRoomUseCaseTest
     void shouldAllowSameNameOnSameRoom()
     {
         var output = useCase.execute(new UpdateRoomUseCase.Request(
-                ADMIN_TOKEN, "room-1", "自习室B", "新位置", 25));
+                ADMIN_TOKEN, "room-1", "自习室B", "新位置"));
 
         assertNull(output);
         assertTrue(presenter.roomNameAlreadyExistsCalled);

@@ -42,7 +42,7 @@ class WebApiReservationPresenterTest {
 
     @Test
     void seatNotAvailableShouldReturn409() {
-        presenter.seatNotAvailable("seat-1", "上午 08:00-12:00");
+        presenter.seatNotAvailable("room-1", 1, "上午 08:00-12:00");
 
         Response response = responseContext.get();
         assertEquals(409, response.getStatus());
@@ -79,7 +79,7 @@ class WebApiReservationPresenterTest {
 
     @Test
     void seatNotFoundShouldReturn404() {
-        presenter.seatNotFound("seat-nonexistent");
+        presenter.seatNotFound("room-1", 1);
 
         Response response = responseContext.get();
         assertEquals(404, response.getStatus());

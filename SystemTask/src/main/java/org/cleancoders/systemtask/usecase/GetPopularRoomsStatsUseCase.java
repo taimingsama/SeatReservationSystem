@@ -51,8 +51,8 @@ public class GetPopularRoomsStatsUseCase
     {
         LocalDate today = LocalDate.now();
 
-        Map<String, String> seatToRoom = seatRepo.findAll().stream()
-                .collect(Collectors.toMap(Seat::id, Seat::roomId));
+        Map<Integer, String> seatToRoom = seatRepo.findAll().stream()
+                .collect(Collectors.toMap(s -> s.id(), Seat::roomId));
 
         List<Reservation> todayReservations = reservationRepo.findAll().stream()
                 .filter(r -> r.date().equals(today))

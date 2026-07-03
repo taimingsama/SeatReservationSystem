@@ -1,6 +1,7 @@
 package org.cleancoders.web.resource;
 
 import jakarta.ws.rs.core.Response;
+import org.cleancoders.seatandroom.domain.RoomLayout;
 import org.cleancoders.seatandroom.domain.RoomStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.usecase.DeleteRoomUseCase;
@@ -84,30 +85,30 @@ class AdminResourceTest
     @Test
     void createRoomShouldDelegateToUseCase()
     {
-        StudyRoom room = new StudyRoom("r-new", "自习室F", "综合楼二楼", 20, RoomStatus.OPEN);
+        StudyRoom room = new StudyRoom("r-new", "自习室F", "综合楼二楼", RoomLayout.SMALL, RoomStatus.OPEN);
         createOutput = new ManageRoomsUseCase.Output("r-new");
         presenter.success(room);
 
         Response response = resource.createRoom("jwt.token.here",
-                new CreateRoomRequest("自习室F", "综合楼二楼", 20));
+                new CreateRoomRequest("自习室F", "综合楼二楼", "SMALL"));
 
         assertTrue(createExecuteCalled);
         assertEquals("jwt.token.here", lastCreateRequest.token());
         assertEquals("自习室F", lastCreateRequest.name());
         assertEquals("综合楼二楼", lastCreateRequest.location());
-        assertEquals(20, lastCreateRequest.capacity());
+        assertEquals("SMALL", lastCreateRequest.layout());
         assertEquals(201, response.getStatus());
     }
 
     @Test
     void createRoomShouldReturn201OnSuccess()
     {
-        StudyRoom room = new StudyRoom("r-new", "自习室G", "图书馆四楼", 15, RoomStatus.OPEN);
+        StudyRoom room = new StudyRoom("r-new", "自习室G", "图书馆四楼", RoomLayout.SMALL, RoomStatus.OPEN);
         createOutput = new ManageRoomsUseCase.Output("r-new");
         presenter.success(room);
 
         Response response = resource.createRoom("jwt.token.here",
-                new CreateRoomRequest("自习室G", "图书馆四楼", 15));
+                new CreateRoomRequest("自习室G", "图书馆四楼", "SMALL"));
 
         assertEquals(201, response.getStatus());
     }
@@ -119,7 +120,7 @@ class AdminResourceTest
         presenter.roomNameAlreadyExists("自习室F");
 
         Response response = resource.createRoom("jwt.token.here",
-                new CreateRoomRequest("自习室F", "综合楼二楼", 20));
+                new CreateRoomRequest("自习室F", "综合楼二楼", "SMALL"));
 
         assertEquals(409, response.getStatus());
         @SuppressWarnings("unchecked")
@@ -133,31 +134,31 @@ class AdminResourceTest
     @Test
     void updateRoomShouldDelegateToUseCase()
     {
-        StudyRoom room = new StudyRoom("room-1", "自习室A-改", "图书馆一楼东", 35, RoomStatus.OPEN);
+        StudyRoom room = new StudyRoom("room-1", "自习室A-改", "图书馆一楼东", RoomLayout.SMALL, RoomStatus.OPEN);
         updateOutput = new UpdateRoomUseCase.Output("room-1");
         presenter.updateSuccess(room);
 
         Response response = resource.updateRoom("jwt.token.here", "room-1",
-                new CreateRoomRequest("自习室A-改", "图书馆一楼东", 35));
+                new CreateRoomRequest("自习室A-改", "图书馆一楼东", "SMALL"));
 
         assertTrue(updateExecuteCalled);
         assertEquals("jwt.token.here", lastUpdateRequest.token());
         assertEquals("room-1", lastUpdateRequest.roomId());
         assertEquals("自习室A-改", lastUpdateRequest.name());
         assertEquals("图书馆一楼东", lastUpdateRequest.location());
-        assertEquals(35, lastUpdateRequest.capacity());
+        assertEquals("图书馆一楼东", lastUpdateRequest.location());
         assertEquals(200, response.getStatus());
     }
 
     @Test
     void updateRoomShouldReturn200OnSuccess()
     {
-        StudyRoom room = new StudyRoom("room-1", "自习室B", "新位置", 25, RoomStatus.OPEN);
+        StudyRoom room = new StudyRoom("room-1", "自习室B", "新位置", RoomLayout.SMALL, RoomStatus.OPEN);
         updateOutput = new UpdateRoomUseCase.Output("room-1");
         presenter.updateSuccess(room);
 
         Response response = resource.updateRoom("jwt.token.here", "room-1",
-                new CreateRoomRequest("自习室B", "新位置", 25));
+                new CreateRoomRequest("自习室B", "新位置", "SMALL"));
 
         assertEquals(200, response.getStatus());
     }
@@ -169,7 +170,7 @@ class AdminResourceTest
         presenter.roomNotFound("nonexistent");
 
         Response response = resource.updateRoom("jwt.token.here", "nonexistent",
-                new CreateRoomRequest("自习室X", "一楼", 10));
+                new CreateRoomRequest("自习室X", "一楼", "SMALL"));
 
         assertEquals(404, response.getStatus());
         @SuppressWarnings("unchecked")
@@ -185,7 +186,7 @@ class AdminResourceTest
         presenter.roomNameAlreadyExists("自习室B");
 
         Response response = resource.updateRoom("jwt.token.here", "room-1",
-                new CreateRoomRequest("自习室B", "图书馆一楼", 30));
+                new CreateRoomRequest("自习室B", "图书馆一楼", "SMALL"));
 
         assertEquals(409, response.getStatus());
     }

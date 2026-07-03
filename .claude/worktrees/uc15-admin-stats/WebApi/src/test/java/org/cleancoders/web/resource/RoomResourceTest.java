@@ -4,6 +4,7 @@ import jakarta.ws.rs.core.Response;
 import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
 import org.cleancoders.common_reservation_seatAndRoom.domain.SeatStatus;
 import org.cleancoders.seatandroom.domain.RoomStatus;
+import org.cleancoders.seatandroom.domain.RoomLayout;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.usecase.ListRoomsUseCase;
 import org.cleancoders.seatandroom.usecase.ListSeatsUseCase;
@@ -77,7 +78,7 @@ class RoomResourceTest
     @Test
     void listShouldReturn200WithRooms()
     {
-        StudyRoom open = new StudyRoom("r1", "A", "L1", 10, RoomStatus.OPEN);
+        StudyRoom open = new StudyRoom("r1", "A", "L1", RoomLayout.SMALL, RoomStatus.OPEN);
         listRoomsOutput = new ListRoomsUseCase.Output(List.of(open));
         presenter.presentRooms(List.of(open));
 
@@ -113,10 +114,10 @@ class RoomResourceTest
     @Test
     void listSeatsShouldReturn200WithSeats()
     {
-        StudyRoom room = new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN);
+        StudyRoom room = new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN);
         List<Seat> seats = List.of(
-                new Seat("seat-1", "room-1", "A-1", SeatStatus.AVAILABLE),
-                new Seat("seat-2", "room-1", "A-2", SeatStatus.RESERVED)
+                new Seat(1, "room-1", SeatStatus.AVAILABLE),
+                new Seat(2, "room-1", SeatStatus.RESERVED)
         );
         presenter.presentSeats(room, seats);
 

@@ -7,6 +7,7 @@ import org.cleancoders.common.usecase.AuthUseCase;
 import org.cleancoders.userandauth_test_infrastructure.StubTokenService;
 import org.cleancoders.userandauth_test_infrastructure.StubUserRepo;
 import org.cleancoders.seatandroom.domain.RoomStatus;
+import org.cleancoders.seatandroom.domain.RoomLayout;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.test.infrastructure.StubRoomRepo;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +51,7 @@ class DeleteRoomUseCaseTest
         userRepo.addUser(new User(ADMIN_ID, "admin", "hashed", UserRole.ADMIN, "Admin", "a@b.com"));
         userRepo.addUser(new User(STUDENT_ID, "alice", "hashed", UserRole.STUDENT, "Alice", "a@b.com"));
 
-        roomRepo.add(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
+        roomRepo.add(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
     }
 
     @Test
@@ -89,7 +90,7 @@ class DeleteRoomUseCaseTest
     @Test
     void shouldRejectAlreadyClosedRoom()
     {
-        roomRepo.add(new StudyRoom("room-closed", "已关闭", "三楼", 10, RoomStatus.CLOSED));
+        roomRepo.add(new StudyRoom("room-closed", "已关闭", "三楼", RoomLayout.SMALL, RoomStatus.CLOSED));
 
         var output = useCase.execute(new DeleteRoomUseCase.Request(ADMIN_TOKEN, "room-closed"));
 

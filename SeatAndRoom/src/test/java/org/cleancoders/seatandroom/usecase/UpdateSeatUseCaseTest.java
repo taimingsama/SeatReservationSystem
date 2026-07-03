@@ -22,6 +22,7 @@ class UpdateSeatUseCaseTest
     private static final String ADMIN_TOKEN = "jwt:" + ADMIN_ID + ":admin:ADMIN";
     private static final String STUDENT_ID = "student-1";
     private static final String STUDENT_TOKEN = "jwt:" + STUDENT_ID + ":alice:STUDENT";
+    private static final String ROOM_ID = "room-1";
 
     private UpdateSeatUseCase useCase;
     private StubTokenService tokenService;
@@ -53,13 +54,13 @@ class UpdateSeatUseCaseTest
     @Test
     void shouldMarkMaintenanceFromAvailable()
     {
-        seatRepo.addSeat(new Seat("seat-1", "room-1", "A-1", SeatStatus.AVAILABLE));
+        seatRepo.addSeat(new Seat(1, ROOM_ID, SeatStatus.AVAILABLE));
 
         var output = useCase.execute(new UpdateSeatUseCase.Request(
-                ADMIN_TOKEN, "seat-1", "MAINTENANCE"));
+                ADMIN_TOKEN, ROOM_ID, 1, "MAINTENANCE"));
 
         assertNotNull(output);
-        assertEquals("seat-1", output.seatId());
+        assertEquals(1, output.seatId());
         assertTrue(presenter.updateSuccessCalled);
         assertEquals(SeatStatus.MAINTENANCE, presenter.updatedSeat.get().status());
     }
@@ -67,10 +68,10 @@ class UpdateSeatUseCaseTest
     @Test
     void shouldMarkAvailableFromMaintenance()
     {
-        seatRepo.addSeat(new Seat("seat-1", "room-1", "A-1", SeatStatus.MAINTENANCE));
+        seatRepo.addSeat(new Seat(1, ROOM_ID, SeatStatus.MAINTENANCE));
 
         var output = useCase.execute(new UpdateSeatUseCase.Request(
-                ADMIN_TOKEN, "seat-1", "AVAILABLE"));
+                ADMIN_TOKEN, ROOM_ID, 1, "AVAILABLE"));
 
         assertNotNull(output);
         assertTrue(presenter.updateSuccessCalled);
@@ -81,24 +82,26 @@ class UpdateSeatUseCaseTest
     void shouldReturnSeatNotFound()
     {
         var output = useCase.execute(new UpdateSeatUseCase.Request(
-                ADMIN_TOKEN, "nonexistent", "MAINTENANCE"));
+                ADMIN_TOKEN, "nonexistent", 99, "MAINTENANCE"));
 
         assertNull(output);
         assertTrue(presenter.seatNotFoundCalled);
-        assertEquals("nonexistent", presenter.seatNotFoundId.get());
+        assertEquals("nonexistent", presenter.seatNotFoundRoomId.get());
+        assertEquals(99, presenter.seatNotFoundSeatId.get());
     }
 
     @Test
     void shouldRejectInvalidStatusTransition()
     {
-        seatRepo.addSeat(new Seat("seat-1", "room-1", "A-1", SeatStatus.RESERVED));
+        seatRepo.addSeat(new Seat(1, ROOM_ID, SeatStatus.RESERVED));
 
         var output = useCase.execute(new UpdateSeatUseCase.Request(
-                ADMIN_TOKEN, "seat-1", "MAINTENANCE"));
+                ADMIN_TOKEN, ROOM_ID, 1, "MAINTENANCE"));
 
         assertNull(output);
         assertTrue(presenter.invalidStatusTransitionCalled);
-        assertEquals("seat-1", presenter.transitionSeatId.get());
+        assertEquals(ROOM_ID, presenter.transitionRoomId.get());
+        assertEquals(1, presenter.transitionSeatId.get());
         assertEquals(SeatStatus.RESERVED, presenter.transitionCurrent.get());
         assertEquals(SeatStatus.MAINTENANCE, presenter.transitionTarget.get());
     }
@@ -106,24 +109,25 @@ class UpdateSeatUseCaseTest
     @Test
     void shouldRejectInvalidStatusValue()
     {
-        seatRepo.addSeat(new Seat("seat-1", "room-1", "A-1", SeatStatus.AVAILABLE));
+        seatRepo.addSeat(new Seat(1, ROOM_ID, SeatStatus.AVAILABLE));
 
         var output = useCase.execute(new UpdateSeatUseCase.Request(
-                ADMIN_TOKEN, "seat-1", "BROKEN"));
+                ADMIN_TOKEN, ROOM_ID, 1, "BROKEN"));
 
         assertNull(output);
         assertTrue(presenter.invalidStatusCalled);
-        assertEquals("seat-1", presenter.invalidStatusSeatId.get());
+        assertEquals(ROOM_ID, presenter.invalidStatusRoomId.get());
+        assertEquals(1, presenter.invalidStatusSeatId.get());
         assertEquals("BROKEN", presenter.invalidStatusValue.get());
     }
 
     @Test
     void shouldRejectReservedAsTargetStatus()
     {
-        seatRepo.addSeat(new Seat("seat-1", "room-1", "A-1", SeatStatus.AVAILABLE));
+        seatRepo.addSeat(new Seat(1, ROOM_ID, SeatStatus.AVAILABLE));
 
         var output = useCase.execute(new UpdateSeatUseCase.Request(
-                ADMIN_TOKEN, "seat-1", "RESERVED"));
+                ADMIN_TOKEN, ROOM_ID, 1, "RESERVED"));
 
         assertNull(output);
         assertTrue(presenter.invalidStatusCalled);
@@ -133,10 +137,10 @@ class UpdateSeatUseCaseTest
     void shouldRejectNonAdminUser()
     {
         tokenService.setUserId(STUDENT_ID);
-        seatRepo.addSeat(new Seat("seat-1", "room-1", "A-1", SeatStatus.AVAILABLE));
+        seatRepo.addSeat(new Seat(1, ROOM_ID, SeatStatus.AVAILABLE));
 
         var output = useCase.execute(new UpdateSeatUseCase.Request(
-                STUDENT_TOKEN, "seat-1", "MAINTENANCE"));
+                STUDENT_TOKEN, ROOM_ID, 1, "MAINTENANCE"));
 
         assertNull(output);
         assertTrue(presenter.forbiddenCalled);
@@ -152,13 +156,16 @@ class UpdateSeatUseCaseTest
         boolean updateSuccessCalled = false;
         AtomicReference<Seat> updatedSeat = new AtomicReference<>();
         boolean seatNotFoundCalled = false;
-        AtomicReference<String> seatNotFoundId = new AtomicReference<>();
+        AtomicReference<String> seatNotFoundRoomId = new AtomicReference<>();
+        AtomicReference<Integer> seatNotFoundSeatId = new AtomicReference<>();
         boolean invalidStatusTransitionCalled = false;
-        AtomicReference<String> transitionSeatId = new AtomicReference<>();
+        AtomicReference<String> transitionRoomId = new AtomicReference<>();
+        AtomicReference<Integer> transitionSeatId = new AtomicReference<>();
         AtomicReference<SeatStatus> transitionCurrent = new AtomicReference<>();
         AtomicReference<SeatStatus> transitionTarget = new AtomicReference<>();
         boolean invalidStatusCalled = false;
-        AtomicReference<String> invalidStatusSeatId = new AtomicReference<>();
+        AtomicReference<String> invalidStatusRoomId = new AtomicReference<>();
+        AtomicReference<Integer> invalidStatusSeatId = new AtomicReference<>();
         AtomicReference<String> invalidStatusValue = new AtomicReference<>();
         boolean forbiddenCalled = false;
 
@@ -170,25 +177,28 @@ class UpdateSeatUseCaseTest
         }
 
         @Override
-        public void seatNotFound(String seatId)
+        public void seatNotFound(String roomId, int seatId)
         {
             seatNotFoundCalled = true;
-            seatNotFoundId.set(seatId);
+            seatNotFoundRoomId.set(roomId);
+            seatNotFoundSeatId.set(seatId);
         }
 
         @Override
-        public void invalidStatusTransition(String seatId, SeatStatus current, SeatStatus target)
+        public void invalidStatusTransition(String roomId, int seatId, SeatStatus current, SeatStatus target)
         {
             invalidStatusTransitionCalled = true;
+            transitionRoomId.set(roomId);
             transitionSeatId.set(seatId);
             transitionCurrent.set(current);
             transitionTarget.set(target);
         }
 
         @Override
-        public void invalidStatus(String seatId, String status)
+        public void invalidStatus(String roomId, int seatId, String status)
         {
             invalidStatusCalled = true;
+            invalidStatusRoomId.set(roomId);
             invalidStatusSeatId.set(seatId);
             invalidStatusValue.set(status);
         }

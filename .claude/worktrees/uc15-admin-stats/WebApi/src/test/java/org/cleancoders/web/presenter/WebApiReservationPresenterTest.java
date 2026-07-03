@@ -36,7 +36,7 @@ class WebApiReservationPresenterTest {
 
         ReservationCreatedResponse entity = (ReservationCreatedResponse) response.getEntity();
         assertEquals("res-123", entity.reservationId());
-        assertEquals("A-1", entity.seatNumber());
+        assertEquals("A-1", String.valueOf(entity.id()));
         assertEquals("上午 08:00-12:00", entity.timeSlot());
     }
 

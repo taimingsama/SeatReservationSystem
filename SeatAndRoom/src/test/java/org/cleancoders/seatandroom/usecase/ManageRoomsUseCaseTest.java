@@ -1,8 +1,10 @@
 package org.cleancoders.seatandroom.usecase;
 
+import org.cleancoders.seatandroom.domain.RoomLayout;
 import org.cleancoders.seatandroom.domain.RoomStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.test.infrastructure.StubRoomRepo;
+import org.cleancoders.seatandroom.test.infrastructure.StubSeatRepo;
 import org.cleancoders.userandauth.domain.User;
 import org.cleancoders.userandauth.domain.UserRole;
 import org.cleancoders.userandauth.usecase.AdminAuthUseCase;
@@ -28,6 +30,7 @@ class ManageRoomsUseCaseTest
     private StubTokenService tokenService;
     private StubUserRepo userRepo;
     private StubRoomRepo roomRepo;
+    private StubSeatRepo seatRepo;
     private StubPresenter presenter;
 
     @BeforeEach
@@ -37,17 +40,18 @@ class ManageRoomsUseCaseTest
         tokenService.setUserId(ADMIN_ID);
         userRepo = new StubUserRepo();
         roomRepo = new StubRoomRepo();
+        seatRepo = new StubSeatRepo();
         presenter = new StubPresenter();
 
         useCase = new ManageRoomsUseCase();
         useCase.tokenService = tokenService;
         useCase.userRepo = userRepo;
         useCase.roomRepo = roomRepo;
+        useCase.seatRepo = seatRepo;
         useCase.presenter = presenter;
         ((AdminAuthUseCase<?, ?>) useCase).presenter = presenter;
         ((AuthUseCase<?, ?>) useCase).presenter = presenter;
 
-        // Default: admin user
         userRepo.addUser(new User(ADMIN_ID, "admin", "hashed", UserRole.ADMIN, "Admin", "a@b.com"));
         userRepo.addUser(new User(STUDENT_ID, "alice", "hashed", UserRole.STUDENT, "Alice", "a@b.com"));
     }
@@ -56,7 +60,7 @@ class ManageRoomsUseCaseTest
     void shouldCreateRoomSuccessfully()
     {
         var output = useCase.execute(new ManageRoomsUseCase.Request(
-                ADMIN_TOKEN, "自习室F", "综合楼二楼", 20));
+                ADMIN_TOKEN, "自习室F", "综合楼二楼", "SMALL"));
 
         assertNotNull(output);
         assertNotNull(output.roomId());
@@ -64,17 +68,34 @@ class ManageRoomsUseCaseTest
         assertNotNull(presenter.successRoom.get());
         assertEquals("自习室F", presenter.successRoom.get().name());
         assertEquals("综合楼二楼", presenter.successRoom.get().location());
-        assertEquals(20, presenter.successRoom.get().capacity());
+        assertEquals(RoomLayout.SMALL, presenter.successRoom.get().layout());
         assertEquals(RoomStatus.OPEN, presenter.successRoom.get().status());
+    }
+
+    @Test
+    void shouldAutoGenerateSeats()
+    {
+        var output = useCase.execute(new ManageRoomsUseCase.Request(
+                ADMIN_TOKEN, "自习室Z", "三楼", "SMALL"));
+
+        assertNotNull(output);
+        // SMALL layout = 40 seats
+        var seats = seatRepo.findByRoomId(output.roomId());
+        assertEquals(40, seats.size());
+        // Seats should be 1..40
+        for (int i = 1; i <= 40; i++)
+        {
+            assertTrue(seatRepo.findByRoomIdAndSeatId(output.roomId(), i).isPresent());
+        }
     }
 
     @Test
     void shouldRejectDuplicateName()
     {
-        roomRepo.add(new StudyRoom("r-existing", "自习室F", "图书馆一楼", 30, RoomStatus.OPEN));
+        roomRepo.add(new StudyRoom("r-existing", "自习室F", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
 
         var output = useCase.execute(new ManageRoomsUseCase.Request(
-                ADMIN_TOKEN, "自习室F", "综合楼二楼", 20));
+                ADMIN_TOKEN, "自习室F", "综合楼二楼", "SMALL"));
 
         assertNull(output);
         assertTrue(presenter.roomNameAlreadyExistsCalled);
@@ -82,12 +103,23 @@ class ManageRoomsUseCaseTest
     }
 
     @Test
+    void shouldRejectInvalidLayout()
+    {
+        var output = useCase.execute(new ManageRoomsUseCase.Request(
+                ADMIN_TOKEN, "自习室X", "一楼", "INVALID"));
+
+        assertNull(output);
+        assertTrue(presenter.invalidLayoutCalled);
+        assertEquals("INVALID", presenter.invalidLayoutValue.get());
+    }
+
+    @Test
     void shouldGenerateUniqueIdForEachRoom()
     {
         var output1 = useCase.execute(new ManageRoomsUseCase.Request(
-                ADMIN_TOKEN, "自习室X", "一楼", 10));
+                ADMIN_TOKEN, "自习室X", "一楼", "SMALL"));
         var output2 = useCase.execute(new ManageRoomsUseCase.Request(
-                ADMIN_TOKEN, "自习室Y", "二楼", 10));
+                ADMIN_TOKEN, "自习室Y", "二楼", "MEDIUM"));
 
         assertNotNull(output1);
         assertNotNull(output2);
@@ -98,7 +130,7 @@ class ManageRoomsUseCaseTest
     void shouldSetStatusToOpenByDefault()
     {
         var output = useCase.execute(new ManageRoomsUseCase.Request(
-                ADMIN_TOKEN, "自习室Z", "三楼", 15));
+                ADMIN_TOKEN, "自习室Z", "三楼", "LARGE"));
 
         assertNotNull(output);
         assertEquals(RoomStatus.OPEN, presenter.successRoom.get().status());
@@ -115,6 +147,8 @@ class ManageRoomsUseCaseTest
         AtomicReference<StudyRoom> successRoom = new AtomicReference<>();
         boolean roomNameAlreadyExistsCalled = false;
         AtomicReference<String> roomNameAlreadyExistsName = new AtomicReference<>();
+        boolean invalidLayoutCalled = false;
+        AtomicReference<String> invalidLayoutValue = new AtomicReference<>();
 
         @Override
         public void success(StudyRoom room)
@@ -128,6 +162,13 @@ class ManageRoomsUseCaseTest
         {
             roomNameAlreadyExistsCalled = true;
             roomNameAlreadyExistsName.set(name);
+        }
+
+        @Override
+        public void invalidLayout(String layout)
+        {
+            invalidLayoutCalled = true;
+            invalidLayoutValue.set(layout);
         }
 
         @Override

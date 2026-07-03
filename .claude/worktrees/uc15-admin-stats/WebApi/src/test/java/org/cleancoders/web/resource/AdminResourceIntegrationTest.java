@@ -16,6 +16,7 @@ import org.cleancoders.infrastructure.persistence.InMemoryTimeSlotRepo;
 import org.cleancoders.infrastructure.persistence.InMemoryUserRepo;
 import org.cleancoders.infrastructure.security.JjwtTokenService;
 import org.cleancoders.seatandroom.domain.RoomStatus;
+import org.cleancoders.seatandroom.domain.RoomLayout;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.outbound.RoomRepository;
 import org.cleancoders.web.binder.ReservationBinder;
@@ -124,7 +125,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn409WhenNameAlreadyExists()
     {
-        roomRepo.save(new StudyRoom("r-existing", "自习室F", "图书馆一楼", 30, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("r-existing", "自习室F", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
 
         String adminToken = tokenService.generate("admin-1");
 
@@ -155,7 +156,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn200WhenAdminUpdatesRoom()
     {
-        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
         String adminToken = tokenService.generate("admin-1");
 
         Response response = target("/admin/rooms/room-1")
@@ -195,8 +196,8 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn409WhenUpdatingToExistingName()
     {
-        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
-        roomRepo.save(new StudyRoom("room-2", "自习室B", "图书馆二楼", 20, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("room-2", "自习室B", "图书馆二楼", RoomLayout.SMALL, RoomStatus.OPEN));
         String adminToken = tokenService.generate("admin-1");
 
         Response response = target("/admin/rooms/room-1")
@@ -214,7 +215,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldAllowUpdatingRoomWithSameName()
     {
-        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
         String adminToken = tokenService.generate("admin-1");
 
         Response response = target("/admin/rooms/room-1")
@@ -234,7 +235,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn403WhenStudentUpdatesRoom()
     {
-        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
         String studentToken = tokenService.generate("student-1");
 
         Response response = target("/admin/rooms/room-1")
@@ -250,7 +251,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn200WhenAdminDeletesRoom()
     {
-        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
         String adminToken = tokenService.generate("admin-1");
 
         Response response = target("/admin/rooms/room-1")
@@ -286,7 +287,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn409WhenDeletingAlreadyClosedRoom()
     {
-        roomRepo.save(new StudyRoom("room-closed", "已关闭", "三楼", 10, RoomStatus.CLOSED));
+        roomRepo.save(new StudyRoom("room-closed", "已关闭", "三楼", RoomLayout.SMALL, RoomStatus.CLOSED));
         String adminToken = tokenService.generate("admin-1");
 
         Response response = target("/admin/rooms/room-closed")
@@ -300,7 +301,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn403WhenStudentDeletesRoom()
     {
-        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
         String studentToken = tokenService.generate("student-1");
 
         Response response = target("/admin/rooms/room-1")

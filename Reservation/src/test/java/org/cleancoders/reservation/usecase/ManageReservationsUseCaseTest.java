@@ -33,7 +33,8 @@ class ManageReservationsUseCaseTest
     private static final String ADMIN_ID = "admin-1";
     private static final String ADMIN_TOKEN = "jwt:" + ADMIN_ID + ":bob:ADMIN";
     private static final String STUDENT_TOKEN = "jwt:student-1:alice:STUDENT";
-    private static final String SEAT_ID = "seat-1";
+    private static final String ROOM_ID = "room-1";
+    private static final int SEAT_ID = 1;
     private static final String TIME_SLOT_ID = "ts-1";
     private static final LocalDate DATE = LocalDate.of(2026, 7, 2);
     private ManageReservationsUseCase useCase;
@@ -58,7 +59,6 @@ class ManageReservationsUseCaseTest
         useCase.tokenService = tokenService;
         useCase.userRepo = userRepo;
         useCase.reservationRepo = reservationRepo;
-        useCase.seatRepo = seatRepo;
         useCase.timeSlotRepo = timeSlotRepo;
         useCase.presenter = presenter;
         ((AdminAuthUseCase<?, ?>) useCase).presenter = presenter;
@@ -66,15 +66,15 @@ class ManageReservationsUseCaseTest
 
         userRepo.addUser(new User(ADMIN_ID, "bob", "hashed", UserRole.ADMIN, "Bob", "b@b.com"));
         userRepo.addUser(new User("student-1", "alice", "hashed", UserRole.STUDENT, "Alice", "a@b.com"));
-        seatRepo.addSeat(new Seat(SEAT_ID, "room-1", "A-1", SeatStatus.AVAILABLE));
+        seatRepo.addSeat(new Seat(SEAT_ID, ROOM_ID, SeatStatus.AVAILABLE));
         timeSlotRepo.addTimeSlot(new TimeSlot(TIME_SLOT_ID, "08:00", "12:00", "上午 08:00-12:00"));
     }
 
     @Test
     void shouldReturnAllReservations()
     {
-        reservationRepo.addReservation(new Reservation("res-1", ADMIN_ID, SEAT_ID, TIME_SLOT_ID, DATE));
-        reservationRepo.addReservation(new Reservation("res-2", "student-1", SEAT_ID, TIME_SLOT_ID, DATE));
+        reservationRepo.addReservation(new Reservation("res-1", ADMIN_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE));
+        reservationRepo.addReservation(new Reservation("res-2", "student-1", ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE));
 
         var output = useCase.execute(new ManageReservationsUseCase.Request(ADMIN_TOKEN));
 
@@ -195,9 +195,9 @@ class ManageReservationsUseCaseTest
 
         @Override
         public Optional<Reservation> findBySeatIdAndDateAndTimeSlotIdAndStatusIn(
-                String sid, LocalDate d, String ts, Set<ReservationStatus> ss)
+                String roomId, int seatId, LocalDate d, String ts, Set<ReservationStatus> ss)
         {
-            return m.values().stream().filter(r -> r.seatId().equals(sid) && r.date().equals(d)
+            return m.values().stream().filter(r -> r.roomId().equals(roomId) && r.seatId() == seatId && r.date().equals(d)
                     && r.timeSlotId().equals(ts) && ss.contains(r.status())).findFirst();
         }
 
@@ -208,10 +208,10 @@ class ManageReservationsUseCaseTest
         }
 
         @Override
-        public List<Reservation> findBySeatIdAndStatusIn(String seatId, Set<ReservationStatus> statuses)
+        public List<Reservation> findBySeatIdAndStatusIn(String roomId, int seatId, Set<ReservationStatus> statuses)
         {
             return m.values().stream()
-                    .filter(r -> r.seatId().equals(seatId))
+                    .filter(r -> r.roomId().equals(roomId) && r.seatId() == seatId)
                     .filter(r -> statuses.contains(r.status()))
                     .toList();
         }

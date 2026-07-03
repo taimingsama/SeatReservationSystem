@@ -30,7 +30,8 @@ class ListMyReservationsUseCaseTest
     private static final String STUDENT_ID = "student-1";
     private static final String STUDENT_TOKEN = "jwt:" + STUDENT_ID + ":alice:STUDENT";
     private static final String ADMIN_TOKEN = "jwt:admin-1:bob:ADMIN";
-    private static final String SEAT_ID = "seat-1";
+    private static final String ROOM_ID = "room-1";
+    private static final int SEAT_ID = 1;
     private static final String TIME_SLOT_ID = "ts-1";
     private static final LocalDate DATE = LocalDate.of(2026, 7, 2);
     private ListMyReservationsUseCase useCase;
@@ -56,7 +57,6 @@ class ListMyReservationsUseCaseTest
         useCase.tokenService = tokenService;
         useCase.userRepo = userRepo;
         useCase.reservationRepo = reservationRepo;
-        useCase.seatRepo = seatRepo;
         useCase.timeSlotRepo = timeSlotRepo;
         useCase.presenter = presenter;
         ((StudentAuthUseCase<?, ?>) useCase).presenter = presenter;
@@ -64,15 +64,15 @@ class ListMyReservationsUseCaseTest
 
         userRepo.addUser(new User(STUDENT_ID, "alice", "hashed", UserRole.STUDENT, "Alice", "a@b.com"));
         userRepo.addUser(new User("admin-1", "bob", "hashed", UserRole.ADMIN, "Bob", "b@b.com"));
-        seatRepo.addSeat(new Seat(SEAT_ID, "room-1", "A-1", SeatStatus.AVAILABLE));
+        seatRepo.addSeat(new Seat(SEAT_ID, ROOM_ID, SeatStatus.AVAILABLE));
         timeSlotRepo.addTimeSlot(new TimeSlot(TIME_SLOT_ID, "08:00", "12:00", "上午 08:00-12:00"));
     }
 
     @Test
     void shouldReturnOwnReservations()
     {
-        reservationRepo.addReservation(new Reservation("res-1", STUDENT_ID, SEAT_ID, TIME_SLOT_ID, DATE));
-        reservationRepo.addReservation(new Reservation("res-2", STUDENT_ID, "seat-2", TIME_SLOT_ID, DATE));
+        reservationRepo.addReservation(new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE));
+        reservationRepo.addReservation(new Reservation("res-2", STUDENT_ID, ROOM_ID, 2, TIME_SLOT_ID, DATE));
 
         var output = useCase.execute(new ListMyReservationsUseCase.Request(STUDENT_TOKEN));
 
@@ -80,14 +80,15 @@ class ListMyReservationsUseCaseTest
         assertEquals(2, output.items().size());
         assertEquals(2, presenter.items.size());
         assertEquals("res-1", presenter.items.get(0).reservationId());
-        assertEquals("A-1", presenter.items.get(0).seatNumber());
+        assertEquals(ROOM_ID, presenter.items.get(0).roomId());
+        assertEquals(SEAT_ID, presenter.items.get(0).seatId());
     }
 
     @Test
     void shouldNotReturnOtherUsersReservations()
     {
-        reservationRepo.addReservation(new Reservation("res-1", STUDENT_ID, SEAT_ID, TIME_SLOT_ID, DATE));
-        reservationRepo.addReservation(new Reservation("res-2", "other-user", SEAT_ID, TIME_SLOT_ID, DATE));
+        reservationRepo.addReservation(new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE));
+        reservationRepo.addReservation(new Reservation("res-2", "other-user", ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE));
 
         var output = useCase.execute(new ListMyReservationsUseCase.Request(STUDENT_TOKEN));
 
@@ -168,9 +169,9 @@ class ListMyReservationsUseCaseTest
 
         @Override
         public Optional<Reservation> findBySeatIdAndDateAndTimeSlotIdAndStatusIn(
-                String sid, LocalDate d, String ts, Set<ReservationStatus> ss)
+                String roomId, int seatId, LocalDate d, String ts, Set<ReservationStatus> ss)
         {
-            return m.values().stream().filter(r -> r.seatId().equals(sid) && r.date().equals(d)
+            return m.values().stream().filter(r -> r.roomId().equals(roomId) && r.seatId() == seatId && r.date().equals(d)
                     && r.timeSlotId().equals(ts) && ss.contains(r.status())).findFirst();
         }
 
@@ -181,10 +182,11 @@ class ListMyReservationsUseCaseTest
         }
 
         @Override
-        public List<Reservation> findBySeatIdAndStatusIn(String seatId, Set<ReservationStatus> statuses)
+        public List<Reservation> findBySeatIdAndStatusIn(String roomId, int seatId, Set<ReservationStatus> statuses)
         {
             return m.values().stream()
-                    .filter(r -> r.seatId().equals(seatId))
+                    .filter(r -> r.roomId().equals(roomId))
+                    .filter(r -> r.seatId() == seatId)
                     .filter(r -> statuses.contains(r.status()))
                     .toList();
         }

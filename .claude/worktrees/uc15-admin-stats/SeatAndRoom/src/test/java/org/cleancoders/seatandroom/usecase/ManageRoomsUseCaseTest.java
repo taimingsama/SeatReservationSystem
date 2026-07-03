@@ -7,6 +7,7 @@ import org.cleancoders.common.usecase.AuthUseCase;
 import org.cleancoders.userandauth_test_infrastructure.StubTokenService;
 import org.cleancoders.userandauth_test_infrastructure.StubUserRepo;
 import org.cleancoders.seatandroom.domain.RoomStatus;
+import org.cleancoders.seatandroom.domain.RoomLayout;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.test.infrastructure.StubRoomRepo;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,7 +72,7 @@ class ManageRoomsUseCaseTest
     @Test
     void shouldRejectDuplicateName()
     {
-        roomRepo.add(new StudyRoom("r-existing", "自习室F", "图书馆一楼", 30, RoomStatus.OPEN));
+        roomRepo.add(new StudyRoom("r-existing", "自习室F", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
 
         var output = useCase.execute(new ManageRoomsUseCase.Request(
                 ADMIN_TOKEN, "自习室F", "综合楼二楼", 20));

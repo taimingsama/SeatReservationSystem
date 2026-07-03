@@ -48,9 +48,9 @@ class GetNoShowRateStatsUseCaseTest
     void shouldReturnCorrectNoShowRate()
     {
         LocalDate today = LocalDate.now();
-        reservationRepo.save(new Reservation("r1", "u1", "s1", "ts-1", today));
-        reservationRepo.save(new Reservation("r2", "u2", "s2", "ts-1", today));
-        Reservation r3 = new Reservation("r3", "u3", "s3", "ts-2", today);
+        reservationRepo.save(new Reservation("r1", "u1", "room-1", 1, "ts-1", today));
+        reservationRepo.save(new Reservation("r2", "u2", "room-1", 1, "ts-1", today));
+        Reservation r3 = new Reservation("r3", "u3", "room-1", 1, "ts-2", today);
         reservationRepo.save(r3);
         r3.expire();
 
@@ -67,8 +67,8 @@ class GetNoShowRateStatsUseCaseTest
     void shouldNotCountCancelledAsExpired()
     {
         LocalDate today = LocalDate.now();
-        reservationRepo.save(new Reservation("r1", "u1", "s1", "ts-1", today));
-        Reservation r2 = new Reservation("r2", "u2", "s2", "ts-1", today);
+        reservationRepo.save(new Reservation("r1", "u1", "room-1", 1, "ts-1", today));
+        Reservation r2 = new Reservation("r2", "u2", "room-1", 1, "ts-1", today);
         reservationRepo.save(r2);
         r2.cancel();
 

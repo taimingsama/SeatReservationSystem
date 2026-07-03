@@ -48,7 +48,7 @@ class ReservationResourceTest {
         presenter.success("res-1", "A-1", "上午 08:00-12:00");
 
         Response response = resource.reserve("jwt.token.here",
-                new ReserveInput("seat-1", "ts-1", "2026-07-02"));
+                new ReserveInput("room-1", 1, "ts-1", "2026-07-02"));
 
         assertTrue(executeCalled);
         assertEquals("jwt.token.here", lastRequest.token());
@@ -64,7 +64,7 @@ class ReservationResourceTest {
         presenter.success("res-2", "B-1", "下午 13:00-17:00");
 
         Response response = resource.reserve("jwt.token.here",
-                new ReserveInput("seat-9", "ts-2", "2026-07-03"));
+                new ReserveInput("room-1", 1, "ts-2", "2026-07-03"));
 
         assertEquals(201, response.getStatus());
     }
@@ -72,10 +72,10 @@ class ReservationResourceTest {
     @Test
     void reserveShouldReturn409OnConflict() {
         outputToReturn = null;
-        presenter.seatNotAvailable("seat-1", "上午 08:00-12:00");
+        presenter.seatNotAvailable("room-1", 1, "上午 08:00-12:00");
 
         Response response = resource.reserve("jwt.token.here",
-                new ReserveInput("seat-1", "ts-1", "2026-07-02"));
+                new ReserveInput("room-1", 1, "ts-1", "2026-07-02"));
 
         assertEquals(409, response.getStatus());
     }
@@ -83,7 +83,7 @@ class ReservationResourceTest {
     @Test
     void reserveShouldReturn400OnInvalidDateFormat() {
         Response response = resource.reserve("jwt.token.here",
-                new ReserveInput("seat-1", "ts-1", "not-a-date"));
+                new ReserveInput("room-1", 1, "ts-1", "not-a-date"));
 
         assertEquals(400, response.getStatus());
     }
@@ -94,7 +94,7 @@ class ReservationResourceTest {
         presenter.duplicateReservation("existing-res-1");
 
         Response response = resource.reserve("jwt.token.here",
-                new ReserveInput("seat-1", "ts-1", "2026-07-02"));
+                new ReserveInput("room-1", 1, "ts-1", "2026-07-02"));
 
         assertEquals(409, response.getStatus());
     }

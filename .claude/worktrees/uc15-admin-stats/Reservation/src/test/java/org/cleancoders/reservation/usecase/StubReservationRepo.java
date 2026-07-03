@@ -51,7 +51,7 @@ class StubReservationRepo implements ReservationRepository
             String seatId, LocalDate date, String timeSlotId, Set<ReservationStatus> statuses)
     {
         return reservations.values().stream()
-                .filter(r -> r.seatId().equals(seatId))
+                .filter(r -> r.roomId().equals(roomId) && r.seatId() == seatId)
                 .filter(r -> r.date().equals(date))
                 .filter(r -> r.timeSlotId().equals(timeSlotId))
                 .filter(r -> statuses.contains(r.status()))

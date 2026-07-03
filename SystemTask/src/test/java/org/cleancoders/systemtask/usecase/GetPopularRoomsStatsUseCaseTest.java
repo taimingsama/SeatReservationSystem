@@ -2,6 +2,7 @@ package org.cleancoders.systemtask.usecase;
 
 import org.cleancoders.reservation.domain.Reservation;
 import org.cleancoders.seatandroom.domain.RoomStatus;
+import org.cleancoders.seatandroom.domain.RoomLayout;
 import org.cleancoders.seatandroom.domain.Seat;
 import org.cleancoders.seatandroom.domain.SeatStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
@@ -59,21 +60,21 @@ class GetPopularRoomsStatsUseCaseTest
         userRepo.addUser(admin);
         tokenService.setUserId(admin.id());
 
-        roomRepo.addRoom(new StudyRoom("room-1", "自习室A", "一楼", 30, RoomStatus.OPEN));
-        roomRepo.addRoom(new StudyRoom("room-2", "自习室B", "二楼", 20, RoomStatus.OPEN));
-        seatRepo.addSeat(new Seat("s1", "room-1", "A-1", SeatStatus.AVAILABLE));
-        seatRepo.addSeat(new Seat("s2", "room-1", "A-2", SeatStatus.AVAILABLE));
-        seatRepo.addSeat(new Seat("s3", "room-2", "B-1", SeatStatus.AVAILABLE));
+        roomRepo.addRoom(new StudyRoom("room-1", "自习室A", "一楼", RoomLayout.SMALL, RoomStatus.OPEN));
+        roomRepo.addRoom(new StudyRoom("room-2", "自习室B", "二楼", RoomLayout.SMALL, RoomStatus.OPEN));
+        seatRepo.addSeat(new Seat(1, "room-1", SeatStatus.AVAILABLE));
+        seatRepo.addSeat(new Seat(2, "room-1", SeatStatus.AVAILABLE));
+        seatRepo.addSeat(new Seat(3, "room-2", SeatStatus.AVAILABLE));
     }
 
     @Test
     void shouldRankRoomsByReservationCountDescending()
     {
         LocalDate today = LocalDate.now();
-        reservationRepo.save(new Reservation("r1", "u1", "s1", "ts-1", today));
-        reservationRepo.save(new Reservation("r2", "u2", "s1", "ts-2", today));
-        reservationRepo.save(new Reservation("r3", "u3", "s2", "ts-1", today));
-        reservationRepo.save(new Reservation("r4", "u4", "s3", "ts-1", today));
+        reservationRepo.save(new Reservation("r1", "u1", "room-1", 1, "ts-1", today));
+        reservationRepo.save(new Reservation("r2", "u2", "room-1", 1, "ts-2", today));
+        reservationRepo.save(new Reservation("r3", "u3", "room-1", 1, "ts-1", today));
+        reservationRepo.save(new Reservation("r4", "u4", "room-1", 1, "ts-1", today));
 
         GetPopularRoomsStatsUseCase.Output output = useCase.execute(
                 new GetPopularRoomsStatsUseCase.Request("valid-token"));

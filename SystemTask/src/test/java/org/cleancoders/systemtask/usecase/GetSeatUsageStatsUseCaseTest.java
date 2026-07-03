@@ -56,15 +56,15 @@ class GetSeatUsageStatsUseCaseTest
     @Test
     void shouldReturnCorrectUsageRate()
     {
-        seatRepo.addSeat(new Seat("s1", "room-1", "A-1", SeatStatus.AVAILABLE));
-        seatRepo.addSeat(new Seat("s2", "room-1", "A-2", SeatStatus.AVAILABLE));
-        seatRepo.addSeat(new Seat("s3", "room-1", "A-3", SeatStatus.MAINTENANCE));
-        seatRepo.addSeat(new Seat("s4", "room-1", "A-4", SeatStatus.REMOVED));
+        seatRepo.addSeat(new Seat(1, "room-1", SeatStatus.AVAILABLE));
+        seatRepo.addSeat(new Seat(2, "room-1", SeatStatus.AVAILABLE));
+        seatRepo.addSeat(new Seat(3, "room-1", SeatStatus.MAINTENANCE));
+        seatRepo.addSeat(new Seat(4, "room-1", SeatStatus.REMOVED));
 
         LocalDate today = LocalDate.now();
-        Reservation r1 = new Reservation("r1", "user-1", "s1", "ts-1", today);
+        Reservation r1 = new Reservation("r1", "user-1", "room-1", 1, "ts-1", today);
         reservationRepo.save(r1);
-        Reservation r2 = new Reservation("r2", "user-2", "s2", "ts-2", today);
+        Reservation r2 = new Reservation("r2", "user-2", "room-1", 1, "ts-2", today);
         reservationRepo.save(r2);
         r2.checkIn();
 
@@ -98,10 +98,10 @@ class GetSeatUsageStatsUseCaseTest
     @Test
     void shouldReturnZeroWhenNoTodayReservations()
     {
-        seatRepo.addSeat(new Seat("s1", "room-1", "A-1", SeatStatus.AVAILABLE));
-        seatRepo.addSeat(new Seat("s2", "room-1", "A-2", SeatStatus.AVAILABLE));
+        seatRepo.addSeat(new Seat(1, "room-1", SeatStatus.AVAILABLE));
+        seatRepo.addSeat(new Seat(2, "room-1", SeatStatus.AVAILABLE));
 
-        Reservation old = new Reservation("r-old", "user-1", "s1", "ts-1",
+        Reservation old = new Reservation("r-old", "user-1", "room-1", 1, "ts-1",
                 LocalDate.now().minusDays(1));
         reservationRepo.save(old);
 
@@ -117,11 +117,11 @@ class GetSeatUsageStatsUseCaseTest
     @Test
     void shouldDeduplicateSeats()
     {
-        seatRepo.addSeat(new Seat("s1", "room-1", "A-1", SeatStatus.AVAILABLE));
+        seatRepo.addSeat(new Seat(1, "room-1", SeatStatus.AVAILABLE));
 
         LocalDate today = LocalDate.now();
-        reservationRepo.save(new Reservation("r1", "user-1", "s1", "ts-1", today));
-        reservationRepo.save(new Reservation("r2", "user-2", "s1", "ts-2", today));
+        reservationRepo.save(new Reservation("r1", "user-1", "room-1", 1, "ts-1", today));
+        reservationRepo.save(new Reservation("r2", "user-2", "room-1", 1, "ts-2", today));
 
         GetSeatUsageStatsUseCase.Output output = useCase.execute(
                 new GetSeatUsageStatsUseCase.Request("valid-token"));
@@ -158,10 +158,10 @@ class GetSeatUsageStatsUseCaseTest
         @Override public Optional<Reservation> findByUserIdAndDateAndTimeSlotIdAndStatusIn(
                 String uid, LocalDate d, String ts, Set<ReservationStatus> ss) { return Optional.empty(); }
         @Override public Optional<Reservation> findBySeatIdAndDateAndTimeSlotIdAndStatusIn(
-                String sid, LocalDate d, String ts, Set<ReservationStatus> ss) { return Optional.empty(); }
+                String roomId, int seatId, LocalDate d, String ts, Set<ReservationStatus> ss) { return Optional.empty(); }
         @Override public List<Reservation> findByUserId(String uid) { return List.of(); }
         @Override public List<Reservation> findAll() { return List.copyOf(store.values()); }
-        @Override public List<Reservation> findBySeatIdAndStatusIn(String sid, Set<ReservationStatus> ss) { return List.of(); }
+        @Override public List<Reservation> findBySeatIdAndStatusIn(String roomId, int seatId, Set<ReservationStatus> ss) { return List.of(); }
     }
 
     static class StubPresenter implements GetSeatUsageStatsUseCase.Presenter,

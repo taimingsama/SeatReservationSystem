@@ -26,36 +26,36 @@ class ReservationBasedActiveReservationCheckerTest
     @Test
     void shouldReturnTrueWhenReservedExists()
     {
-        repo.save(new Reservation("r1", "user-1", "seat-1", "ts-1", LocalDate.now()));
-        assertTrue(checker.hasActiveForSeat("seat-1"));
+        repo.save(new Reservation("r1", "user-1", "room-1", 1, "ts-1", LocalDate.now()));
+        assertTrue(checker.hasActiveForSeat("seat-1", 1));
     }
 
     @Test
     void shouldReturnTrueWhenCheckedInExists()
     {
-        Reservation r = new Reservation("r2", "user-1", "seat-1", "ts-1", LocalDate.now());
+        Reservation r = new Reservation("r2", "user-1", "room-1", 1, "ts-1", LocalDate.now());
         r.checkIn();
         repo.save(r);
-        assertTrue(checker.hasActiveForSeat("seat-1"));
+        assertTrue(checker.hasActiveForSeat("seat-1", 1));
     }
 
     @Test
     void shouldReturnFalseWhenAllCancelledOrExpired()
     {
-        Reservation cancelled = new Reservation("r3", "user-1", "seat-1", "ts-1", LocalDate.now());
+        Reservation cancelled = new Reservation("r3", "user-1", "room-1", 1, "ts-1", LocalDate.now());
         cancelled.cancel();
         repo.save(cancelled);
 
-        Reservation expired = new Reservation("r4", "user-2", "seat-1", "ts-2", LocalDate.now());
+        Reservation expired = new Reservation("r4", "user-2", "room-1", 1, "ts-2", LocalDate.now());
         expired.expire();
         repo.save(expired);
 
-        assertFalse(checker.hasActiveForSeat("seat-1"));
+        assertFalse(checker.hasActiveForSeat("seat-1", 1));
     }
 
     @Test
     void shouldReturnFalseWhenNoReservations()
     {
-        assertFalse(checker.hasActiveForSeat("seat-1"));
+        assertFalse(checker.hasActiveForSeat("seat-1", 1));
     }
 }

@@ -40,7 +40,8 @@ class CancelReservationUseCaseTest {
     private static final String STUDENT_ID = "student-1";
     private static final String STUDENT_TOKEN = "jwt:" + STUDENT_ID + ":alice:STUDENT";
     private static final String ADMIN_TOKEN = "jwt:admin-1:bob:ADMIN";
-    private static final String SEAT_ID = "seat-1";
+    private static final String ROOM_ID = "room-1";
+    private static final int SEAT_ID = 1;
     private static final String TIME_SLOT_ID = "ts-1";
     private static final LocalDate DATE = LocalDate.of(2026, 7, 2);
 
@@ -65,13 +66,13 @@ class CancelReservationUseCaseTest {
 
         userRepo.addUser(new User(STUDENT_ID, "alice", "hashed", UserRole.STUDENT, "Alice", "a@b.com"));
         userRepo.addUser(new User("admin-1", "bob", "hashed", UserRole.ADMIN, "Bob", "b@b.com"));
-        seatRepo.addSeat(new Seat(SEAT_ID, "room-1", "A-1", SeatStatus.AVAILABLE));
+        seatRepo.addSeat(new Seat(SEAT_ID, ROOM_ID, SeatStatus.AVAILABLE));
         timeSlotRepo.addTimeSlot(new TimeSlot(TIME_SLOT_ID, "08:00", "12:00", "上午 08:00-12:00"));
     }
 
     @Test
     void shouldCancelSuccessfully() {
-        Reservation res = new Reservation("res-1", STUDENT_ID, SEAT_ID, TIME_SLOT_ID, DATE);
+        Reservation res = new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         reservationRepo.addReservation(res);
 
         var output = useCase.execute(new CancelReservationUseCase.Request(STUDENT_TOKEN, "res-1"));
@@ -79,7 +80,7 @@ class CancelReservationUseCaseTest {
         assertNotNull(output);
         assertEquals("res-1", output.reservationId());
         assertEquals("res-1", presenter.successReservationId.get());
-        assertEquals("A-1", presenter.successSeatNumber.get());
+        assertEquals("1", presenter.successSeatNumber.get());
 
         Reservation updated = reservationRepo.findById("res-1").get();
         assertEquals(ReservationStatus.CANCELLED, updated.status());
@@ -95,7 +96,7 @@ class CancelReservationUseCaseTest {
 
     @Test
     void shouldRejectNotYourReservation() {
-        Reservation res = new Reservation("res-1", "other-user", SEAT_ID, TIME_SLOT_ID, DATE);
+        Reservation res = new Reservation("res-1", "other-user", ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         reservationRepo.addReservation(res);
 
         var output = useCase.execute(new CancelReservationUseCase.Request(STUDENT_TOKEN, "res-1"));
@@ -106,7 +107,7 @@ class CancelReservationUseCaseTest {
 
     @Test
     void shouldRejectAlreadyCheckedIn() {
-        Reservation res = new Reservation("res-1", STUDENT_ID, SEAT_ID, TIME_SLOT_ID, DATE);
+        Reservation res = new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         res.checkIn();
         reservationRepo.addReservation(res);
 
@@ -119,7 +120,7 @@ class CancelReservationUseCaseTest {
 
     @Test
     void shouldRejectAlreadyCancelled() {
-        Reservation res = new Reservation("res-1", STUDENT_ID, SEAT_ID, TIME_SLOT_ID, DATE);
+        Reservation res = new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         res.cancel();
         reservationRepo.addReservation(res);
 
@@ -140,7 +141,7 @@ class CancelReservationUseCaseTest {
 
     @Test
     void shouldRejectAdminUser() {
-        Reservation res = new Reservation("res-1", "admin-1", SEAT_ID, TIME_SLOT_ID, DATE);
+        Reservation res = new Reservation("res-1", "admin-1", ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         reservationRepo.addReservation(res);
 
         var output = useCase.execute(new CancelReservationUseCase.Request(ADMIN_TOKEN, "res-1"));
@@ -205,8 +206,8 @@ class CancelReservationUseCaseTest {
 
         @Override
         public Optional<Reservation> findBySeatIdAndDateAndTimeSlotIdAndStatusIn(
-                String sid, LocalDate d, String ts, Set<ReservationStatus> ss) {
-            return m.values().stream().filter(r -> r.seatId().equals(sid) && r.date().equals(d) && r.timeSlotId().equals(ts) && ss.contains(r.status())).findFirst();
+                String roomId, int seatId, LocalDate d, String ts, Set<ReservationStatus> ss) {
+            return m.values().stream().filter(r -> r.roomId().equals(roomId) && r.seatId() == seatId && r.date().equals(d) && r.timeSlotId().equals(ts) && ss.contains(r.status())).findFirst();
         }
 
         @Override
@@ -215,9 +216,9 @@ class CancelReservationUseCaseTest {
         }
 
         @Override
-        public List<Reservation> findBySeatIdAndStatusIn(String seatId, Set<ReservationStatus> statuses) {
+        public List<Reservation> findBySeatIdAndStatusIn(String roomId, int seatId, Set<ReservationStatus> statuses) {
             return m.values().stream()
-                    .filter(r -> r.seatId().equals(seatId))
+                    .filter(r -> r.roomId().equals(roomId) && r.seatId() == seatId)
                     .filter(r -> statuses.contains(r.status()))
                     .toList();
         }

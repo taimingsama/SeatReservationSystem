@@ -40,7 +40,8 @@ class CheckOutUseCaseTest {
     private static final String ADMIN_TOKEN = "jwt:" + ADMIN_ID + ":bob:ADMIN";
     private static final String OTHER_STUDENT_ID = "student-2";
     private static final String OTHER_STUDENT_TOKEN = "jwt:" + OTHER_STUDENT_ID + ":charlie:STUDENT";
-    private static final String SEAT_ID = "seat-1";
+    private static final String ROOM_ID = "room-1";
+    private static final int SEAT_ID = 1;
     private static final String TIME_SLOT_ID = "ts-1";
     private static final LocalDate DATE = LocalDate.of(2026, 7, 2);
 
@@ -67,13 +68,13 @@ class CheckOutUseCaseTest {
         userRepo.addUser(new User(STUDENT_ID, "alice", "hashed", UserRole.STUDENT, "Alice", "a@b.com"));
         userRepo.addUser(new User(ADMIN_ID, "bob", "hashed", UserRole.ADMIN, "Bob", "b@b.com"));
         userRepo.addUser(new User(OTHER_STUDENT_ID, "charlie", "hashed", UserRole.STUDENT, "Charlie", "c@c.com"));
-        seatRepo.addSeat(new Seat(SEAT_ID, "room-1", "A-1", SeatStatus.OCCUPIED));
+        seatRepo.addSeat(new Seat(1, ROOM_ID, SeatStatus.OCCUPIED));
         timeSlotRepo.addTimeSlot(new TimeSlot(TIME_SLOT_ID, "08:00", "12:00", "上午 08:00-12:00"));
     }
 
     @Test
     void shouldCheckOutSuccessfully() {
-        Reservation res = new Reservation("res-1", STUDENT_ID, SEAT_ID, TIME_SLOT_ID, DATE);
+        Reservation res = new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         res.checkIn(); // transition to CHECKED_IN
         reservationRepo.addReservation(res);
 
@@ -82,14 +83,14 @@ class CheckOutUseCaseTest {
         assertNotNull(output);
         assertEquals("res-1", output.reservationId());
         assertEquals("res-1", presenter.successReservationId.get());
-        assertEquals("A-1", presenter.successSeatNumber.get());
+        assertEquals("1", presenter.successSeatNumber.get());
 
         // Verify reservation status
         Reservation updated = reservationRepo.findById("res-1").get();
         assertEquals(ReservationStatus.CHECKED_OUT, updated.status());
 
         // Verify seat is released
-        Seat seat = seatRepo.findById(SEAT_ID).get();
+        Seat seat = seatRepo.findByRoomIdAndSeatId(ROOM_ID, 1).get();
         assertEquals(SeatStatus.AVAILABLE, seat.status());
     }
 
@@ -104,7 +105,7 @@ class CheckOutUseCaseTest {
 
     @Test
     void shouldRejectNotYourReservation() {
-        Reservation res = new Reservation("res-1", OTHER_STUDENT_ID, SEAT_ID, TIME_SLOT_ID, DATE);
+        Reservation res = new Reservation("res-1", OTHER_STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         res.checkIn();
         reservationRepo.addReservation(res);
 
@@ -116,7 +117,7 @@ class CheckOutUseCaseTest {
 
     @Test
     void shouldRejectReservationNotCheckedIn() {
-        Reservation res = new Reservation("res-1", STUDENT_ID, SEAT_ID, TIME_SLOT_ID, DATE);
+        Reservation res = new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         reservationRepo.addReservation(res);
 
         var output = useCase.execute(new CheckOutUseCase.Request(STUDENT_TOKEN, "res-1"));
@@ -128,7 +129,7 @@ class CheckOutUseCaseTest {
 
     @Test
     void shouldRejectAlreadyCheckedOut() {
-        Reservation res = new Reservation("res-1", STUDENT_ID, SEAT_ID, TIME_SLOT_ID, DATE);
+        Reservation res = new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         res.checkIn();
         res.checkOut();
         reservationRepo.addReservation(res);
@@ -142,7 +143,7 @@ class CheckOutUseCaseTest {
 
     @Test
     void shouldRejectCancelledReservation() {
-        Reservation res = new Reservation("res-1", STUDENT_ID, SEAT_ID, TIME_SLOT_ID, DATE);
+        Reservation res = new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         res.cancel();
         reservationRepo.addReservation(res);
 
@@ -163,7 +164,7 @@ class CheckOutUseCaseTest {
 
     @Test
     void shouldRejectAdminUser() {
-        Reservation res = new Reservation("res-1", ADMIN_ID, SEAT_ID, TIME_SLOT_ID, DATE);
+        Reservation res = new Reservation("res-1", ADMIN_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         res.checkIn();
         reservationRepo.addReservation(res);
 

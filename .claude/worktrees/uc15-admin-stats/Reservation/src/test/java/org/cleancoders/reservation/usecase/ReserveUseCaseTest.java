@@ -101,7 +101,7 @@ class ReserveUseCaseTest
     @Test
     void shouldRejectMaintenanceSeat()
     {
-        seatRepo.addSeat(new Seat("seat-maint", "room-1", "A-M", SeatStatus.MAINTENANCE));
+        seatRepo.addSeat(new Seat(1, "room-1", SeatStatus.MAINTENANCE));
 
         var output = useCase.execute(new ReserveUseCase.Request(
                 STUDENT_TOKEN, "seat-maint", TIME_SLOT_ID, DATE));
