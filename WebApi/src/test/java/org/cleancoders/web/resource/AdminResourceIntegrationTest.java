@@ -5,13 +5,10 @@ import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.cleancoders.common.outbound.TokenService;
-import org.cleancoders.infrastructure.persistence.InMemoryRoomRepo;
-import org.cleancoders.infrastructure.persistence.InMemorySeatRepo;
-import org.cleancoders.infrastructure.persistence.InMemoryTimeSlotRepo;
-import org.cleancoders.infrastructure.persistence.InMemoryUserRepo;
+import org.cleancoders.infrastructure.persistence.*;
 import org.cleancoders.infrastructure.security.JjwtTokenService;
 import org.cleancoders.reservation.domain.Reservation;
+import org.cleancoders.reservation.domain.ReservationStatus;
 import org.cleancoders.reservation.outbound.ReservationRepository;
 import org.cleancoders.seatandroom.domain.RoomStatus;
 import org.cleancoders.seatandroom.domain.Seat;
@@ -22,6 +19,7 @@ import org.cleancoders.seatandroom.outbound.SeatRepository;
 import org.cleancoders.seatandroom.outbound.TimeSlotRepository;
 import org.cleancoders.userandauth.domain.User;
 import org.cleancoders.userandauth.domain.UserRole;
+import org.cleancoders.userandauth.outbound.TokenService;
 import org.cleancoders.userandauth.outbound.UserRepository;
 import org.cleancoders.web.binder.ReservationBinder;
 import org.cleancoders.web.binder.SeatAndRoomBinder;
@@ -30,7 +28,6 @@ import org.cleancoders.web.binder.WebAppBinder;
 import org.cleancoders.web.dto.admin.CreateRoomRequest;
 import org.cleancoders.web.dto.admin.CreateSeatRequest;
 import org.cleancoders.web.dto.admin.UpdateSeatRequest;
-import org.cleancoders.web.filter.CorsFilter;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
@@ -38,10 +35,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.Map;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class AdminResourceIntegrationTest extends JerseyTest
 {
@@ -52,21 +50,35 @@ class AdminResourceIntegrationTest extends JerseyTest
     private String studentToken;
     private String studentId;
     private JjwtTokenService tokenService;
+    private InMemoryReservationRepo reservationRepo;
 
     @Override
     protected Application configure()
     {
         // ---- Repositories ----
         InMemoryUserRepo userRepo = new InMemoryUserRepo();
-        InMemorySeatRepo seatRepo = new InMemorySeatRepo();
         InMemoryTimeSlotRepo timeSlotRepo = new InMemoryTimeSlotRepo();
-        InMemoryReservationRepo reservationRepo = new InMemoryReservationRepo();
+        reservationRepo = new InMemoryReservationRepo();
         roomRepo = new InMemoryRoomRepo();
         seatRepo = new InMemorySeatRepo();
         tokenService = new JjwtTokenService();
 
         userRepo.save(new User("admin-1", "admin", "admin123", UserRole.ADMIN, "Admin", "admin@example.com"));
         userRepo.save(new User("student-1", "alice", "pass123", UserRole.STUDENT, "Alice", "a@b.com"));
+
+        studentId = "student-1";
+
+        Reservation r1 = reservationRepo.save(
+                new Reservation(null, studentId, "seat-1", "ts-1", LocalDate.of(2026, 7, 3)));
+        Reservation r2 = reservationRepo.save(
+                new Reservation(null, studentId, "seat-2", "ts-2", LocalDate.of(2026, 7, 3)));
+
+
+        reservationRepo.save(r1);
+        reservationRepo.save(r2);
+
+        adminToken = tokenService.generate("admin-1");
+        studentToken = tokenService.generate("student-1");
 
         var config = new ResourceConfig();
         config.register(RoomResource.class);
@@ -139,7 +151,7 @@ class AdminResourceIntegrationTest extends JerseyTest
         Map<String, Object> first = list.get(0);
         assertNotNull(first.get("reservationId"));
         assertEquals(studentId, first.get("userId"));
-        assertEquals("student", first.get("username"));
+        assertEquals("alice", first.get("username"));
         assertNotNull(first.get("timeSlotLabel"));
         assertEquals("2026-07-03", first.get("date"));
         assertEquals("RESERVED", first.get("status"));
@@ -744,7 +756,6 @@ class AdminResourceIntegrationTest extends JerseyTest
     void shouldReturn409WhenSeatHasActiveReservations()
     {
         // seat-1: AVAILABLE but TestDataReservationRepo has RESERVED res-1
-        String adminToken = tokenService.generate("admin-1");
 
         Response response = target("/admin/seats/seat-1")
                 .request(MediaType.APPLICATION_JSON)
@@ -763,7 +774,8 @@ class AdminResourceIntegrationTest extends JerseyTest
     void shouldReturn200WhenSeatOnlyHasCancelledReservations()
     {
         // seat-2: AVAILABLE, res-6 is CANCELLED (not active)
-        String adminToken = tokenService.generate("admin-1");
+        var reat = reservationRepo.findBySeatIdAndStatusIn("seat-2", Set.of(ReservationStatus.RESERVED)).get(0);
+        reat.cancel();
 
         Response response = target("/admin/seats/seat-2")
                 .request(MediaType.APPLICATION_JSON)
@@ -782,7 +794,6 @@ class AdminResourceIntegrationTest extends JerseyTest
     void shouldReturn403WhenStudentDeletesSeat()
     {
         seatRepo.save(new Seat("seat-del-st", "room-1", "X-S", SeatStatus.AVAILABLE));
-        String studentToken = tokenService.generate("student-1");
 
         Response response = target("/admin/seats/seat-del-st")
                 .request(MediaType.APPLICATION_JSON)
