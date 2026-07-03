@@ -32,7 +32,9 @@ class StubUserRepo implements UserRepository
     public User save(User user)
     {
         String id = user.id() != null ? user.id() : "generated-id";
-        User saved = new User(id, user.username(), user.password(), user.role(), user.name(), user.email());
+        User saved = new User(id, user.username(), user.password(), user.role(),
+                user.name(), user.email(), user.reservationCount(), user.studyHours(),
+                user.checkInCount(), user.creditScore());
         users.put(saved.username(), saved);
         return saved;
     }

@@ -14,7 +14,15 @@ public record UserResponse(
         @Schema(description = "显示名称", example = "John Doe")
         String name,
         @Schema(description = "邮箱地址", example = "john@example.com")
-        String email
+        String email,
+        @Schema(description = "累计预约次数", example = "15")
+        int reservationCount,
+        @Schema(description = "累计学习时长（小时）", example = "42")
+        int studyHours,
+        @Schema(description = "累计签到次数", example = "12")
+        int checkInCount,
+        @Schema(description = "信用分（满分100）", example = "95")
+        int creditScore
 )
 {
 }

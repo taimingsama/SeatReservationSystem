@@ -68,7 +68,8 @@ public class WebApiAuthPresenter extends WebApiPresenter implements
 
     private UserResponse toUserResponse(User user)
     {
-        return new UserResponse(user.id(), user.username(), user.role(), user.name(), user.email());
+        return new UserResponse(user.id(), user.username(), user.role(), user.name(), user.email(),
+                user.reservationCount(), user.studyHours(), user.checkInCount(), user.creditScore());
     }
 
     // --- AuthUseCase.Presenterr ---
