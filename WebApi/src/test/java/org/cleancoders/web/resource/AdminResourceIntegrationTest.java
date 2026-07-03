@@ -58,6 +58,9 @@ class AdminResourceIntegrationTest extends JerseyTest
         seatRepo = new InMemorySeatRepo();
         tokenService = new JjwtTokenService();
 
+        // Pre-seed room so roomName resolution works
+        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
+
         userRepo.save(new User("admin-1", "admin", "admin123", UserRole.ADMIN, "Admin", "admin@example.com"));
         userRepo.save(new User("student-1", "alice", "pass123", UserRole.STUDENT, "Alice", "a@b.com"));
 
@@ -144,6 +147,8 @@ class AdminResourceIntegrationTest extends JerseyTest
         assertNotNull(first.get("reservationId"));
         assertEquals(studentId, first.get("userId"));
         assertEquals("alice", first.get("username"));
+        assertEquals("room-1", first.get("roomId"));
+        assertEquals("自习室A", first.get("roomName"));
         assertNotNull(first.get("timeSlotLabel"));
         assertEquals("2026-07-03", first.get("date"));
         assertEquals("RESERVED", first.get("status"));

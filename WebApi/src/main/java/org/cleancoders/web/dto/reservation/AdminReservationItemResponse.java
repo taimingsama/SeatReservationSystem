@@ -12,6 +12,8 @@ public record AdminReservationItemResponse(
         String username,
         @Schema(description = "自习室ID", example = "r1")
         String roomId,
+        @Schema(description = "自习室名称", example = "A 自习室")
+        String roomName,
         @Schema(description = "座位ID", example = "1")
         int seatId,
         @Schema(description = "时段ID", example = "ts-1")

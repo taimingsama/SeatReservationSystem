@@ -3,10 +3,15 @@ package org.cleancoders.reservation.usecase;
 import org.cleancoders.reservation.domain.Reservation;
 import org.cleancoders.reservation.domain.ReservationStatus;
 import org.cleancoders.reservation.outbound.ReservationRepository;
+import org.cleancoders.seatandroom.domain.RoomLayout;
+import org.cleancoders.seatandroom.domain.RoomStatus;
 import org.cleancoders.seatandroom.domain.Seat;
 import org.cleancoders.seatandroom.domain.SeatStatus;
+import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.domain.TimeSlot;
+import org.cleancoders.seatandroom.outbound.RoomRepository;
 import org.cleancoders.seatandroom.outbound.TimeSlotRepository;
+import org.cleancoders.seatandroom_test_infrastructure.StubRoomRepo;
 import org.cleancoders.seatandroom_test_infrastructure.StubSeatRepo;
 import org.cleancoders.userandauth.domain.User;
 import org.cleancoders.userandauth.domain.UserRole;
@@ -43,6 +48,7 @@ class ManageReservationsUseCaseTest
     private StubReservationRepo reservationRepo;
     private StubSeatRepo seatRepo;
     private StubTimeSlotRepo timeSlotRepo;
+    private StubRoomRepo roomRepo;
     private StubPresenter presenter;
 
     @BeforeEach
@@ -53,6 +59,7 @@ class ManageReservationsUseCaseTest
         reservationRepo = new StubReservationRepo();
         seatRepo = new StubSeatRepo();
         timeSlotRepo = new StubTimeSlotRepo();
+        roomRepo = new StubRoomRepo();
         presenter = new StubPresenter();
 
         useCase = new ManageReservationsUseCase();
@@ -60,6 +67,7 @@ class ManageReservationsUseCaseTest
         useCase.userRepo = userRepo;
         useCase.reservationRepo = reservationRepo;
         useCase.timeSlotRepo = timeSlotRepo;
+        useCase.roomRepo = roomRepo;
         useCase.presenter = presenter;
         ((AdminAuthUseCase<?, ?>) useCase).presenter = presenter;
         ((AuthUseCase<?, ?>) useCase).presenter = presenter;
@@ -68,6 +76,7 @@ class ManageReservationsUseCaseTest
         userRepo.addUser(new User("student-1", "alice", "hashed", UserRole.STUDENT, "Alice", "a@b.com"));
         seatRepo.addSeat(new Seat(SEAT_ID, ROOM_ID, SeatStatus.AVAILABLE));
         timeSlotRepo.addTimeSlot(new TimeSlot(TIME_SLOT_ID, "08:00", "12:00", "上午 08:00-12:00"));
+        roomRepo.add(new StudyRoom(ROOM_ID, "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
     }
 
     @Test

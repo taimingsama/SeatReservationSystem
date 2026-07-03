@@ -3,7 +3,9 @@ package org.cleancoders.reservation.usecase;
 import jakarta.inject.Inject;
 import org.cleancoders.reservation.domain.Reservation;
 import org.cleancoders.reservation.outbound.ReservationRepository;
+import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.domain.TimeSlot;
+import org.cleancoders.seatandroom.outbound.RoomRepository;
 import org.cleancoders.seatandroom.outbound.TimeSlotRepository;
 import org.cleancoders.userandauth.domain.User;
 import org.cleancoders.userandauth.usecase.AdminAuthUseCase;
@@ -29,6 +31,9 @@ public class ManageReservationsUseCase extends AdminAuthUseCase<ManageReservatio
     @Inject
     protected TimeSlotRepository timeSlotRepo;
 
+    @Inject
+    protected RoomRepository roomRepo;
+
     // --- Presenter ---
 
     public interface Presenter
@@ -49,6 +54,7 @@ public class ManageReservationsUseCase extends AdminAuthUseCase<ManageReservatio
             String userId,
             String username,
             String roomId,
+            String roomName,
             int seatId,
             String timeSlotId,
             String timeSlotLabel,
@@ -73,9 +79,12 @@ public class ManageReservationsUseCase extends AdminAuthUseCase<ManageReservatio
                     String timeSlotLabel = timeSlotRepo.findById(r.timeSlotId())
                             .map(TimeSlot::label).orElse("未知");
 
+                    String roomName = roomRepo.findById(r.roomId())
+                            .map(StudyRoom::name).orElse("未知");
+
                     return new ReservationItem(
                             r.id(), r.userId(), username,
-                            r.roomId(), r.seatId(),
+                            r.roomId(), roomName, r.seatId(),
                             r.timeSlotId(), timeSlotLabel,
                             r.date(), r.status().name(),
                             r.createdAt(), r.checkInAt(), r.checkOutAt()
