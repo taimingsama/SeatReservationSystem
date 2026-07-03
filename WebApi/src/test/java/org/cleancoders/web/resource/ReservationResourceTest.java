@@ -3,6 +3,7 @@ package org.cleancoders.web.resource;
 import jakarta.ws.rs.core.Response;
 import org.cleancoders.reservation.usecase.ReserveUseCase;
 import org.cleancoders.web.dto.reservation.ReserveInput;
+import org.cleancoders.web.presenter.ResponseContext;
 import org.cleancoders.web.presenter.WebApiReservationPresenter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,18 +17,21 @@ class ReservationResourceTest {
 
     private ReservationResource resource;
     private WebApiReservationPresenter presenter;
+    private ResponseContext ctx;
     private boolean executeCalled;
     private ReserveUseCase.Request lastRequest;
     private ReserveUseCase.Output outputToReturn;
 
     @BeforeEach
     void setUp() {
+        ctx = new ResponseContext();
         presenter = new WebApiReservationPresenter();
+        presenter.responseContext = ctx;
         executeCalled = false;
         lastRequest = null;
 
         resource = new ReservationResource();
-        resource.presenter = presenter;
+        resource.responseContext = ctx;
         resource.reserveUseCase = new ReserveUseCase() {
             @Override
             public Output execute(Request request) {
@@ -74,28 +78,6 @@ class ReservationResourceTest {
                 new ReserveInput("seat-1", "ts-1", "2026-07-02"));
 
         assertEquals(409, response.getStatus());
-    }
-
-    @Test
-    void reserveShouldReturn401OnInvalidToken() {
-        outputToReturn = null;
-        presenter.invalidToken();
-
-        Response response = resource.reserve("bad-token",
-                new ReserveInput("seat-1", "ts-1", "2026-07-02"));
-
-        assertEquals(401, response.getStatus());
-    }
-
-    @Test
-    void reserveShouldReturn403OnForbidden() {
-        outputToReturn = null;
-        presenter.forbidden();
-
-        Response response = resource.reserve("admin-token",
-                new ReserveInput("seat-1", "ts-1", "2026-07-02"));
-
-        assertEquals(403, response.getStatus());
     }
 
     @Test

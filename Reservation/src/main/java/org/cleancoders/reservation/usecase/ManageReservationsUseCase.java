@@ -2,13 +2,13 @@ package org.cleancoders.reservation.usecase;
 
 import jakarta.inject.Inject;
 import org.cleancoders.common.domain.User;
-import org.cleancoders.reservation.domain.Reservation;
 import org.cleancoders.common.usecase.AdminAuthUseCase;
 import org.cleancoders.common.usecase.AuthUseCase;
 import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
 import org.cleancoders.common_reservation_seatAndRoom.domain.TimeSlot;
 import org.cleancoders.common_reservation_seatAndRoom.outbound.SeatRepository;
 import org.cleancoders.common_reservation_seatAndRoom.outbound.TimeSlotRepository;
+import org.cleancoders.reservation.domain.Reservation;
 import org.cleancoders.reservation.outbound.ReservationRepository;
 
 import java.time.LocalDate;
@@ -36,7 +36,8 @@ public class ManageReservationsUseCase extends AdminAuthUseCase<ManageReservatio
 
     // --- Presenter ---
 
-    public interface Presenter extends AdminAuthUseCase.Presenter {
+    public interface Presenter
+    {
         void presentAllReservations(List<ReservationItem> items);
     }
 

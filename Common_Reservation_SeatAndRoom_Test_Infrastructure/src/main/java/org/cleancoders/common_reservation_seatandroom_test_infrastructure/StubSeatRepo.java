@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public class StubSeatRepo implements SeatRepository
 {
-    private final java.util.Map<String, Seat> seats = new java.util.HashMap<>();
+    private final java.util.Map<String, Seat> seats = new java.util.LinkedHashMap<>();
 
     public void addSeat(Seat seat)
     {

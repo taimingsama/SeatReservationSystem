@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class InMemoryTimeSlotRepo implements TimeSlotRepository
 {
 
-    private final Map<String, TimeSlot> store = new ConcurrentHashMap<>();
+    protected final Map<String, TimeSlot> store = new ConcurrentHashMap<>();
 
     public InMemoryTimeSlotRepo()
     {

@@ -23,7 +23,7 @@ import org.cleancoders.web.dto.reservation.ReservationNotFoundResponse;
 import org.cleancoders.web.dto.reservation.ReserveInput;
 import org.cleancoders.web.dto.reservation.SeatConflictResponse;
 import org.cleancoders.web.dto.reservation.SeatNotFoundResponse;
-import org.cleancoders.web.presenter.WebApiReservationPresenter;
+import org.cleancoders.web.presenter.ResponseContext;
 
 import java.time.LocalDate;
 
@@ -49,7 +49,7 @@ public class ReservationResource {
     ListMyReservationsUseCase listMyReservationsUseCase;
 
     @Inject
-    WebApiReservationPresenter presenter;
+    ResponseContext responseContext;
 
     @POST
     @Operation(summary = "创建预约 (UC-08)", description = "学生选择座位、时段和日期，通过冲突检测后创建预约。")
@@ -79,7 +79,7 @@ public class ReservationResource {
 
         reserveUseCase.execute(new ReserveUseCase.Request(
                 authCookie, input.seatId(), input.timeSlotId(), date));
-        return presenter.getResponse();
+        return responseContext.get();
     }
 
     @POST
@@ -100,7 +100,7 @@ public class ReservationResource {
     })
     public Response checkIn(@CookieParam("Authorization") String authCookie, @PathParam("id") String reservationId) {
         checkInUseCase.execute(new CheckInUseCase.Request(authCookie, reservationId));
-        return presenter.getResponse();
+        return responseContext.get();
     }
 
     @POST
@@ -121,7 +121,7 @@ public class ReservationResource {
     })
     public Response checkOut(@CookieParam("Authorization") String authCookie, @PathParam("id") String reservationId) {
         checkOutUseCase.execute(new CheckOutUseCase.Request(authCookie, reservationId));
-        return presenter.getResponse();
+        return responseContext.get();
     }
 
     @DELETE
@@ -142,7 +142,7 @@ public class ReservationResource {
     })
     public Response cancel(@CookieParam("Authorization") String authCookie, @PathParam("id") String reservationId) {
         cancelReservationUseCase.execute(new CancelReservationUseCase.Request(authCookie, reservationId));
-        return presenter.getResponse();
+        return responseContext.get();
     }
 
     @GET
@@ -158,6 +158,6 @@ public class ReservationResource {
     })
     public Response myReservations(@CookieParam("Authorization") String authCookie) {
         listMyReservationsUseCase.execute(new ListMyReservationsUseCase.Request(authCookie));
-        return presenter.getResponse();
+        return responseContext.get();
     }
 }

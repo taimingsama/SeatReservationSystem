@@ -7,6 +7,7 @@ import org.cleancoders.userandauth.usecase.LoginUseCase;
 import org.cleancoders.userandauth.usecase.RegisterUseCase;
 import org.cleancoders.web.dto.auth.LoginRequest;
 import org.cleancoders.web.dto.auth.RegisterRequest;
+import org.cleancoders.web.presenter.ResponseContext;
 import org.cleancoders.web.presenter.WebApiAuthPresenter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ class AuthResourceTest
 
     private AuthResource resource;
     private WebApiAuthPresenter presenter;
+    private ResponseContext ctx;
     private boolean loginExecuteCalled;
     private LoginUseCase.Request lastLoginRequest;
     private LoginUseCase.Output loginOutputToReturn;
@@ -29,14 +31,16 @@ class AuthResourceTest
     @BeforeEach
     void setUp()
     {
+        ctx = new ResponseContext();
         presenter = new WebApiAuthPresenter();
+        presenter.responseContext = ctx;
         loginExecuteCalled = false;
         lastLoginRequest = null;
         registerExecuteCalled = false;
         lastRegisterRequest = null;
 
         resource = new AuthResource();
-        resource.presenter = presenter;
+        resource.responseContext = ctx;
         resource.loginUseCase = new LoginUseCase()
         {
             @Override

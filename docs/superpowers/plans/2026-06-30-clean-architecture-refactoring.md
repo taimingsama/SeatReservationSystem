@@ -436,7 +436,7 @@ public class AppConfig extends Application {
 package org.cleancoders.web;
 
 import jakarta.ws.rs.core.Application;
-import org.cleancoders.web.binder.AppBinder;
+import org.cleancoders.web.binder.WebAppBinder;
 import org.cleancoders.web.filter.CorsFilter;
 import org.cleancoders.web.resource.HealthResource;
 

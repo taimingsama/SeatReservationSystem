@@ -8,6 +8,7 @@ public record StudyRoom(
         String name,
         String location,
         int capacity,
-        String status
-) {
+        RoomStatus status
+)
+{
 }

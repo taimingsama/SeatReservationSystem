@@ -27,8 +27,15 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ManageReservationsUseCaseTest {
+class ManageReservationsUseCaseTest
+{
 
+    private static final String ADMIN_ID = "admin-1";
+    private static final String ADMIN_TOKEN = "jwt:" + ADMIN_ID + ":bob:ADMIN";
+    private static final String STUDENT_TOKEN = "jwt:student-1:alice:STUDENT";
+    private static final String SEAT_ID = "seat-1";
+    private static final String TIME_SLOT_ID = "ts-1";
+    private static final LocalDate DATE = LocalDate.of(2026, 7, 2);
     private ManageReservationsUseCase useCase;
     private StubTokenService tokenService;
     private StubUserRepo userRepo;
@@ -37,15 +44,9 @@ class ManageReservationsUseCaseTest {
     private StubTimeSlotRepo timeSlotRepo;
     private StubPresenter presenter;
 
-    private static final String ADMIN_ID = "admin-1";
-    private static final String ADMIN_TOKEN = "jwt:" + ADMIN_ID + ":bob:ADMIN";
-    private static final String STUDENT_TOKEN = "jwt:student-1:alice:STUDENT";
-    private static final String SEAT_ID = "seat-1";
-    private static final String TIME_SLOT_ID = "ts-1";
-    private static final LocalDate DATE = LocalDate.of(2026, 7, 2);
-
     @BeforeEach
-    void setUp() {
+    void setUp()
+    {
         tokenService = new StubTokenService();
         userRepo = new StubUserRepo();
         reservationRepo = new StubReservationRepo();
@@ -70,7 +71,8 @@ class ManageReservationsUseCaseTest {
     }
 
     @Test
-    void shouldReturnAllReservations() {
+    void shouldReturnAllReservations()
+    {
         reservationRepo.addReservation(new Reservation("res-1", ADMIN_ID, SEAT_ID, TIME_SLOT_ID, DATE));
         reservationRepo.addReservation(new Reservation("res-2", "student-1", SEAT_ID, TIME_SLOT_ID, DATE));
 
@@ -84,7 +86,8 @@ class ManageReservationsUseCaseTest {
     }
 
     @Test
-    void shouldReturnEmptyListWhenNoReservations() {
+    void shouldReturnEmptyListWhenNoReservations()
+    {
         var output = useCase.execute(new ManageReservationsUseCase.Request(ADMIN_TOKEN));
 
         assertNotNull(output);
@@ -92,7 +95,8 @@ class ManageReservationsUseCaseTest {
     }
 
     @Test
-    void shouldRejectInvalidToken() {
+    void shouldRejectInvalidToken()
+    {
         var output = useCase.execute(new ManageReservationsUseCase.Request("bad-token"));
 
         assertNull(output);
@@ -100,7 +104,8 @@ class ManageReservationsUseCaseTest {
     }
 
     @Test
-    void shouldRejectStudentUser() {
+    void shouldRejectStudentUser()
+    {
         var output = useCase.execute(new ManageReservationsUseCase.Request(STUDENT_TOKEN));
 
         assertNull(output);
@@ -109,14 +114,17 @@ class ManageReservationsUseCaseTest {
 
     // --- Stubs ---
 
-    static class StubTokenService implements TokenService {
+    static class StubTokenService implements TokenService
+    {
         @Override
-        public String generate(String userId) {
+        public String generate(String userId)
+        {
             return "jwt:" + userId;
         }
 
         @Override
-        public TokenPayload validate(String t) {
+        public TokenPayload validate(String t)
+        {
             if (t == null || !t.startsWith("jwt:"))
                 throw new TokenValidationException("Invalid");
             String[] p = t.split(":");
@@ -126,103 +134,167 @@ class ManageReservationsUseCaseTest {
         }
     }
 
-    static class StubUserRepo implements UserRepository {
+    static class StubUserRepo implements UserRepository
+    {
         private final java.util.Map<String, User> m = new java.util.HashMap<>();
 
-        void addUser(User u) { m.put(u.id(), u); }
+        void addUser(User u)
+        {
+            m.put(u.id(), u);
+        }
 
         @Override
-        public Optional<User> findByUsername(String u) {
+        public Optional<User> findByUsername(String u)
+        {
             return m.values().stream().filter(x -> x.username().equals(u)).findFirst();
         }
 
         @Override
-        public Optional<User> findById(String id) { return Optional.ofNullable(m.get(id)); }
+        public Optional<User> findById(String id)
+        {
+            return Optional.ofNullable(m.get(id));
+        }
 
         @Override
-        public User save(User u) { m.put(u.id(), u); return u; }
+        public User save(User u)
+        {
+            m.put(u.id(), u);
+            return u;
+        }
     }
 
-    static class StubReservationRepo implements ReservationRepository {
+    static class StubReservationRepo implements ReservationRepository
+    {
         private final java.util.Map<String, Reservation> m = new java.util.HashMap<>();
 
-        void addReservation(Reservation r) { m.put(r.id(), r); }
+        void addReservation(Reservation r)
+        {
+            m.put(r.id(), r);
+        }
 
         @Override
-        public Reservation save(Reservation r) { m.put(r.id(), r); return r; }
+        public Reservation save(Reservation r)
+        {
+            m.put(r.id(), r);
+            return r;
+        }
 
         @Override
-        public Optional<Reservation> findById(String id) { return Optional.ofNullable(m.get(id)); }
+        public Optional<Reservation> findById(String id)
+        {
+            return Optional.ofNullable(m.get(id));
+        }
 
         @Override
         public Optional<Reservation> findByUserIdAndDateAndTimeSlotIdAndStatusIn(
-                String uid, LocalDate d, String ts, Set<ReservationStatus> ss) {
+                String uid, LocalDate d, String ts, Set<ReservationStatus> ss)
+        {
             return m.values().stream().filter(r -> r.userId().equals(uid) && r.date().equals(d)
                     && r.timeSlotId().equals(ts) && ss.contains(r.status())).findFirst();
         }
 
         @Override
         public Optional<Reservation> findBySeatIdAndDateAndTimeSlotIdAndStatusIn(
-                String sid, LocalDate d, String ts, Set<ReservationStatus> ss) {
+                String sid, LocalDate d, String ts, Set<ReservationStatus> ss)
+        {
             return m.values().stream().filter(r -> r.seatId().equals(sid) && r.date().equals(d)
                     && r.timeSlotId().equals(ts) && ss.contains(r.status())).findFirst();
         }
 
         @Override
-        public List<Reservation> findByUserId(String uid) {
+        public List<Reservation> findByUserId(String uid)
+        {
             return m.values().stream().filter(r -> r.userId().equals(uid)).toList();
         }
 
         @Override
-        public List<Reservation> findAll() { return new ArrayList<>(m.values()); }
+        public List<Reservation> findAll()
+        {
+            return new ArrayList<>(m.values());
+        }
     }
 
-    static class StubSeatRepo implements SeatRepository {
+    static class StubSeatRepo implements SeatRepository
+    {
         private final java.util.Map<String, Seat> m = new java.util.HashMap<>();
 
-        void addSeat(Seat s) { m.put(s.id(), s); }
+        void addSeat(Seat s)
+        {
+            m.put(s.id(), s);
+        }
 
         @Override
-        public Optional<Seat> findById(String id) { return Optional.ofNullable(m.get(id)); }
+        public Optional<Seat> findById(String id)
+        {
+            return Optional.ofNullable(m.get(id));
+        }
 
         @Override
-        public Seat save(Seat s) { m.put(s.id(), s); return s; }
+        public Seat save(Seat s)
+        {
+            m.put(s.id(), s);
+            return s;
+        }
 
         @Override
-        public List<Seat> findByRoomId(String rid) {
+        public List<Seat> findByRoomId(String rid)
+        {
             return m.values().stream().filter(s -> s.roomId().equals(rid)).toList();
         }
     }
 
-    static class StubTimeSlotRepo implements TimeSlotRepository {
+    static class StubTimeSlotRepo implements TimeSlotRepository
+    {
         private final java.util.Map<String, TimeSlot> m = new java.util.HashMap<>();
 
-        void addTimeSlot(TimeSlot ts) { m.put(ts.id(), ts); }
+        void addTimeSlot(TimeSlot ts)
+        {
+            m.put(ts.id(), ts);
+        }
 
         @Override
-        public Optional<TimeSlot> findById(String id) { return Optional.ofNullable(m.get(id)); }
+        public Optional<TimeSlot> findById(String id)
+        {
+            return Optional.ofNullable(m.get(id));
+        }
 
         @Override
-        public List<TimeSlot> findAll() { return List.copyOf(m.values()); }
+        public List<TimeSlot> findAll()
+        {
+            return List.copyOf(m.values());
+        }
     }
 
     static class StubPresenter implements
             ManageReservationsUseCase.Presenter,
+            AdminAuthUseCase.Presenter,
             AuthUseCase.Presenter
     {
         List<ManageReservationsUseCase.ReservationItem> items = List.of();
         boolean invalidTokenCalled, userNotFoundCalled, forbiddenCalled;
 
         @Override
-        public void presentAllReservations(List<ManageReservationsUseCase.ReservationItem> items) { this.items = items; }
+        public void presentAllReservations(List<ManageReservationsUseCase.ReservationItem> items)
+        {
+            this.items = items;
+        }
 
         @Override
-        public void forbidden() { forbiddenCalled = true; }
+        public void forbidden()
+        {
+            forbiddenCalled = true;
+        }
 
         @Override
-        public void invalidToken() { invalidTokenCalled = true; }
+        public void invalidToken()
+        {
+            invalidTokenCalled = true;
+        }
 
         @Override
-        public void userNotFound() { userNotFoundCalled = true; }
+        public void userNotFound()
+        {
+            userNotFoundCalled = true;
+        }
     }
 }

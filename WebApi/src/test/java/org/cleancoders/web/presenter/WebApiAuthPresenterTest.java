@@ -16,11 +16,14 @@ class WebApiAuthPresenterTest
 {
 
     private WebApiAuthPresenter presenter;
+    private ResponseContext responseContext;
 
     @BeforeEach
     void setUp()
     {
+        responseContext = new ResponseContext();
         presenter = new WebApiAuthPresenter();
+        presenter.responseContext = responseContext;
     }
 
     @Test
@@ -29,7 +32,7 @@ class WebApiAuthPresenterTest
         User user = new User("u1", "alice", "hashed", UserRole.STUDENT, "Alice", "a@b.com");
         presenter.success("jwt.token.here", user);
 
-        Response response = presenter.getResponse();
+        Response response = responseContext.get();
         assertEquals(200, response.getStatus());
 
         LoginResponse entity = (LoginResponse) response.getEntity();
@@ -47,7 +50,7 @@ class WebApiAuthPresenterTest
     {
         presenter.invalidCredentials();
 
-        Response response = presenter.getResponse();
+        Response response = responseContext.get();
         assertEquals(401, response.getStatus());
 
         ErrorResponse entity = (ErrorResponse) response.getEntity();
@@ -59,7 +62,7 @@ class WebApiAuthPresenterTest
     {
         presenter.userNotFound();
 
-        Response response = presenter.getResponse();
+        Response response = responseContext.get();
         assertEquals(404, response.getStatus());
 
         ErrorResponse entity = (ErrorResponse) response.getEntity();
@@ -74,7 +77,7 @@ class WebApiAuthPresenterTest
         User user = new User("u1", "alice", "hashed", UserRole.STUDENT, "Alice", "a@b.com");
         presenter.success(user);
 
-        Response response = presenter.getResponse();
+        Response response = responseContext.get();
         assertEquals(201, response.getStatus());
 
         RegisterResponse entity = (RegisterResponse) response.getEntity();
@@ -88,7 +91,7 @@ class WebApiAuthPresenterTest
     {
         presenter.usernameAlreadyExists("alice");
 
-        Response response = presenter.getResponse();
+        Response response = responseContext.get();
         assertEquals(409, response.getStatus());
 
         UsernameConflictResponse entity = (UsernameConflictResponse) response.getEntity();

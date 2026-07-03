@@ -3,13 +3,10 @@ package org.cleancoders.web.presenter;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
 import org.cleancoders.reservation.domain.ReservationStatus;
-import org.cleancoders.reservation.usecase.CancelReservationUseCase;
 import org.cleancoders.reservation.usecase.CheckInUseCase;
-import org.cleancoders.reservation.usecase.CheckOutUseCase;
-import org.cleancoders.reservation.usecase.ListMyReservationsUseCase;
-import org.cleancoders.reservation.usecase.ListMyReservationsUseCase.ReservationItem;
-import org.cleancoders.reservation.usecase.ManageReservationsUseCase;
 import org.cleancoders.reservation.usecase.ReserveUseCase;
+import org.cleancoders.reservation.usecase.*;
+import org.cleancoders.reservation.usecase.ListMyReservationsUseCase.ReservationItem;
 import org.cleancoders.web.dto.common.ErrorResponse;
 import org.cleancoders.web.dto.reservation.*;
 
@@ -20,7 +17,7 @@ import java.util.Map;
 /**
  * WebApi presenter implementation for all reservation-related use cases.
  * <p>
- * Uses {@link ThreadLocal} to store the current request's {@link Response},
+ * Uses {@link ResponseContext} to store the current request's {@link Response},
  * allowing the singleton presenter to serve concurrent HTTP requests safely.
  * <p>
  * Implements all six reservation presenter interfaces:
@@ -32,7 +29,7 @@ import java.util.Map;
  * {@link ManageReservationsUseCase.Presenter}.
  */
 @Singleton
-public class WebApiReservationPresenter extends WebApiCommonPresenter implements
+public class WebApiReservationPresenter extends WebApiPresenter implements
         ReserveUseCase.Presenter,
         CheckInUseCase.Presenter,
         CheckOutUseCase.Presenter,
@@ -48,7 +45,7 @@ public class WebApiReservationPresenter extends WebApiCommonPresenter implements
     @Override
     public void success(String reservationId, String seatNumber, String timeSlot)
     {
-        current.set(Response.status(201).entity(new ReservationCreatedResponse(
+        responseContext.set(Response.status(201).entity(new ReservationCreatedResponse(
                 reservationId, seatNumber, timeSlot)).build());
     }
 
@@ -59,47 +56,44 @@ public class WebApiReservationPresenter extends WebApiCommonPresenter implements
     @Override
     public void seatNotAvailable(String seatId, String timeSlot)
     {
-        current.set(Response.status(409).entity(new SeatConflictResponse(
+        responseContext.set(Response.status(409).entity(new SeatConflictResponse(
                 "座位已被预约", seatId, timeSlot)).build());
     }
 
     @Override
     public void duplicateReservation(String existingId)
     {
-        current.set(Response.status(409).entity(new DuplicateReservationResponse(
+        responseContext.set(Response.status(409).entity(new DuplicateReservationResponse(
                 "该时段已有预约", existingId)).build());
     }
 
     @Override
     public void timeSlotNotFound(String timeSlotId)
     {
-        current.set(Response.status(404).entity(new TimeSlotNotFoundResponse(
+        responseContext.set(Response.status(404).entity(new TimeSlotNotFoundResponse(
                 "时段不存在", timeSlotId)).build());
     }
 
     @Override
     public void seatNotFound(String seatId)
     {
-        current.set(Response.status(404).entity(new SeatNotFoundResponse(
+        responseContext.set(Response.status(404).entity(new SeatNotFoundResponse(
                 "座位不存在", seatId)).build());
     }
 
-    // -------------------------------------------------------
-    // CheckInUseCase.Presenter / CheckOutUseCase.Presenter / CancelReservationUseCase.Presenter
-    // (shared error branches across UC-09, UC-10, UC-11)
-    // -------------------------------------------------------
+    // --- CheckInUseCase.Presenter ---
 
     @Override
     public void reservationNotFound(String reservationId)
     {
-        current.set(Response.status(404).entity(new ReservationNotFoundResponse(
+        responseContext.set(Response.status(404).entity(new ReservationNotFoundResponse(
                 "预约不存在", reservationId)).build());
     }
 
     @Override
     public void notYourReservation()
     {
-        current.set(Response.status(403).entity(new ErrorResponse(
+        responseContext.set(Response.status(403).entity(new ErrorResponse(
                 "只能签到自己的预约")).build());
     }
 
@@ -119,17 +113,13 @@ public class WebApiReservationPresenter extends WebApiCommonPresenter implements
                 "权限不足，仅学生可创建预约")).build());
     }
 
-    // --- CheckInUseCase.Presenter ---
-
     @Override
     public void checkInNotAvailable(String reason)
     {
-        current.set(Response.status(409).entity(new ErrorResponse(reason)).build());
+        responseContext.set(Response.status(409).entity(new ErrorResponse(reason)).build());
     }
 
-    // -------------------------------------------------------
-    // ListMyReservationsUseCase.Presenter (UC-12)
-    // -------------------------------------------------------
+    // --- ListMyReservationsUseCase.Presenter ---
 
     @Override
     public void presentReservations(List<ReservationItem> items)
@@ -147,12 +137,10 @@ public class WebApiReservationPresenter extends WebApiCommonPresenter implements
                 ))
                 .toList();
 
-        current.set(Response.ok(Map.of("reservations", list)).build());
+        responseContext.set(Response.ok(Map.of("reservations", list)).build());
     }
 
-    // -------------------------------------------------------
-    // ManageReservationsUseCase.Presenter (UC-13)
-    // -------------------------------------------------------
+    // --- ManageReservationsUseCase.Presenter ---
 
     @Override
     public void presentAllReservations(List<ManageReservationsUseCase.ReservationItem> items)
@@ -176,6 +164,6 @@ public class WebApiReservationPresenter extends WebApiCommonPresenter implements
                 })
                 .toList();
 
-        current.set(Response.ok(Map.of("reservations", list)).build());
+        responseContext.set(Response.ok(Map.of("reservations", list)).build());
     }
 }
