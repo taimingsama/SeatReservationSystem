@@ -15,8 +15,8 @@ public class ReservationBasedActiveReservationChecker implements ActiveReservati
     ReservationRepository reservationRepo;
 
     @Override
-    public boolean hasActiveForSeat(String seatId) {
-        return !reservationRepo.findBySeatIdAndStatusIn(seatId,
+    public boolean hasActiveForSeat(String roomId, int seatId) {
+        return !reservationRepo.findBySeatIdAndStatusIn(roomId, seatId,
                 Set.of(ReservationStatus.RESERVED, ReservationStatus.CHECKED_IN)).isEmpty();
     }
 }

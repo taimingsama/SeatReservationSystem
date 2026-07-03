@@ -6,35 +6,34 @@ import org.cleancoders.seatandroom.domain.SeatStatus;
 
 /**
  * {@link InMemorySeatRepo} pre-seeded with extra test seats.
- * <p>
- * Inherits the 12 base seats (seat-1 ~ seat-12) from {@link InMemorySeatRepo}
+ * Inherits the base seats (room-1: 8 seats, room-2: 4 seats) from parent
  * and adds additional seats for room-3, room-4, and room-5.
  */
 public class TestDataSeatRepo extends InMemorySeatRepo {
 
     public TestDataSeatRepo() {
-        // Inherits seat-1 ~ seat-8 (room-1) and seat-9 ~ seat-12 (room-2) from parent
+        // Inherits room-1 (8 seats) and room-2 (4 seats) from parent
 
-        // room-3 seats (13-18)
-        save(new Seat("seat-13", "room-3", "C-1", SeatStatus.AVAILABLE));
-        save(new Seat("seat-14", "room-3", "C-2", SeatStatus.AVAILABLE));
-        save(new Seat("seat-15", "room-3", "C-3", SeatStatus.RESERVED));
-        save(new Seat("seat-16", "room-3", "C-4", SeatStatus.MAINTENANCE));
-        save(new Seat("seat-17", "room-3", "C-5", SeatStatus.OCCUPIED));
-        save(new Seat("seat-18", "room-3", "C-6", SeatStatus.AVAILABLE));
+        // room-3: 6 seats
+        save(new Seat(1, "room-3", SeatStatus.AVAILABLE));
+        save(new Seat(2, "room-3", SeatStatus.AVAILABLE));
+        save(new Seat(3, "room-3", SeatStatus.RESERVED));
+        save(new Seat(4, "room-3", SeatStatus.MAINTENANCE));
+        save(new Seat(5, "room-3", SeatStatus.OCCUPIED));
+        save(new Seat(6, "room-3", SeatStatus.AVAILABLE));
 
-        // room-4 seats (19-22)
-        save(new Seat("seat-19", "room-4", "D-1", SeatStatus.AVAILABLE));
-        save(new Seat("seat-20", "room-4", "D-2", SeatStatus.AVAILABLE));
-        save(new Seat("seat-21", "room-4", "D-3", SeatStatus.MAINTENANCE));
-        save(new Seat("seat-22", "room-4", "D-4", SeatStatus.AVAILABLE));
+        // room-4: 4 seats
+        save(new Seat(1, "room-4", SeatStatus.AVAILABLE));
+        save(new Seat(2, "room-4", SeatStatus.AVAILABLE));
+        save(new Seat(3, "room-4", SeatStatus.MAINTENANCE));
+        save(new Seat(4, "room-4", SeatStatus.AVAILABLE));
 
-        // room-5 seats (23-28)
-        save(new Seat("seat-23", "room-5", "E-1", SeatStatus.AVAILABLE));
-        save(new Seat("seat-24", "room-5", "E-2", SeatStatus.AVAILABLE));
-        save(new Seat("seat-25", "room-5", "E-3", SeatStatus.OCCUPIED));
-        save(new Seat("seat-26", "room-5", "E-4", SeatStatus.AVAILABLE));
-        save(new Seat("seat-27", "room-5", "E-5", SeatStatus.RESERVED));
-        save(new Seat("seat-28", "room-5", "E-6", SeatStatus.AVAILABLE));
+        // room-5: 6 seats
+        save(new Seat(1, "room-5", SeatStatus.AVAILABLE));
+        save(new Seat(2, "room-5", SeatStatus.AVAILABLE));
+        save(new Seat(3, "room-5", SeatStatus.OCCUPIED));
+        save(new Seat(4, "room-5", SeatStatus.AVAILABLE));
+        save(new Seat(5, "room-5", SeatStatus.RESERVED));
+        save(new Seat(6, "room-5", SeatStatus.AVAILABLE));
     }
 }
