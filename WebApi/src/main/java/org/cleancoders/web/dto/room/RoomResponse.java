@@ -11,8 +11,10 @@ public record RoomResponse(
         String name,
         @Schema(description = "位置", example = "1号楼2层")
         String location,
-        @Schema(description = "容量", example = "10")
-        int capacity,
+        @Schema(description = "布局类型", example = "SMALL")
+        String layout,
+        @Schema(description = "座位数量", example = "40")
+        int seatCount,
         @Schema(description = "状态", example = "OPEN", allowableValues = {"OPEN", "CLOSED", "MAINTENANCE"})
         RoomStatus status
 )

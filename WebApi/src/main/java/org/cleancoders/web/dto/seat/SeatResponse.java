@@ -5,10 +5,10 @@ import org.cleancoders.seatandroom.domain.SeatStatus;
 
 @Schema(description = "座位信息")
 public record SeatResponse(
-        @Schema(description = "座位ID", example = "seat-1")
-        String id,
-        @Schema(description = "座位编号", example = "A-1")
-        String seatNumber,
+        @Schema(description = "座位序号 (教室内 1-N)", example = "5")
+        int id,
+        @Schema(description = "所属教室ID", example = "room-1")
+        String roomId,
         @Schema(description = "座位状态",
                 allowableValues = {"AVAILABLE", "RESERVED", "OCCUPIED", "MAINTENANCE"})
         SeatStatus status

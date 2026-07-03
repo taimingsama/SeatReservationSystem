@@ -6,8 +6,6 @@ import org.cleancoders.seatandroom.domain.Seat;
 import org.cleancoders.seatandroom.domain.SeatStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.usecase.*;
-import org.cleancoders.userandauth.usecase.AdminAuthUseCase;
-import org.cleancoders.userandauth.usecase.AuthUseCase;
 import org.cleancoders.web.dto.room.RoomListResponse;
 import org.cleancoders.web.dto.room.RoomResponse;
 import org.cleancoders.web.dto.seat.SeatListResponse;
@@ -17,16 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * WebApi presenter for {@link ListRoomsUseCase}, {@link ListSeatsUseCase},
- * {@link ManageRoomsUseCase}, {@link UpdateRoomUseCase}, {@link DeleteRoomUseCase}
- * and {@link ManageSeatsUseCase}.
- * <p>
- * Implements each use case's own {@code Presenter} (success / business-error
- * branches). Auth-related branches (401 invalid token, 404 user not found,
- * 403 forbidden) are handled by {@link WebApiAuthPresenter}, which is bound
- * to {@link AuthUseCase.Presenter} /
- * {@link AdminAuthUseCase.Presenter} and
- * injected into the base-class presenter fields.
+ * WebApi presenter for room and seat use cases.
  */
 @Singleton
 public class WebApiRoomPresenter extends WebApiPresenter implements
@@ -35,16 +24,15 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
         ManageRoomsUseCase.Presenter,
         UpdateRoomUseCase.Presenter,
         DeleteRoomUseCase.Presenter,
-        ManageSeatsUseCase.Presenter,
-        UpdateSeatUseCase.Presenter,
-        DeleteSeatUseCase.Presenter
+        UpdateSeatUseCase.Presenter
 {
 
     @Override
     public void presentRooms(List<StudyRoom> rooms)
     {
         List<RoomResponse> dtos = rooms.stream()
-                .map(r -> new RoomResponse(r.id(), r.name(), r.location(), r.capacity(), r.status()))
+                .map(r -> new RoomResponse(r.id(), r.name(), r.location(),
+                        r.layout().name(), r.layout().seatCount(), r.status()))
                 .toList();
         responseContext.set(Response.ok(new RoomListResponse(dtos)).build());
     }
@@ -53,7 +41,7 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
     public void presentSeats(StudyRoom room, List<Seat> seats)
     {
         List<SeatResponse> dtos = seats.stream()
-                .map(s -> new SeatResponse(s.id(), s.seatNumber(), s.status()))
+                .map(s -> new SeatResponse(s.id(), s.roomId(), s.status()))
                 .toList();
         responseContext.set(Response.ok(new SeatListResponse(room.id(), room.name(), dtos)).build());
     }
@@ -71,7 +59,8 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
     public void success(StudyRoom room)
     {
         responseContext.set(Response.status(201).entity(
-                new RoomResponse(room.id(), room.name(), room.location(), room.capacity(), room.status())
+                new RoomResponse(room.id(), room.name(), room.location(),
+                        room.layout().name(), room.layout().seatCount(), room.status())
         ).build());
     }
 
@@ -79,7 +68,8 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
     public void updateSuccess(StudyRoom room)
     {
         responseContext.set(Response.ok(
-                new RoomResponse(room.id(), room.name(), room.location(), room.capacity(), room.status())
+                new RoomResponse(room.id(), room.name(), room.location(),
+                        room.layout().name(), room.layout().seatCount(), room.status())
         ).build());
     }
 
@@ -89,6 +79,16 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
         responseContext.set(Response.status(409).entity(Map.of(
                 "error", "自习室名称已存在",
                 "name", name
+        )).build());
+    }
+
+    @Override
+    public void invalidLayout(String layout)
+    {
+        responseContext.set(Response.status(400).entity(Map.of(
+                "error", "无效的布局类型",
+                "layout", layout,
+                "validValues", new String[]{"SMALL", "MEDIUM", "LARGE"}
         )).build());
     }
 
@@ -110,50 +110,32 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
         )).build());
     }
 
-    // --- ManageSeatsUseCase (UC-07 create seat) ---
-
-    @Override
-    public void success(Seat seat)
-    {
-        responseContext.set(Response.status(201).entity(
-                new SeatResponse(seat.id(), seat.seatNumber(), seat.status())
-        ).build());
-    }
-
-    @Override
-    public void seatNumberAlreadyExists(String roomId, String seatNumber)
-    {
-        responseContext.set(Response.status(409).entity(Map.of(
-                "error", "座位编号已存在",
-                "roomId", roomId,
-                "seatNumber", seatNumber
-        )).build());
-    }
-
-    // --- UpdateSeatUseCase (UC-07 update seat status) ---
+    // --- UpdateSeatUseCase ---
 
     @Override
     public void updateSuccess(Seat seat)
     {
         responseContext.set(Response.ok(
-                new SeatResponse(seat.id(), seat.seatNumber(), seat.status())
+                new SeatResponse(seat.id(), seat.roomId(), seat.status())
         ).build());
     }
 
     @Override
-    public void seatNotFound(String seatId)
+    public void seatNotFound(String roomId, int seatId)
     {
         responseContext.set(Response.status(404).entity(Map.of(
                 "error", "座位不存在",
+                "roomId", roomId,
                 "seatId", seatId
         )).build());
     }
 
     @Override
-    public void invalidStatusTransition(String seatId, SeatStatus current, SeatStatus target)
+    public void invalidStatusTransition(String roomId, int seatId, SeatStatus current, SeatStatus target)
     {
         responseContext.set(Response.status(409).entity(Map.of(
                 "error", "非法状态转换",
+                "roomId", roomId,
                 "seatId", seatId,
                 "currentStatus", current.name(),
                 "targetStatus", target.name()
@@ -161,51 +143,13 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
     }
 
     @Override
-    public void invalidStatus(String seatId, String status)
+    public void invalidStatus(String roomId, int seatId, String status)
     {
         responseContext.set(Response.status(400).entity(Map.of(
                 "error", "非法座位状态",
+                "roomId", roomId,
                 "seatId", seatId,
                 "status", status == null ? "null" : status
-        )).build());
-    }
-
-    // --- DeleteSeatUseCase (UC-07 delete seat) ---
-
-    @Override
-    public void deleteSeatSuccess(String seatId)
-    {
-        responseContext.set(Response.status(200).entity(Map.of(
-                "message", "座位已删除",
-                "seatId", seatId
-        )).build());
-    }
-
-    @Override
-    public void seatAlreadyRemoved(String seatId)
-    {
-        responseContext.set(Response.status(409).entity(Map.of(
-                "error", "座位已处于删除状态",
-                "seatId", seatId
-        )).build());
-    }
-
-    @Override
-    public void seatInUse(String seatId, SeatStatus current)
-    {
-        responseContext.set(Response.status(409).entity(Map.of(
-                "error", "座位正在使用中，无法删除",
-                "seatId", seatId,
-                "currentStatus", current.name()
-        )).build());
-    }
-
-    @Override
-    public void seatHasActiveReservations(String seatId)
-    {
-        responseContext.set(Response.status(409).entity(Map.of(
-                "error", "座位存在活跃预约，无法删除",
-                "seatId", seatId
         )).build());
     }
 }

@@ -78,7 +78,7 @@ public class ReservationResource {
         }
 
         reserveUseCase.execute(new ReserveUseCase.Request(
-                authCookie, input.seatId(), input.timeSlotId(), date));
+                authCookie, input.roomId(), input.seatId(), input.timeSlotId(), date));
         return responseContext.get();
     }
 

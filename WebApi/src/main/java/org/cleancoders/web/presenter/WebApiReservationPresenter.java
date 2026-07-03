@@ -14,17 +14,6 @@ import java.util.Map;
 
 /**
  * WebApi presenter implementation for all reservation-related use cases.
- * <p>
- * Uses {@link ResponseContext} to store the current request's {@link Response},
- * allowing the singleton presenter to serve concurrent HTTP requests safely.
- * <p>
- * Implements all six reservation presenter interfaces:
- * {@link ReserveUseCase.Presenter},
- * {@link CheckInUseCase.Presenter},
- * {@link CheckOutUseCase.Presenter},
- * {@link CancelReservationUseCase.Presenter},
- * {@link ListMyReservationsUseCase.Presenter}, and
- * {@link ManageReservationsUseCase.Presenter}.
  */
 @Singleton
 public class WebApiReservationPresenter extends WebApiPresenter implements
@@ -52,10 +41,10 @@ public class WebApiReservationPresenter extends WebApiPresenter implements
     // -------------------------------------------------------
 
     @Override
-    public void seatNotAvailable(String seatId, String timeSlot)
+    public void seatNotAvailable(String roomId, int seatId, String timeSlot)
     {
         responseContext.set(Response.status(409).entity(new SeatConflictResponse(
-                "座位已被预约", seatId, timeSlot)).build());
+                "座位已被预约", roomId + ":" + seatId, timeSlot)).build());
     }
 
     @Override
@@ -73,10 +62,10 @@ public class WebApiReservationPresenter extends WebApiPresenter implements
     }
 
     @Override
-    public void seatNotFound(String seatId)
+    public void seatNotFound(String roomId, int seatId)
     {
         responseContext.set(Response.status(404).entity(new SeatNotFoundResponse(
-                "座位不存在", seatId)).build());
+                "座位不存在", roomId + ":" + seatId)).build());
     }
 
     // --- CheckInUseCase.Presenter ---
@@ -116,8 +105,8 @@ public class WebApiReservationPresenter extends WebApiPresenter implements
         var list = items.stream()
                 .map(item -> Map.of(
                         "reservationId", item.reservationId(),
+                        "roomId", item.roomId(),
                         "seatId", item.seatId(),
-                        "seatNumber", item.seatNumber(),
                         "timeSlotId", item.timeSlotId(),
                         "timeSlotLabel", item.timeSlotLabel(),
                         "date", item.date().toString(),
@@ -140,8 +129,8 @@ public class WebApiReservationPresenter extends WebApiPresenter implements
                     m.put("reservationId", item.reservationId());
                     m.put("userId", item.userId());
                     m.put("username", item.username());
+                    m.put("roomId", item.roomId());
                     m.put("seatId", item.seatId());
-                    m.put("seatNumber", item.seatNumber());
                     m.put("timeSlotId", item.timeSlotId());
                     m.put("timeSlotLabel", item.timeSlotLabel());
                     m.put("date", item.date().toString());

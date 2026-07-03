@@ -8,8 +8,9 @@ public record CreateRoomRequest(
         String name,
         @Schema(description = "位置", example = "综合楼二楼")
         String location,
-        @Schema(description = "容量", example = "20")
-        int capacity
+        @Schema(description = "布局类型", example = "SMALL",
+                allowableValues = {"SMALL", "MEDIUM", "LARGE"})
+        String layout
 )
 {
 }
