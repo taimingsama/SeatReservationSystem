@@ -17,9 +17,11 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.cleancoders.seatandroom.usecase.ListRoomsUseCase;
 import org.cleancoders.seatandroom.usecase.ListSeatsUseCase;
+import org.cleancoders.seatandroom.usecase.ListTimeSlotsUseCase;
 import org.cleancoders.web.dto.room.RoomListResponse;
 import org.cleancoders.web.dto.room.RoomNotFoundResponse;
 import org.cleancoders.web.dto.seat.SeatListResponse;
+import org.cleancoders.web.dto.seat.TimeSlotListResponse;
 import org.cleancoders.web.presenter.ResponseContext;
 
 import java.time.LocalDate;
@@ -37,7 +39,24 @@ public class RoomResource
     ListSeatsUseCase listSeatsUseCase;
 
     @Inject
+    ListTimeSlotsUseCase listTimeSlotsUseCase;
+
+    @Inject
     ResponseContext responseContext;
+
+    @GET
+    @Path("/timeslots")
+    @Operation(summary = "获取所有时间段", description = "公开接口，返回系统预设的全部时间段。")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "返回时间段列表",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = TimeSlotListResponse.class)))
+    })
+    public Response listTimeSlots()
+    {
+        listTimeSlotsUseCase.execute();
+        return responseContext.get();
+    }
 
     @GET
     @Operation(summary = "获取所有 OPEN 状态的自习室 (UC-04)", description = "公开接口,返回当前状态为 OPEN 的全部自习室。")

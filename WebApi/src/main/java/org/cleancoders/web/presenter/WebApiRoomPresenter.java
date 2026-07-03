@@ -5,6 +5,7 @@ import jakarta.ws.rs.core.Response;
 import org.cleancoders.seatandroom.domain.Seat;
 import org.cleancoders.seatandroom.domain.SeatStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
+import org.cleancoders.seatandroom.domain.TimeSlot;
 import org.cleancoders.seatandroom.usecase.*;
 import org.cleancoders.web.dto.room.*;
 import org.cleancoders.web.dto.seat.*;
@@ -18,6 +19,7 @@ import java.util.List;
 public class WebApiRoomPresenter extends WebApiPresenter implements
         ListRoomsUseCase.Presenter,
         ListSeatsUseCase.Presenter,
+        ListTimeSlotsUseCase.Presenter,
         ManageRoomsUseCase.Presenter,
         UpdateRoomUseCase.Presenter,
         DeleteRoomUseCase.Presenter,
@@ -32,6 +34,15 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
                         r.layout().name(), r.layout().seatCount(), r.status()))
                 .toList();
         responseContext.set(Response.ok(new RoomListResponse(dtos)).build());
+    }
+
+    @Override
+    public void presentTimeSlots(List<TimeSlot> slots)
+    {
+        List<TimeSlotResponse> dtos = slots.stream()
+                .map(s -> new TimeSlotResponse(s.id(), s.startTime(), s.endTime(), s.label()))
+                .toList();
+        responseContext.set(Response.ok(new TimeSlotListResponse(dtos)).build());
     }
 
     @Override

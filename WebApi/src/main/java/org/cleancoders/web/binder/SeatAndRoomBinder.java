@@ -21,6 +21,7 @@ public class SeatAndRoomBinder extends AbstractBinder
         // === UseCases ===
         bind(ListRoomsUseCase.class).to(ListRoomsUseCase.class);
         bind(ListSeatsUseCase.class).to(ListSeatsUseCase.class);
+        bind(ListTimeSlotsUseCase.class).to(ListTimeSlotsUseCase.class);
         bind(ManageRoomsUseCase.class).to(ManageRoomsUseCase.class);
         bind(UpdateRoomUseCase.class).to(UpdateRoomUseCase.class);
         bind(DeleteRoomUseCase.class).to(DeleteRoomUseCase.class);
@@ -30,6 +31,7 @@ public class SeatAndRoomBinder extends AbstractBinder
         bind(WebApiRoomPresenter.class)
                 .to(ListRoomsUseCase.Presenter.class)
                 .to(ListSeatsUseCase.Presenter.class)
+                .to(ListTimeSlotsUseCase.Presenter.class)
                 .to(ManageRoomsUseCase.Presenter.class)
                 .to(UpdateRoomUseCase.Presenter.class)
                 .to(DeleteRoomUseCase.Presenter.class)
