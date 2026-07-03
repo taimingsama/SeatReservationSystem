@@ -64,7 +64,7 @@ class GetSeatUsageStatsUseCaseTest
         LocalDate today = LocalDate.now();
         Reservation r1 = new Reservation("r1", "user-1", "room-1", 1, "ts-1", today);
         reservationRepo.save(r1);
-        Reservation r2 = new Reservation("r2", "user-2", "room-1", 1, "ts-2", today);
+        Reservation r2 = new Reservation("r2", "user-2", "room-1", 3, "ts-2", today);
         reservationRepo.save(r2);
         r2.checkIn();
 

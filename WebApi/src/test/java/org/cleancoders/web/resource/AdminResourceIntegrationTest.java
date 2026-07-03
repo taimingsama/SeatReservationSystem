@@ -10,11 +10,7 @@ import org.cleancoders.infrastructure.security.JjwtTokenService;
 import org.cleancoders.reservation.domain.Reservation;
 import org.cleancoders.reservation.domain.ReservationStatus;
 import org.cleancoders.reservation.outbound.ReservationRepository;
-import org.cleancoders.seatandroom.domain.RoomLayout;
-import org.cleancoders.seatandroom.domain.RoomStatus;
-import org.cleancoders.seatandroom.domain.Seat;
-import org.cleancoders.seatandroom.domain.SeatStatus;
-import org.cleancoders.seatandroom.domain.StudyRoom;
+import org.cleancoders.seatandroom.domain.*;
 import org.cleancoders.seatandroom.outbound.RoomRepository;
 import org.cleancoders.seatandroom.outbound.SeatRepository;
 import org.cleancoders.seatandroom.outbound.TimeSlotRepository;
@@ -27,7 +23,6 @@ import org.cleancoders.web.binder.SeatAndRoomBinder;
 import org.cleancoders.web.binder.UserAndAuthBinder;
 import org.cleancoders.web.binder.WebAppBinder;
 import org.cleancoders.web.dto.admin.CreateRoomRequest;
-import org.cleancoders.web.dto.admin.CreateSeatRequest;
 import org.cleancoders.web.dto.admin.UpdateSeatRequest;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -145,8 +140,8 @@ class AdminResourceIntegrationTest extends JerseyTest
         java.util.List<String> seatNumbers = list.stream()
                 .map(m -> (String) m.get("seatNumber"))
                 .toList();
-        assertTrue(seatNumbers.contains("A-1"), "Should contain A-1");
-        assertTrue(seatNumbers.contains("A-2"), "Should contain A-2");
+        assertTrue(seatNumbers.contains("1"), "Should contain A-1");
+        assertTrue(seatNumbers.contains("2"), "Should contain A-2");
 
         // Verify fields on any reservation (both belong to the same student)
         Map<String, Object> first = list.get(0);
@@ -375,93 +370,6 @@ class AdminResourceIntegrationTest extends JerseyTest
         assertEquals(403, response.getStatus());
     }
 
-    // --- create seat tests ---
-
-    @Test
-    void shouldReturn201WhenAdminCreatesSeat()
-    {
-        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
-        String adminToken = tokenService.generate("admin-1");
-
-        Response response = target("/admin/seats")
-                .request(MediaType.APPLICATION_JSON)
-                .cookie("Authorization", adminToken)
-                .post(Entity.json(new CreateSeatRequest("room-1", "A-9")));
-
-        assertEquals(201, response.getStatus());
-        Map<String, Object> body = response.readEntity(new GenericType<>()
-        {
-        });
-        assertNotNull(body.get("id"));
-        assertEquals("A-9", body.get("seatNumber"));
-        assertEquals("AVAILABLE", body.get("status"));
-    }
-
-    @Test
-    void shouldReturn404WhenRoomNotFoundForSeat()
-    {
-        String adminToken = tokenService.generate("admin-1");
-
-        Response response = target("/admin/seats")
-                .request(MediaType.APPLICATION_JSON)
-                .cookie("Authorization", adminToken)
-                .post(Entity.json(new CreateSeatRequest("nonexistent", "A-9")));
-
-        assertEquals(404, response.getStatus());
-        Map<String, Object> body = response.readEntity(new GenericType<>()
-        {
-        });
-        assertEquals("自习室不存在", body.get("error"));
-        assertEquals("nonexistent", body.get("roomId"));
-    }
-
-    @Test
-    void shouldReturn409WhenSeatNumberAlreadyExists()
-    {
-        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
-        // InMemorySeatRepo pre-seeds seat-1 ("A-1") in room-1
-        String adminToken = tokenService.generate("admin-1");
-
-        Response response = target("/admin/seats")
-                .request(MediaType.APPLICATION_JSON)
-                .cookie("Authorization", adminToken)
-                .post(Entity.json(new CreateSeatRequest("room-1", "A-1")));
-
-        assertEquals(409, response.getStatus());
-        Map<String, Object> body = response.readEntity(new GenericType<>()
-        {
-        });
-        assertEquals("座位编号已存在", body.get("error"));
-        assertEquals("room-1", body.get("roomId"));
-        assertEquals("A-1", body.get("seatNumber"));
-    }
-
-    @Test
-    void shouldReturn403WhenStudentCreatesSeat()
-    {
-        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
-        String studentToken = tokenService.generate("student-1");
-
-        Response response = target("/admin/seats")
-                .request(MediaType.APPLICATION_JSON)
-                .cookie("Authorization", studentToken)
-                .post(Entity.json(new CreateSeatRequest("room-1", "A-9")));
-
-        assertEquals(403, response.getStatus());
-    }
-
-    @Test
-    void shouldReturn401WhenNoTokenForSeat()
-    {
-        roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", RoomLayout.SMALL, RoomStatus.OPEN));
-
-        Response response = target("/admin/seats")
-                .request(MediaType.APPLICATION_JSON)
-                .post(Entity.json(new CreateSeatRequest("room-1", "A-9")));
-
-        assertEquals(401, response.getStatus());
-    }
-
     // --- update seat tests ---
 
     @Test
@@ -480,7 +388,7 @@ class AdminResourceIntegrationTest extends JerseyTest
         {
         });
         assertEquals("seat-1", body.get("id"));
-        assertEquals("A-1", body.get("seatNumber"));
+        assertEquals("1", body.get("seatNumber"));
         assertEquals("MAINTENANCE", body.get("status"));
     }
 

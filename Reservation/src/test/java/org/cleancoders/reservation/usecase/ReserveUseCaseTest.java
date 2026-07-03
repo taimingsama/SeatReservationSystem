@@ -155,7 +155,7 @@ class ReserveUseCaseTest
 
         void addReservation(Reservation r) { m.put(r.id(), r); }
 
-        @Override public Reservation save(Reservation r) { m.put(r.id(), r); return r; }
+        @Override public Reservation save(Reservation r) { if (r.id() == null) r.setId("r-" + m.size()); m.put(r.id(), r); return r; }
         @Override public Optional<Reservation> findById(String id) { return Optional.ofNullable(m.get(id)); }
         @Override
         public Optional<Reservation> findByUserIdAndDateAndTimeSlotIdAndStatusIn(

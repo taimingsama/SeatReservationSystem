@@ -90,7 +90,7 @@ class ListSeatsUseCaseTest
         var output = useCase.execute(new ListSeatsUseCase.Request("room-1"));
 
         assertEquals(1, output.seats().size());
-        assertEquals("seat-1", output.seats().get(0).id());
+        assertEquals(1, output.seats().get(0).id());
     }
 
     @Test

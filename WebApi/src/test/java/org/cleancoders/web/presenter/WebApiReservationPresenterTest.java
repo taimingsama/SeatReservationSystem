@@ -49,7 +49,7 @@ class WebApiReservationPresenterTest {
 
         SeatConflictResponse entity = (SeatConflictResponse) response.getEntity();
         assertEquals("座位已被预约", entity.error());
-        assertEquals("seat-1", entity.seatId());
+        assertEquals("room-1:1", entity.seatId());
         assertEquals("上午 08:00-12:00", entity.timeSlot());
     }
 
@@ -86,7 +86,7 @@ class WebApiReservationPresenterTest {
 
         SeatNotFoundResponse entity = (SeatNotFoundResponse) response.getEntity();
         assertEquals("座位不存在", entity.error());
-        assertEquals("seat-nonexistent", entity.seatId());
+        assertEquals("room-1:1", entity.seatId());
     }
 
     // --- CheckInUseCase.Presenter ---

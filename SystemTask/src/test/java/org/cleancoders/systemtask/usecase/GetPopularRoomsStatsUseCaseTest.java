@@ -72,9 +72,9 @@ class GetPopularRoomsStatsUseCaseTest
     {
         LocalDate today = LocalDate.now();
         reservationRepo.save(new Reservation("r1", "u1", "room-1", 1, "ts-1", today));
-        reservationRepo.save(new Reservation("r2", "u2", "room-1", 1, "ts-2", today));
+        reservationRepo.save(new Reservation("r2", "u2", "room-1", 2, "ts-2", today));
         reservationRepo.save(new Reservation("r3", "u3", "room-1", 1, "ts-1", today));
-        reservationRepo.save(new Reservation("r4", "u4", "room-1", 1, "ts-1", today));
+        reservationRepo.save(new Reservation("r4", "u4", "room-2", 3, "ts-1", today));
 
         GetPopularRoomsStatsUseCase.Output output = useCase.execute(
                 new GetPopularRoomsStatsUseCase.Request("valid-token"));

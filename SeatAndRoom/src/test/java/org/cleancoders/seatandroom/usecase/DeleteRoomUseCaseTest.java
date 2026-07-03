@@ -4,6 +4,7 @@ import org.cleancoders.seatandroom.domain.RoomStatus;
 import org.cleancoders.seatandroom.domain.RoomLayout;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.test.infrastructure.StubRoomRepo;
+import org.cleancoders.seatandroom.test.infrastructure.StubSeatRepo;
 import org.cleancoders.userandauth.domain.User;
 import org.cleancoders.userandauth.domain.UserRole;
 import org.cleancoders.userandauth.usecase.AdminAuthUseCase;
@@ -29,6 +30,7 @@ class DeleteRoomUseCaseTest
     private StubTokenService tokenService;
     private StubUserRepo userRepo;
     private StubRoomRepo roomRepo;
+    private StubSeatRepo seatRepo;
     private StubPresenter presenter;
 
     @BeforeEach
@@ -38,12 +40,14 @@ class DeleteRoomUseCaseTest
         tokenService.setUserId(ADMIN_ID);
         userRepo = new StubUserRepo();
         roomRepo = new StubRoomRepo();
+        seatRepo = new StubSeatRepo();
         presenter = new StubPresenter();
 
         useCase = new DeleteRoomUseCase();
         useCase.tokenService = tokenService;
         useCase.userRepo = userRepo;
         useCase.roomRepo = roomRepo;
+        useCase.seatRepo = seatRepo;
         useCase.presenter = presenter;
         ((AdminAuthUseCase<?, ?>) useCase).presenter = presenter;
         ((AuthUseCase<?, ?>) useCase).presenter = presenter;

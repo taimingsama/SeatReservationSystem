@@ -27,7 +27,7 @@ class ReservationBasedActiveReservationCheckerTest
     void shouldReturnTrueWhenReservedExists()
     {
         repo.save(new Reservation("r1", "user-1", "room-1", 1, "ts-1", LocalDate.now()));
-        assertTrue(checker.hasActiveForSeat("seat-1", 1));
+        assertTrue(checker.hasActiveForSeat("room-1", 1));
     }
 
     @Test
@@ -36,7 +36,7 @@ class ReservationBasedActiveReservationCheckerTest
         Reservation r = new Reservation("r2", "user-1", "room-1", 1, "ts-1", LocalDate.now());
         r.checkIn();
         repo.save(r);
-        assertTrue(checker.hasActiveForSeat("seat-1", 1));
+        assertTrue(checker.hasActiveForSeat("room-1", 1));
     }
 
     @Test
@@ -50,12 +50,12 @@ class ReservationBasedActiveReservationCheckerTest
         expired.expire();
         repo.save(expired);
 
-        assertFalse(checker.hasActiveForSeat("seat-1", 1));
+        assertFalse(checker.hasActiveForSeat("room-1", 1));
     }
 
     @Test
     void shouldReturnFalseWhenNoReservations()
     {
-        assertFalse(checker.hasActiveForSeat("seat-1", 1));
+        assertFalse(checker.hasActiveForSeat("room-1", 1));
     }
 }
