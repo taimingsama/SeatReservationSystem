@@ -10,11 +10,13 @@ import java.util.Optional;
  */
 public interface SeatRepository {
 
-    Optional<Seat> findById(String id);
+    Optional<Seat> findByRoomIdAndSeatId(String roomId, int seatId);
 
     Seat save(Seat seat);
 
     List<Seat> findByRoomId(String roomId);
 
     List<Seat> findAll();
+
+    void deleteByRoomId(String roomId);
 }
