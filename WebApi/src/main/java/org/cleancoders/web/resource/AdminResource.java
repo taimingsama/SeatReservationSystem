@@ -16,6 +16,7 @@ import org.cleancoders.seatandroom.usecase.DeleteRoomUseCase;
 import org.cleancoders.seatandroom.usecase.ManageRoomsUseCase;
 import org.cleancoders.seatandroom.usecase.ManageSeatsUseCase;
 import org.cleancoders.seatandroom.usecase.UpdateRoomUseCase;
+import org.cleancoders.seatandroom.usecase.DeleteSeatUseCase;
 import org.cleancoders.seatandroom.usecase.UpdateSeatUseCase;
 import org.cleancoders.web.dto.admin.CreateRoomRequest;
 import org.cleancoders.web.dto.admin.CreateSeatRequest;
@@ -49,6 +50,9 @@ public class AdminResource
 
     @Inject
     UpdateSeatUseCase updateSeatUseCase;
+
+    @Inject
+    DeleteSeatUseCase deleteSeatUseCase;
 
     @Inject
     ResponseContext responseContext;
@@ -186,6 +190,28 @@ public class AdminResource
             @PathParam("id") String roomId)
     {
         deleteRoomUseCase.execute(new DeleteRoomUseCase.Request(authCookie, roomId));
+        return responseContext.get();
+    }
+
+    @DELETE
+    @Path("/seats/{id}")
+    @Operation(summary = "删除座位 (UC-07)",
+            description = "管理员软删除座位(转 REMOVED)。座位不存在返回 404,已删除/处于 RESERVED-OCCUPIED/有活跃预约返回 409。")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "删除成功"),
+            @ApiResponse(responseCode = "401", description = "Token 无效或已过期",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "权限不足（非管理员角色）",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "座位不存在"),
+            @ApiResponse(responseCode = "409", description = "座位已删除 / 正在使用中 / 存在活跃预约")
+    })
+    public Response deleteSeat(
+            @CookieParam("Authorization") String authCookie,
+            @Parameter(description = "座位ID", required = true, example = "seat-1")
+            @PathParam("id") String seatId)
+    {
+        deleteSeatUseCase.execute(new DeleteSeatUseCase.Request(authCookie, seatId));
         return responseContext.get();
     }
 }

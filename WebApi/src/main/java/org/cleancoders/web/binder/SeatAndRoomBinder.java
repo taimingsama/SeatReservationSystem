@@ -1,8 +1,10 @@
 package org.cleancoders.web.binder;
 
 import jakarta.inject.Singleton;
+import org.cleancoders.common_reservation_seatAndRoom.outbound.ActiveReservationChecker;
 import org.cleancoders.common_reservation_seatAndRoom.outbound.SeatRepository;
 import org.cleancoders.common_reservation_seatAndRoom.outbound.TimeSlotRepository;
+import org.cleancoders.infrastructure.persistence.ReservationBasedActiveReservationChecker;
 import org.cleancoders.infrastructure.persistence.testdata.TestDataRoomRepo;
 import org.cleancoders.infrastructure.persistence.testdata.TestDataSeatRepo;
 import org.cleancoders.infrastructure.persistence.testdata.TestDataTimeSlotRepo;
@@ -24,6 +26,7 @@ public class SeatAndRoomBinder extends AbstractBinder
         bind(DeleteRoomUseCase.class).to(DeleteRoomUseCase.class);
         bind(ManageSeatsUseCase.class).to(ManageSeatsUseCase.class);
         bind(UpdateSeatUseCase.class).to(UpdateSeatUseCase.class);
+        bind(DeleteSeatUseCase.class).to(DeleteSeatUseCase.class);
 
         // === Presenters ===
         bind(WebApiRoomPresenter.class)
@@ -34,11 +37,13 @@ public class SeatAndRoomBinder extends AbstractBinder
                 .to(DeleteRoomUseCase.Presenter.class)
                 .to(ManageSeatsUseCase.Presenter.class)
                 .to(UpdateSeatUseCase.Presenter.class)
+                .to(DeleteSeatUseCase.Presenter.class)
                 .in(Singleton.class);
 
         // === Infrastructure ===
         bind(TestDataSeatRepo.class).to(SeatRepository.class).in(Singleton.class);
         bind(TestDataTimeSlotRepo.class).to(TimeSlotRepository.class).in(Singleton.class);
         bind(TestDataRoomRepo.class).to(RoomRepository.class).in(Singleton.class);
+        bind(ReservationBasedActiveReservationChecker.class).to(ActiveReservationChecker.class).in(Singleton.class);
     }
 }
