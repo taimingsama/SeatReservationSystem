@@ -7,7 +7,7 @@ public record StudyRoom(
         String id,
         String name,
         String location,
-        int capacity,
+        RoomLayout layout,
         RoomStatus status
 )
 {
