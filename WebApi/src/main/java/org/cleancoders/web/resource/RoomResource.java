@@ -17,6 +17,7 @@ import jakarta.ws.rs.core.Response;
 import org.cleancoders.seatandroom.usecase.ListRoomsUseCase;
 import org.cleancoders.seatandroom.usecase.ListSeatsUseCase;
 import org.cleancoders.web.dto.room.RoomListResponse;
+import org.cleancoders.web.dto.room.RoomNotFoundResponse;
 import org.cleancoders.web.dto.seat.SeatListResponse;
 import org.cleancoders.web.presenter.ResponseContext;
 
@@ -55,7 +56,8 @@ public class RoomResource
             @ApiResponse(responseCode = "200", description = "返回座位列表(可为空)",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON,
                             schema = @Schema(implementation = SeatListResponse.class))),
-            @ApiResponse(responseCode = "404", description = "自习室不存在")
+            @ApiResponse(responseCode = "404", description = "自习室不存在",
+                    content = @Content(schema = @Schema(implementation = RoomNotFoundResponse.class)))
     })
     public Response listSeats(
             @Parameter(description = "自习室ID", required = true, example = "room-1")

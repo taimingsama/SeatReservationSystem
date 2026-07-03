@@ -19,8 +19,9 @@ import org.cleancoders.seatandroom.usecase.UpdateSeatUseCase;
 import org.cleancoders.web.dto.admin.CreateRoomRequest;
 import org.cleancoders.web.dto.admin.UpdateSeatRequest;
 import org.cleancoders.web.dto.common.ErrorResponse;
-import org.cleancoders.web.dto.room.RoomResponse;
-import org.cleancoders.web.dto.seat.SeatResponse;
+import org.cleancoders.web.dto.reservation.AdminReservationListResponse;
+import org.cleancoders.web.dto.room.*;
+import org.cleancoders.web.dto.seat.*;
 import org.cleancoders.web.presenter.ResponseContext;
 
 @Path("/admin")
@@ -53,13 +54,16 @@ public class AdminResource
     @Operation(summary = "查看所有预约 (UC-13)", description = "管理员查看系统中所有预约记录，包含用户、座位和时段信息。")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "成功返回所有预约",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = AdminReservationListResponse.class))),
             @ApiResponse(responseCode = "401", description = "Token 无效或已过期",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "权限不足（非管理员角色）",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public Response listAllReservations(@CookieParam("Authorization") String authCookie) {
+    public Response listAllReservations(
+            @Parameter(description = "JWT 认证 token", required = true)
+            @CookieParam("Authorization") String authCookie) {
         manageReservationsUseCase.execute(new ManageReservationsUseCase.Request(authCookie));
         return responseContext.get();
     }
@@ -71,14 +75,17 @@ public class AdminResource
             @ApiResponse(responseCode = "201", description = "创建成功",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON,
                             schema = @Schema(implementation = RoomResponse.class))),
-            @ApiResponse(responseCode = "400", description = "无效的布局类型"),
+            @ApiResponse(responseCode = "400", description = "无效的布局类型",
+                    content = @Content(schema = @Schema(implementation = InvalidLayoutResponse.class))),
             @ApiResponse(responseCode = "401", description = "Token 无效或已过期",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "权限不足（非管理员角色）",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "409", description = "自习室名称已存在")
+            @ApiResponse(responseCode = "409", description = "自习室名称已存在",
+                    content = @Content(schema = @Schema(implementation = RoomNameConflictResponse.class)))
     })
     public Response createRoom(
+            @Parameter(description = "JWT 认证 token", required = true)
             @CookieParam("Authorization") String authCookie,
             CreateRoomRequest input)
     {
@@ -95,17 +102,18 @@ public class AdminResource
                     content = @Content(mediaType = MediaType.APPLICATION_JSON,
                             schema = @Schema(implementation = SeatResponse.class))),
             @ApiResponse(responseCode = "400", description = "非法座位状态",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    content = @Content(schema = @Schema(implementation = InvalidSeatStatusResponse.class))),
             @ApiResponse(responseCode = "401", description = "Token 无效或已过期",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "权限不足（非管理员角色）",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "座位不存在",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    content = @Content(schema = @Schema(implementation = SeatNotFoundInRoomResponse.class))),
             @ApiResponse(responseCode = "409", description = "非法状态转换",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+                    content = @Content(schema = @Schema(implementation = InvalidStatusTransitionResponse.class)))
     })
     public Response updateSeat(
+            @Parameter(description = "JWT 认证 token", required = true)
             @CookieParam("Authorization") String authCookie,
             @Parameter(description = "教室ID", required = true, example = "room-1")
             @PathParam("roomId") String roomId,
@@ -129,10 +137,13 @@ public class AdminResource
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "权限不足（非管理员角色）",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = "自习室不存在"),
-            @ApiResponse(responseCode = "409", description = "自习室名称已存在")
+            @ApiResponse(responseCode = "404", description = "自习室不存在",
+                    content = @Content(schema = @Schema(implementation = RoomNotFoundResponse.class))),
+            @ApiResponse(responseCode = "409", description = "自习室名称已存在",
+                    content = @Content(schema = @Schema(implementation = RoomNameConflictResponse.class)))
     })
     public Response updateRoom(
+            @Parameter(description = "JWT 认证 token", required = true)
             @CookieParam("Authorization") String authCookie,
             @Parameter(description = "自习室ID", required = true, example = "room-1")
             @PathParam("id") String roomId,
@@ -147,15 +158,19 @@ public class AdminResource
     @Path("/rooms/{id}")
     @Operation(summary = "删除自习室 (UC-06)", description = "管理员将自习室状态标记为 CLOSED（软删除），同时级联删除所有座位。")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "删除成功"),
+            @ApiResponse(responseCode = "200", description = "删除成功",
+                    content = @Content(schema = @Schema(implementation = RoomDeletedResponse.class))),
             @ApiResponse(responseCode = "401", description = "Token 无效或已过期",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "权限不足（非管理员角色）",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = "自习室不存在"),
-            @ApiResponse(responseCode = "409", description = "自习室已处于关闭状态")
+            @ApiResponse(responseCode = "404", description = "自习室不存在",
+                    content = @Content(schema = @Schema(implementation = RoomNotFoundResponse.class))),
+            @ApiResponse(responseCode = "409", description = "自习室已处于关闭状态",
+                    content = @Content(schema = @Schema(implementation = RoomAlreadyClosedResponse.class)))
     })
     public Response deleteRoom(
+            @Parameter(description = "JWT 认证 token", required = true)
             @CookieParam("Authorization") String authCookie,
             @Parameter(description = "自习室ID", required = true, example = "room-1")
             @PathParam("id") String roomId)

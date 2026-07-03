@@ -1,6 +1,7 @@
 package org.cleancoders.web.resource;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -40,7 +41,7 @@ public class AuthResource
 
     @POST
     @Path("/login")
-    @Operation(summary = "用户登录", description = "使用用户名和密码登录，成功返回 JWT token。")
+    @Operation(summary = "用户登录 (UC-01)", description = "使用用户名和密码登录，成功返回 JWT token。")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "登录成功，返回 JWT token",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -60,7 +61,7 @@ public class AuthResource
 
     @GET
     @Path("/me")
-    @Operation(summary = "获取当前用户信息", description = "通过 JWT token 获取当前登录用户的基本信息。")
+    @Operation(summary = "获取当前用户信息 (UC-03)", description = "通过 JWT token 获取当前登录用户的基本信息。")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "成功返回用户信息",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -70,7 +71,9 @@ public class AuthResource
             @ApiResponse(responseCode = "404", description = "用户不存在",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public Response me(@CookieParam("Authorization") String authCookie)
+    public Response me(
+            @Parameter(description = "JWT 认证 token", required = true)
+            @CookieParam("Authorization") String authCookie)
     {
         getMeUseCase.execute(new GetMeUseCase.Request(authCookie));
         return responseContext.get();
@@ -78,7 +81,7 @@ public class AuthResource
 
     @POST
     @Path("/register")
-    @Operation(summary = "用户注册", description = "注册新用户账户。")
+    @Operation(summary = "用户注册 (UC-02)", description = "注册新用户账户。")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "注册成功",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON,

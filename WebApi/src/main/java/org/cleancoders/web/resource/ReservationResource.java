@@ -1,6 +1,7 @@
 package org.cleancoders.web.resource;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -19,6 +20,7 @@ import org.cleancoders.web.dto.common.ErrorResponse;
 import org.cleancoders.web.dto.reservation.InvalidDateResponse;
 import org.cleancoders.web.dto.reservation.InvalidStatusResponse;
 import org.cleancoders.web.dto.reservation.ReservationCreatedResponse;
+import org.cleancoders.web.dto.reservation.ReservationListResponse;
 import org.cleancoders.web.dto.reservation.ReservationNotFoundResponse;
 import org.cleancoders.web.dto.reservation.ReserveInput;
 import org.cleancoders.web.dto.reservation.SeatConflictResponse;
@@ -68,7 +70,10 @@ public class ReservationResource {
             @ApiResponse(responseCode = "409", description = "座位已被预约",
                     content = @Content(schema = @Schema(implementation = SeatConflictResponse.class)))
     })
-    public Response reserve(@CookieParam("Authorization") String authCookie, ReserveInput input) {
+    public Response reserve(
+            @Parameter(description = "JWT 认证 token", required = true)
+            @CookieParam("Authorization") String authCookie,
+            ReserveInput input) {
         LocalDate date;
         try {
             date = LocalDate.parse(input.date());
@@ -98,7 +103,11 @@ public class ReservationResource {
             @ApiResponse(responseCode = "409", description = "当前状态不允许签到或不在签到时间窗口内",
                     content = @Content(schema = @Schema(implementation = InvalidStatusResponse.class)))
     })
-    public Response checkIn(@CookieParam("Authorization") String authCookie, @PathParam("id") String reservationId) {
+    public Response checkIn(
+            @Parameter(description = "JWT 认证 token", required = true)
+            @CookieParam("Authorization") String authCookie,
+            @Parameter(description = "预约 ID", required = true, example = "res-001")
+            @PathParam("id") String reservationId) {
         checkInUseCase.execute(new CheckInUseCase.Request(authCookie, reservationId));
         return responseContext.get();
     }
@@ -119,7 +128,11 @@ public class ReservationResource {
             @ApiResponse(responseCode = "409", description = "当前状态不允许退座",
                     content = @Content(schema = @Schema(implementation = InvalidStatusResponse.class)))
     })
-    public Response checkOut(@CookieParam("Authorization") String authCookie, @PathParam("id") String reservationId) {
+    public Response checkOut(
+            @Parameter(description = "JWT 认证 token", required = true)
+            @CookieParam("Authorization") String authCookie,
+            @Parameter(description = "预约 ID", required = true, example = "res-001")
+            @PathParam("id") String reservationId) {
         checkOutUseCase.execute(new CheckOutUseCase.Request(authCookie, reservationId));
         return responseContext.get();
     }
@@ -140,7 +153,11 @@ public class ReservationResource {
             @ApiResponse(responseCode = "409", description = "当前状态不允许取消",
                     content = @Content(schema = @Schema(implementation = InvalidStatusResponse.class)))
     })
-    public Response cancel(@CookieParam("Authorization") String authCookie, @PathParam("id") String reservationId) {
+    public Response cancel(
+            @Parameter(description = "JWT 认证 token", required = true)
+            @CookieParam("Authorization") String authCookie,
+            @Parameter(description = "预约 ID", required = true, example = "res-001")
+            @PathParam("id") String reservationId) {
         cancelReservationUseCase.execute(new CancelReservationUseCase.Request(authCookie, reservationId));
         return responseContext.get();
     }
@@ -150,13 +167,16 @@ public class ReservationResource {
     @Operation(summary = "我的预约 (UC-12)", description = "学生查看自己的所有预约记录（当前+历史），包含座位和时段信息。")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "成功返回预约列表",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = ReservationListResponse.class))),
             @ApiResponse(responseCode = "401", description = "Token 无效或已过期",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "权限不足（非学生角色）",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public Response myReservations(@CookieParam("Authorization") String authCookie) {
+    public Response myReservations(
+            @Parameter(description = "JWT 认证 token", required = true)
+            @CookieParam("Authorization") String authCookie) {
         listMyReservationsUseCase.execute(new ListMyReservationsUseCase.Request(authCookie));
         return responseContext.get();
     }
