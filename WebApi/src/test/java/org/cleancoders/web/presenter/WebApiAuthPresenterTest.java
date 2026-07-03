@@ -1,8 +1,8 @@
 package org.cleancoders.web.presenter;
 
 import jakarta.ws.rs.core.Response;
-import org.cleancoders.common.domain.User;
-import org.cleancoders.common.domain.UserRole;
+import org.cleancoders.userandauth.domain.User;
+import org.cleancoders.userandauth.domain.UserRole;
 import org.cleancoders.web.dto.auth.LoginResponse;
 import org.cleancoders.web.dto.auth.RegisterResponse;
 import org.cleancoders.web.dto.auth.UsernameConflictResponse;

@@ -1,28 +1,25 @@
 package org.cleancoders.reservation.usecase;
 
-import org.cleancoders.common.domain.User;
-import org.cleancoders.common.domain.UserRole;
-import org.cleancoders.common.outbound.TokenPayload;
-import org.cleancoders.common.outbound.TokenService;
-import org.cleancoders.common.outbound.TokenValidationException;
-import org.cleancoders.common.outbound.UserRepository;
-import org.cleancoders.common.usecase.AuthUseCase;
-import org.cleancoders.common.usecase.StudentAuthUseCase;
-import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
-import org.cleancoders.common_reservation_seatAndRoom.domain.SeatStatus;
-import org.cleancoders.common_reservation_seatAndRoom.domain.TimeSlot;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.SeatRepository;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.TimeSlotRepository;
 import org.cleancoders.reservation.domain.Reservation;
 import org.cleancoders.reservation.domain.ReservationStatus;
-import org.cleancoders.reservation.outbound.ReservationRepository;
+import org.cleancoders.seatandroom.domain.Seat;
+import org.cleancoders.seatandroom.domain.SeatStatus;
+import org.cleancoders.seatandroom.domain.TimeSlot;
+import org.cleancoders.seatandroom_test_infrastructure.StubSeatRepo;
+import org.cleancoders.seatandroom_test_infrastructure.StubTimeSlotRepo;
+import org.cleancoders.userandauth.domain.User;
+import org.cleancoders.userandauth.domain.UserRole;
+import org.cleancoders.userandauth.outbound.TokenPayload;
+import org.cleancoders.userandauth.outbound.TokenService;
+import org.cleancoders.userandauth.outbound.TokenValidationException;
+import org.cleancoders.userandauth.outbound.UserRepository;
+import org.cleancoders.userandauth.usecase.AuthUseCase;
+import org.cleancoders.userandauth.usecase.StudentAuthUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -212,77 +209,6 @@ class CheckOutUseCaseTest {
 
         @Override
         public User save(User user) { users.put(user.id(), user); return user; }
-    }
-
-    static class StubReservationRepo implements ReservationRepository {
-        private final java.util.Map<String, Reservation> reservations = new java.util.HashMap<>();
-
-        void addReservation(Reservation r) { reservations.put(r.id(), r); }
-
-        @Override
-        public Reservation save(Reservation r) { reservations.put(r.id(), r); return r; }
-
-        @Override
-        public Optional<Reservation> findById(String id) { return Optional.ofNullable(reservations.get(id)); }
-
-        @Override
-        public Optional<Reservation> findByUserIdAndDateAndTimeSlotIdAndStatusIn(
-                String userId, LocalDate date, String timeSlotId, Set<ReservationStatus> statuses) {
-            return reservations.values().stream()
-                    .filter(r -> r.userId().equals(userId) && r.date().equals(date)
-                            && r.timeSlotId().equals(timeSlotId) && statuses.contains(r.status()))
-                    .findFirst();
-        }
-
-        @Override
-        public Optional<Reservation> findBySeatIdAndDateAndTimeSlotIdAndStatusIn(
-                String seatId, LocalDate date, String timeSlotId, Set<ReservationStatus> statuses) {
-            return reservations.values().stream()
-                    .filter(r -> r.seatId().equals(seatId) && r.date().equals(date)
-                            && r.timeSlotId().equals(timeSlotId) && statuses.contains(r.status()))
-                    .findFirst();
-        }
-
-        @Override
-        public List<Reservation> findByUserId(String userId) {
-            return reservations.values().stream()
-                    .filter(r -> r.userId().equals(userId))
-                    .toList();
-        }
-
-        @Override
-        public List<Reservation> findAll() {
-            return List.copyOf(reservations.values());
-        }
-    }
-
-    static class StubSeatRepo implements SeatRepository {
-        private final java.util.Map<String, Seat> seats = new java.util.HashMap<>();
-
-        void addSeat(Seat seat) { seats.put(seat.id(), seat); }
-
-        @Override
-        public Optional<Seat> findById(String id) { return Optional.ofNullable(seats.get(id)); }
-
-        @Override
-        public Seat save(Seat seat) { seats.put(seat.id(), seat); return seat; }
-
-        @Override
-        public List<Seat> findByRoomId(String roomId) {
-            return seats.values().stream().filter(s -> s.roomId().equals(roomId)).toList();
-        }
-    }
-
-    static class StubTimeSlotRepo implements TimeSlotRepository {
-        private final java.util.Map<String, TimeSlot> slots = new java.util.HashMap<>();
-
-        void addTimeSlot(TimeSlot slot) { slots.put(slot.id(), slot); }
-
-        @Override
-        public Optional<TimeSlot> findById(String id) { return Optional.ofNullable(slots.get(id)); }
-
-        @Override
-        public List<TimeSlot> findAll() { return List.copyOf(slots.values()); }
     }
 
     static class StubPresenter implements

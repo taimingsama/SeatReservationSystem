@@ -46,4 +46,10 @@ public class InMemoryRoomRepo implements RoomRepository
                 .filter(r -> r.name().equals(name))
                 .findFirst();
     }
+
+    @Override
+    public List<StudyRoom> findAll()
+    {
+        return List.copyOf(rooms.values());
+    }
 }

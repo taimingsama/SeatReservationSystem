@@ -4,9 +4,9 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.cleancoders.common.outbound.TokenPayload;
-import org.cleancoders.common.outbound.TokenService;
-import org.cleancoders.common.outbound.TokenValidationException;
+import org.cleancoders.userandauth.outbound.TokenPayload;
+import org.cleancoders.userandauth.outbound.TokenService;
+import org.cleancoders.userandauth.outbound.TokenValidationException;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;

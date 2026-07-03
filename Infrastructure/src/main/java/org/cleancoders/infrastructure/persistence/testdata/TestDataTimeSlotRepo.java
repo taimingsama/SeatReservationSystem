@@ -1,7 +1,7 @@
 package org.cleancoders.infrastructure.persistence.testdata;
 
-import org.cleancoders.common_reservation_seatAndRoom.domain.TimeSlot;
 import org.cleancoders.infrastructure.persistence.InMemoryTimeSlotRepo;
+import org.cleancoders.seatandroom.domain.TimeSlot;
 
 /**
  * {@link InMemoryTimeSlotRepo} pre-seeded with extra test time slots.

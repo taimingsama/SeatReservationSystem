@@ -1,8 +1,8 @@
 package org.cleancoders.infrastructure.persistence.testdata;
 
-import org.cleancoders.common.domain.User;
-import org.cleancoders.common.domain.UserRole;
 import org.cleancoders.infrastructure.persistence.InMemoryUserRepo;
+import org.cleancoders.userandauth.domain.User;
+import org.cleancoders.userandauth.domain.UserRole;
 
 /**
  * {@link InMemoryUserRepo} pre-seeded with test users.

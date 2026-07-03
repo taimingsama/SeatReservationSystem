@@ -1,15 +1,15 @@
 package org.cleancoders.reservation.usecase;
 
-import org.cleancoders.common.domain.User;
-import org.cleancoders.common.domain.UserRole;
-import org.cleancoders.common.usecase.AuthUseCase;
-import org.cleancoders.common.usecase.StudentAuthUseCase;
-import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
-import org.cleancoders.common_reservation_seatAndRoom.domain.SeatStatus;
-import org.cleancoders.common_reservation_seatAndRoom.domain.TimeSlot;
-import org.cleancoders.common_test_infrastructure.StubTokenService;
-import org.cleancoders.common_test_infrastructure.StubUserRepo;
 import org.cleancoders.reservation.domain.Reservation;
+import org.cleancoders.seatandroom.domain.Seat;
+import org.cleancoders.seatandroom.domain.SeatStatus;
+import org.cleancoders.seatandroom.domain.TimeSlot;
+import org.cleancoders.userandauth.domain.User;
+import org.cleancoders.userandauth.domain.UserRole;
+import org.cleancoders.userandauth.usecase.AuthUseCase;
+import org.cleancoders.userandauth.usecase.StudentAuthUseCase;
+import org.cleancoders.userandauth_test_infrastructure.StubTokenService;
+import org.cleancoders.userandauth_test_infrastructure.StubUserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -31,8 +31,8 @@ class ReserveUseCaseTest
     private ReserveUseCase useCase;
     private StubTokenService tokenService;
     private StubUserRepo userRepo;
-    private org.cleancoders.common_reservation_seatandroom_test_infrastructure.StubSeatRepo seatRepo;
-    private org.cleancoders.common_reservation_seatandroom_test_infrastructure.StubTimeSlotRepo timeSlotRepo;
+    private org.cleancoders.seatandroom_test_infrastructure.StubSeatRepo seatRepo;
+    private org.cleancoders.seatandroom_test_infrastructure.StubTimeSlotRepo timeSlotRepo;
     private StubReservationRepo reservationRepo;
     private StubPresenter presenter;
 
@@ -41,9 +41,9 @@ class ReserveUseCaseTest
     {
         tokenService = new StubTokenService();
         tokenService.setUserId(STUDENT_ID);
-        userRepo = new org.cleancoders.common_test_infrastructure.StubUserRepo();
-        seatRepo = new org.cleancoders.common_reservation_seatandroom_test_infrastructure.StubSeatRepo();
-        timeSlotRepo = new org.cleancoders.common_reservation_seatandroom_test_infrastructure.StubTimeSlotRepo();
+        userRepo = new org.cleancoders.userandauth_test_infrastructure.StubUserRepo();
+        seatRepo = new org.cleancoders.seatandroom_test_infrastructure.StubSeatRepo();
+        timeSlotRepo = new org.cleancoders.seatandroom_test_infrastructure.StubTimeSlotRepo();
         reservationRepo = new StubReservationRepo();
         presenter = new StubPresenter();
 

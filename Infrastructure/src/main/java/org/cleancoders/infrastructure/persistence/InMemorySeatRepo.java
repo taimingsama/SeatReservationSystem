@@ -1,9 +1,9 @@
 package org.cleancoders.infrastructure.persistence;
 
 import jakarta.inject.Singleton;
-import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
-import org.cleancoders.common_reservation_seatAndRoom.domain.SeatStatus;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.SeatRepository;
+import org.cleancoders.seatandroom.domain.Seat;
+import org.cleancoders.seatandroom.domain.SeatStatus;
+import org.cleancoders.seatandroom.outbound.SeatRepository;
 
 import java.util.List;
 import java.util.Map;
@@ -49,5 +49,10 @@ public class InMemorySeatRepo implements SeatRepository {
         return store.values().stream()
                 .filter(s -> s.roomId().equals(roomId))
                 .toList();
+    }
+
+    @Override
+    public List<Seat> findAll() {
+        return List.copyOf(store.values());
     }
 }

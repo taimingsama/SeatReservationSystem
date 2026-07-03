@@ -8,7 +8,7 @@ import org.cleancoders.seatandroom.usecase.ManageRoomsUseCase;
 import org.cleancoders.seatandroom.usecase.UpdateRoomUseCase;
 import org.cleancoders.web.dto.admin.CreateRoomRequest;
 import org.cleancoders.web.presenter.ResponseContext;
-import org.cleancoders.web.presenter.WebApiAdminPresenter;
+import org.cleancoders.web.presenter.WebApiRoomPresenter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +21,7 @@ class AdminResourceTest
 {
 
     private AdminResource resource;
-    private WebApiAdminPresenter presenter;
+    private WebApiRoomPresenter presenter;
     private boolean createExecuteCalled;
     private ManageRoomsUseCase.Request lastCreateRequest;
     private ManageRoomsUseCase.Output createOutput;
@@ -36,7 +36,7 @@ class AdminResourceTest
     void setUp()
     {
         var ctx = new ResponseContext();
-        presenter = new WebApiAdminPresenter();
+        presenter = new WebApiRoomPresenter();
         presenter.responseContext = ctx;
         createExecuteCalled = false;
         lastCreateRequest = null;

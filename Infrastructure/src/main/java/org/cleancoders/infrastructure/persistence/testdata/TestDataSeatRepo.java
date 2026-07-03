@@ -1,8 +1,8 @@
 package org.cleancoders.infrastructure.persistence.testdata;
 
-import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
-import org.cleancoders.common_reservation_seatAndRoom.domain.SeatStatus;
 import org.cleancoders.infrastructure.persistence.InMemorySeatRepo;
+import org.cleancoders.seatandroom.domain.Seat;
+import org.cleancoders.seatandroom.domain.SeatStatus;
 
 /**
  * {@link InMemorySeatRepo} pre-seeded with extra test seats.

@@ -1,8 +1,8 @@
 package org.cleancoders.infrastructure.persistence;
 
 import jakarta.inject.Singleton;
-import org.cleancoders.common_reservation_seatAndRoom.domain.TimeSlot;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.TimeSlotRepository;
+import org.cleancoders.seatandroom.domain.TimeSlot;
+import org.cleancoders.seatandroom.outbound.TimeSlotRepository;
 
 import java.util.List;
 import java.util.Map;

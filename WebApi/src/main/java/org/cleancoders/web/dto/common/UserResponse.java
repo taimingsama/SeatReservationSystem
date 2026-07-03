@@ -1,7 +1,7 @@
 package org.cleancoders.web.dto.common;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.cleancoders.common.domain.UserRole;
+import org.cleancoders.userandauth.domain.UserRole;
 
 @Schema(description = "用户信息")
 public record UserResponse(

@@ -2,9 +2,12 @@ package org.cleancoders.web.presenter;
 
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
-import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
+import org.cleancoders.seatandroom.domain.Seat;
+import org.cleancoders.seatandroom.domain.SeatStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.usecase.*;
+import org.cleancoders.userandauth.usecase.AdminAuthUseCase;
+import org.cleancoders.userandauth.usecase.AuthUseCase;
 import org.cleancoders.web.dto.room.RoomListResponse;
 import org.cleancoders.web.dto.room.RoomResponse;
 import org.cleancoders.web.dto.seat.SeatListResponse;
@@ -14,9 +17,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * WebApi presenter for {@link ListRoomsUseCase} and {@link ListSeatsUseCase}.
- * Public use cases — no auth branches, so extends {@link WebApiPresenter}
- * directly rather than {@link WebApiPresenter}.
+ * WebApi presenter for {@link ListRoomsUseCase}, {@link ListSeatsUseCase},
+ * {@link ManageRoomsUseCase}, {@link UpdateRoomUseCase}, {@link DeleteRoomUseCase}
+ * and {@link ManageSeatsUseCase}.
+ * <p>
+ * Implements each use case's own {@code Presenter} (success / business-error
+ * branches). Auth-related branches (401 invalid token, 404 user not found,
+ * 403 forbidden) are handled by {@link WebApiAuthPresenter}, which is bound
+ * to {@link AuthUseCase.Presenter} /
+ * {@link AdminAuthUseCase.Presenter} and
+ * injected into the base-class presenter fields.
  */
 @Singleton
 public class WebApiRoomPresenter extends WebApiPresenter implements
@@ -24,7 +34,10 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
         ListSeatsUseCase.Presenter,
         ManageRoomsUseCase.Presenter,
         UpdateRoomUseCase.Presenter,
-        DeleteRoomUseCase.Presenter
+        DeleteRoomUseCase.Presenter,
+        ManageSeatsUseCase.Presenter,
+        UpdateSeatUseCase.Presenter,
+        DeleteSeatUseCase.Presenter
 {
 
     @Override
@@ -94,6 +107,105 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
         responseContext.set(Response.status(409).entity(Map.of(
                 "error", "自习室已处于关闭状态",
                 "roomId", roomId
+        )).build());
+    }
+
+    // --- ManageSeatsUseCase (UC-07 create seat) ---
+
+    @Override
+    public void success(Seat seat)
+    {
+        responseContext.set(Response.status(201).entity(
+                new SeatResponse(seat.id(), seat.seatNumber(), seat.status())
+        ).build());
+    }
+
+    @Override
+    public void seatNumberAlreadyExists(String roomId, String seatNumber)
+    {
+        responseContext.set(Response.status(409).entity(Map.of(
+                "error", "座位编号已存在",
+                "roomId", roomId,
+                "seatNumber", seatNumber
+        )).build());
+    }
+
+    // --- UpdateSeatUseCase (UC-07 update seat status) ---
+
+    @Override
+    public void updateSuccess(Seat seat)
+    {
+        responseContext.set(Response.ok(
+                new SeatResponse(seat.id(), seat.seatNumber(), seat.status())
+        ).build());
+    }
+
+    @Override
+    public void seatNotFound(String seatId)
+    {
+        responseContext.set(Response.status(404).entity(Map.of(
+                "error", "座位不存在",
+                "seatId", seatId
+        )).build());
+    }
+
+    @Override
+    public void invalidStatusTransition(String seatId, SeatStatus current, SeatStatus target)
+    {
+        responseContext.set(Response.status(409).entity(Map.of(
+                "error", "非法状态转换",
+                "seatId", seatId,
+                "currentStatus", current.name(),
+                "targetStatus", target.name()
+        )).build());
+    }
+
+    @Override
+    public void invalidStatus(String seatId, String status)
+    {
+        responseContext.set(Response.status(400).entity(Map.of(
+                "error", "非法座位状态",
+                "seatId", seatId,
+                "status", status == null ? "null" : status
+        )).build());
+    }
+
+    // --- DeleteSeatUseCase (UC-07 delete seat) ---
+
+    @Override
+    public void deleteSeatSuccess(String seatId)
+    {
+        responseContext.set(Response.status(200).entity(Map.of(
+                "message", "座位已删除",
+                "seatId", seatId
+        )).build());
+    }
+
+    @Override
+    public void seatAlreadyRemoved(String seatId)
+    {
+        responseContext.set(Response.status(409).entity(Map.of(
+                "error", "座位已处于删除状态",
+                "seatId", seatId
+        )).build());
+    }
+
+    @Override
+    public void seatInUse(String seatId, SeatStatus current)
+    {
+        responseContext.set(Response.status(409).entity(Map.of(
+                "error", "座位正在使用中，无法删除",
+                "seatId", seatId,
+                "currentStatus", current.name()
+        )).build());
+    }
+
+    @Override
+    public void seatHasActiveReservations(String seatId)
+    {
+        responseContext.set(Response.status(409).entity(Map.of(
+                "error", "座位存在活跃预约，无法删除",
+                "seatId", seatId
         )).build());
     }
 }

@@ -1,10 +1,10 @@
 package org.cleancoders.seatandroom.usecase;
 
 import jakarta.inject.Inject;
-import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.SeatRepository;
+import org.cleancoders.seatandroom.domain.Seat;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.outbound.RoomRepository;
+import org.cleancoders.seatandroom.outbound.SeatRepository;
 
 import java.util.List;
 import java.util.Optional;

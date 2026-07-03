@@ -14,23 +14,23 @@
     <dependencies>
         <dependency>
             <groupId>org.cleancoders</groupId>
-            <artifactId>Common</artifactId>
+            <artifactId>UserAndAuth</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.cleancoders</groupId>
-            <artifactId>Common_Reservation_SeatAndRoom</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.cleancoders</groupId>
-            <artifactId>Common_Test_Infrastructure</artifactId>
+            <artifactId>UserAndAuth_Test_Infrastructure</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.cleancoders</groupId>
-            <artifactId>Common_Reservation_SeatAndRoom_Test_Infrastructure</artifactId>
+            <artifactId>SeatAndRoom</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.cleancoders</groupId>
+            <artifactId>SeatAndRoom_Test_Infrastructure</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

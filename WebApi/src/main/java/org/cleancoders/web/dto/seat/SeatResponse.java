@@ -1,7 +1,7 @@
 package org.cleancoders.web.dto.seat;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.cleancoders.common_reservation_seatAndRoom.domain.SeatStatus;
+import org.cleancoders.seatandroom.domain.SeatStatus;
 
 @Schema(description = "座位信息")
 public record SeatResponse(

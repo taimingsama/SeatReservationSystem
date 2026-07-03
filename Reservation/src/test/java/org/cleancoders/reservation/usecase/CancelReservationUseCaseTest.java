@@ -1,21 +1,21 @@
 package org.cleancoders.reservation.usecase;
 
-import org.cleancoders.common.domain.User;
-import org.cleancoders.common.domain.UserRole;
-import org.cleancoders.common.outbound.TokenPayload;
-import org.cleancoders.common.outbound.TokenService;
-import org.cleancoders.common.outbound.TokenValidationException;
-import org.cleancoders.common.outbound.UserRepository;
-import org.cleancoders.common.usecase.AuthUseCase;
-import org.cleancoders.common.usecase.StudentAuthUseCase;
-import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
-import org.cleancoders.common_reservation_seatAndRoom.domain.SeatStatus;
-import org.cleancoders.common_reservation_seatAndRoom.domain.TimeSlot;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.SeatRepository;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.TimeSlotRepository;
 import org.cleancoders.reservation.domain.Reservation;
 import org.cleancoders.reservation.domain.ReservationStatus;
 import org.cleancoders.reservation.outbound.ReservationRepository;
+import org.cleancoders.seatandroom.domain.Seat;
+import org.cleancoders.seatandroom.domain.SeatStatus;
+import org.cleancoders.seatandroom.domain.TimeSlot;
+import org.cleancoders.seatandroom.outbound.TimeSlotRepository;
+import org.cleancoders.seatandroom_test_infrastructure.StubSeatRepo;
+import org.cleancoders.userandauth.domain.User;
+import org.cleancoders.userandauth.domain.UserRole;
+import org.cleancoders.userandauth.outbound.TokenPayload;
+import org.cleancoders.userandauth.outbound.TokenService;
+import org.cleancoders.userandauth.outbound.TokenValidationException;
+import org.cleancoders.userandauth.outbound.UserRepository;
+import org.cleancoders.userandauth.usecase.AuthUseCase;
+import org.cleancoders.userandauth.usecase.StudentAuthUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -215,25 +215,16 @@ class CancelReservationUseCaseTest {
         }
 
         @Override
+        public List<Reservation> findBySeatIdAndStatusIn(String seatId, Set<ReservationStatus> statuses) {
+            return m.values().stream()
+                    .filter(r -> r.seatId().equals(seatId))
+                    .filter(r -> statuses.contains(r.status()))
+                    .toList();
+        }
+
+        @Override
         public List<Reservation> findAll() {
             return List.copyOf(m.values());
-        }
-    }
-
-    static class StubSeatRepo implements SeatRepository {
-        private final java.util.Map<String, Seat> seats = new java.util.HashMap<>();
-
-        void addSeat(Seat s) { seats.put(s.id(), s); }
-
-        @Override
-        public Optional<Seat> findById(String id) { return Optional.ofNullable(seats.get(id)); }
-
-        @Override
-        public Seat save(Seat s) { seats.put(s.id(), s); return s; }
-
-        @Override
-        public List<Seat> findByRoomId(String rid) {
-            return seats.values().stream().filter(s -> s.roomId().equals(rid)).toList();
         }
     }
 

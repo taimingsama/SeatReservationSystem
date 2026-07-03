@@ -1,0 +1,17 @@
+# Swagger / OpenAPI configuration
+# Replaces hardcoded server URLs with request-relative resolution.
+# When deployed behind Tomcat (e.g. /SeatReservationSystem), the spec
+# will derive its server URL from the incoming request automatically.
+
+resourcePackages:
+  - org.cleancoders.web.resource
+
+prettyPrint: true
+cacheTTL: 0
+
+# Let Swagger resolve the server URL dynamically from each request.
+# If you need to override (e.g. behind a reverse proxy), uncomment:
+# openAPI:
+#   servers:
+#     - url: /
+#       description: Relative to deployment context

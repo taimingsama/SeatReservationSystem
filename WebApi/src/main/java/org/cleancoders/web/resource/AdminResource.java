@@ -14,10 +14,16 @@ import jakarta.ws.rs.core.Response;
 import org.cleancoders.reservation.usecase.ManageReservationsUseCase;
 import org.cleancoders.seatandroom.usecase.DeleteRoomUseCase;
 import org.cleancoders.seatandroom.usecase.ManageRoomsUseCase;
+import org.cleancoders.seatandroom.usecase.ManageSeatsUseCase;
 import org.cleancoders.seatandroom.usecase.UpdateRoomUseCase;
+import org.cleancoders.seatandroom.usecase.DeleteSeatUseCase;
+import org.cleancoders.seatandroom.usecase.UpdateSeatUseCase;
 import org.cleancoders.web.dto.admin.CreateRoomRequest;
+import org.cleancoders.web.dto.admin.CreateSeatRequest;
+import org.cleancoders.web.dto.admin.UpdateSeatRequest;
 import org.cleancoders.web.dto.common.ErrorResponse;
 import org.cleancoders.web.dto.room.RoomResponse;
+import org.cleancoders.web.dto.seat.SeatResponse;
 import org.cleancoders.web.presenter.ResponseContext;
 
 @Path("/admin")
@@ -38,6 +44,15 @@ public class AdminResource
 
     @Inject
     ManageReservationsUseCase manageReservationsUseCase;
+
+    @Inject
+    ManageSeatsUseCase manageSeatsUseCase;
+
+    @Inject
+    UpdateSeatUseCase updateSeatUseCase;
+
+    @Inject
+    DeleteSeatUseCase deleteSeatUseCase;
 
     @Inject
     ResponseContext responseContext;
@@ -77,6 +92,58 @@ public class AdminResource
     {
         manageRoomsUseCase.execute(new ManageRoomsUseCase.Request(
                 authCookie, input.name(), input.location(), input.capacity()));
+        return responseContext.get();
+    }
+
+    @POST
+    @Path("/seats")
+    @Operation(summary = "创建座位 (UC-07)", description = "管理员在指定自习室下创建一个座位，状态默认为 AVAILABLE。同一自习室内座位编号不可重复。")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "创建成功",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = SeatResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Token 无效或已过期",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "权限不足（非管理员角色）",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "所属自习室不存在"),
+            @ApiResponse(responseCode = "409", description = "座位编号已存在")
+    })
+    public Response createSeat(
+            @CookieParam("Authorization") String authCookie,
+            CreateSeatRequest input)
+    {
+        manageSeatsUseCase.execute(new ManageSeatsUseCase.Request(
+                authCookie, input.roomId(), input.seatNumber()));
+        return responseContext.get();
+    }
+
+    @PUT
+    @Path("/seats/{id}")
+    @Operation(summary = "更新座位状态 (UC-07)", description = "管理员切换座位状态(AVAILABLE↔MAINTENANCE)。座位不存在返回 404,非法状态值返回 400,非法转换返回 409。")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "更新成功",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = SeatResponse.class))),
+            @ApiResponse(responseCode = "400", description = "非法座位状态",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Token 无效或已过期",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "权限不足（非管理员角色）",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "座位不存在",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "非法状态转换",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public Response updateSeat(
+            @CookieParam("Authorization") String authCookie,
+            @Parameter(description = "座位ID", required = true, example = "seat-1")
+            @PathParam("id") String seatId,
+            UpdateSeatRequest input)
+    {
+        updateSeatUseCase.execute(new UpdateSeatUseCase.Request(
+                authCookie, seatId, input.status()));
         return responseContext.get();
     }
 
@@ -123,6 +190,28 @@ public class AdminResource
             @PathParam("id") String roomId)
     {
         deleteRoomUseCase.execute(new DeleteRoomUseCase.Request(authCookie, roomId));
+        return responseContext.get();
+    }
+
+    @DELETE
+    @Path("/seats/{id}")
+    @Operation(summary = "删除座位 (UC-07)",
+            description = "管理员软删除座位(转 REMOVED)。座位不存在返回 404,已删除/处于 RESERVED-OCCUPIED/有活跃预约返回 409。")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "删除成功"),
+            @ApiResponse(responseCode = "401", description = "Token 无效或已过期",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "权限不足（非管理员角色）",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "座位不存在"),
+            @ApiResponse(responseCode = "409", description = "座位已删除 / 正在使用中 / 存在活跃预约")
+    })
+    public Response deleteSeat(
+            @CookieParam("Authorization") String authCookie,
+            @Parameter(description = "座位ID", required = true, example = "seat-1")
+            @PathParam("id") String seatId)
+    {
+        deleteSeatUseCase.execute(new DeleteSeatUseCase.Request(authCookie, seatId));
         return responseContext.get();
     }
 }

@@ -55,6 +55,14 @@ public class InMemoryReservationRepo implements ReservationRepository {
     }
 
     @Override
+    public List<Reservation> findBySeatIdAndStatusIn(String seatId, Set<ReservationStatus> statuses) {
+        return store.values().stream()
+                .filter(r -> r.seatId().equals(seatId))
+                .filter(r -> statuses.contains(r.status()))
+                .toList();
+    }
+
+    @Override
     public List<Reservation> findByUserId(String userId) {
         return store.values().stream()
                 .filter(r -> r.userId().equals(userId))

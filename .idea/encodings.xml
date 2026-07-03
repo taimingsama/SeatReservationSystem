@@ -17,12 +17,22 @@
     <file url="file://$PROJECT_DIR$/Reservation/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/SeatAndRoom/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/SeatAndRoom/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/SeatAndRoom_Test_Infrastructure/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/SeatAndRoom_Test_Infrastructure/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/SeatReservation/classroom-management/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/SeatReservation/classroom-management/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/SystemTask/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/SystemTask/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/UserAndAuth/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/UserAndAuth/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/UserAndAuth_Test_Infrastructure/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/UserAndAuth_Test_Infrastructure/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/WebApi/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/WebApi/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/seat-reservation/classroom-management/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/seat-reservation/classroom-management/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/seat-reservation/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/seat-reservation/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
   </component>

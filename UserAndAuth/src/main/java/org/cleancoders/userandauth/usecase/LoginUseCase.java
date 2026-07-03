@@ -1,10 +1,10 @@
 package org.cleancoders.userandauth.usecase;
 
 import jakarta.inject.Inject;
-import org.cleancoders.common.domain.User;
-import org.cleancoders.common.outbound.TokenService;
+import org.cleancoders.userandauth.domain.User;
 import org.cleancoders.userandauth.outbound.PasswordEncoder;
-import org.cleancoders.common.outbound.UserRepository;
+import org.cleancoders.userandauth.outbound.TokenService;
+import org.cleancoders.userandauth.outbound.UserRepository;
 
 public class LoginUseCase
 {
