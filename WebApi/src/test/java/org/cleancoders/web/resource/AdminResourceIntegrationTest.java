@@ -9,16 +9,12 @@ import org.cleancoders.common.domain.User;
 import org.cleancoders.common.domain.UserRole;
 import org.cleancoders.common.outbound.TokenService;
 import org.cleancoders.common.outbound.UserRepository;
-import org.cleancoders.common.usecase.AdminAuthUseCase;
-import org.cleancoders.common.usecase.AuthUseCase;
 import org.cleancoders.common_reservation_seatAndRoom.outbound.SeatRepository;
 import org.cleancoders.common_reservation_seatAndRoom.outbound.TimeSlotRepository;
-import org.cleancoders.infrastructure.persistence.InMemoryReservationRepo;
-import org.cleancoders.infrastructure.persistence.InMemoryRoomRepo;
-import org.cleancoders.infrastructure.persistence.InMemorySeatRepo;
-import org.cleancoders.infrastructure.persistence.InMemoryTimeSlotRepo;
-import org.cleancoders.infrastructure.persistence.InMemoryUserRepo;
+import org.cleancoders.infrastructure.persistence.*;
 import org.cleancoders.infrastructure.security.JjwtTokenService;
+import org.cleancoders.reservation.domain.Reservation;
+import org.cleancoders.reservation.outbound.ReservationRepository;
 import org.cleancoders.seatandroom.domain.RoomStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.outbound.RoomRepository;
@@ -27,6 +23,7 @@ import org.cleancoders.web.binder.SeatAndRoomBinder;
 import org.cleancoders.web.binder.UserAndAuthBinder;
 import org.cleancoders.web.binder.WebAppBinder;
 import org.cleancoders.web.dto.admin.CreateRoomRequest;
+import org.cleancoders.web.filter.CorsFilter;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
@@ -35,7 +32,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -46,19 +42,23 @@ import static org.junit.jupiter.api.Assertions.*;
  * Runs a real JerseyTest HTTP server with in-memory repositories,
  * verifying the full stack: HTTP → Resource → UseCase → Presenter → Response.
  */
-class AdminResourceIntegrationTest extends JerseyTest {
-
+class AdminResourceIntegrationTest extends JerseyTest
+{
     private String adminToken;
     private String studentToken;
     private String studentId;
+    private JjwtTokenService tokenService;
+    private InMemoryRoomRepo roomRepo;
 
     @Override
-    protected Application configure() {
+    protected Application configure()
+    {
         // ---- Repositories ----
         InMemoryUserRepo userRepo = new InMemoryUserRepo();
         InMemorySeatRepo seatRepo = new InMemorySeatRepo();
         InMemoryTimeSlotRepo timeSlotRepo = new InMemoryTimeSlotRepo();
         InMemoryReservationRepo reservationRepo = new InMemoryReservationRepo();
+        roomRepo = new InMemoryRoomRepo();
 
         // ---- Pre-seed users ----
         User admin = userRepo.save(new User(null, "admin", "ignored",
@@ -68,7 +68,7 @@ class AdminResourceIntegrationTest extends JerseyTest {
         studentId = student.id();
 
         // ---- Tokens ----
-        JjwtTokenService tokenService = new JjwtTokenService();
+        tokenService = new JjwtTokenService();
         adminToken = tokenService.generate(admin.id());
         studentToken = tokenService.generate(studentId);
 
@@ -78,27 +78,24 @@ class AdminResourceIntegrationTest extends JerseyTest {
         Reservation r2 = reservationRepo.save(
                 new Reservation(null, studentId, "seat-2", "ts-2", LocalDate.of(2026, 7, 3)));
 
-        // ---- Presenter ----
-        WebApiReservationPresenter reservationPresenter = new WebApiReservationPresenter();
-
         ResourceConfig config = new ResourceConfig();
         config.register(AdminResource.class);
         config.register(CorsFilter.class);
-        config.register(new AbstractBinder() {
+        config.register(WebAppBinder.class);
+        config.register(UserAndAuthBinder.class);
+        config.register(ReservationBinder.class);
+        config.register(SeatAndRoomBinder.class);
+        config.register(new AbstractBinder()
+        {
             @Override
-            protected void configure() {
+            protected void configure()
+            {
                 bind(userRepo).to(UserRepository.class);
                 bind(seatRepo).to(SeatRepository.class);
                 bind(timeSlotRepo).to(TimeSlotRepository.class);
                 bind(reservationRepo).to(ReservationRepository.class);
+                bind(roomRepo).to(RoomRepository.class);
                 bind(tokenService).to(TokenService.class);
-
-                bind(ManageReservationsUseCase.class).to(ManageReservationsUseCase.class);
-
-                bind(reservationPresenter).to(WebApiReservationPresenter.class);
-                bind(reservationPresenter).to(ManageReservationsUseCase.Presenter.class);
-                bind(reservationPresenter).to(AdminAuthUseCase.Presenter.class);
-                bind(reservationPresenter).to(AuthUseCase.Presenter.class);
             }
         });
         return config;
@@ -111,7 +108,8 @@ class AdminResourceIntegrationTest extends JerseyTest {
     }
 
     @AfterEach
-    public void tearDown() throws Exception {
+    public void tearDown() throws Exception
+    {
         super.tearDown();
     }
 
@@ -120,7 +118,8 @@ class AdminResourceIntegrationTest extends JerseyTest {
     // ================================================================
 
     @Test
-    void adminShouldSeeAllReservations() {
+    void adminShouldSeeAllReservations()
+    {
         Response response = target("/admin/reservations")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", adminToken)
@@ -155,7 +154,8 @@ class AdminResourceIntegrationTest extends JerseyTest {
     }
 
     @Test
-    void studentShouldGet403WhenAccessingAdminReservations() {
+    void studentShouldGet403WhenAccessingAdminReservations()
+    {
         Response response = target("/admin/reservations")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", studentToken)
@@ -169,7 +169,8 @@ class AdminResourceIntegrationTest extends JerseyTest {
     }
 
     @Test
-    void shouldReturn401ForInvalidToken() {
+    void shouldReturn401ForInvalidToken()
+    {
         Response response = target("/admin/reservations")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", "invalid.jwt.token.here")
@@ -179,7 +180,8 @@ class AdminResourceIntegrationTest extends JerseyTest {
     }
 
     @Test
-    void shouldReturn401ForMissingCookie() {
+    void shouldReturn401ForMissingCookie()
+    {
         Response response = target("/admin/reservations")
                 .request(MediaType.APPLICATION_JSON)
                 .get();
@@ -188,7 +190,8 @@ class AdminResourceIntegrationTest extends JerseyTest {
     }
 
     @Test
-    void adminShouldSeeEmptyListWhenNoReservations() {
+    void adminShouldSeeEmptyListWhenNoReservations()
+    {
         // Use a fresh setup with no reservations — tested by verifying
         // the pre-seeded ones are present, non-empty as verified above.
         // The InMemoryReservationRepo is fresh per test, so the two
@@ -210,19 +213,19 @@ class AdminResourceIntegrationTest extends JerseyTest {
     }
 
     @Test
-    void adminResponseShouldHaveJsonContentType() {
+    void adminResponseShouldHaveJsonContentType()
+    {
         Response response = target("/admin/reservations")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", adminToken)
                 .get();
 
         assertTrue(response.getHeaderString("Content-Type").startsWith(MediaType.APPLICATION_JSON));
+    }
 
     @Test
     void shouldReturn201WhenAdminCreatesRoom()
     {
-        String adminToken = tokenService.generate("admin-1");
-
         Response response = target("/admin/rooms")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", adminToken)
@@ -242,8 +245,6 @@ class AdminResourceIntegrationTest extends JerseyTest {
     @Test
     void shouldReturn403WhenStudentCreatesRoom()
     {
-        String studentToken = tokenService.generate("student-1");
-
         Response response = target("/admin/rooms")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", studentToken)
@@ -256,8 +257,6 @@ class AdminResourceIntegrationTest extends JerseyTest {
     void shouldReturn409WhenNameAlreadyExists()
     {
         roomRepo.save(new StudyRoom("r-existing", "自习室F", "图书馆一楼", 30, RoomStatus.OPEN));
-
-        String adminToken = tokenService.generate("admin-1");
 
         Response response = target("/admin/rooms")
                 .request(MediaType.APPLICATION_JSON)
@@ -287,7 +286,6 @@ class AdminResourceIntegrationTest extends JerseyTest {
     void shouldReturn200WhenAdminUpdatesRoom()
     {
         roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
-        String adminToken = tokenService.generate("admin-1");
 
         Response response = target("/admin/rooms/room-1")
                 .request(MediaType.APPLICATION_JSON)
@@ -308,8 +306,6 @@ class AdminResourceIntegrationTest extends JerseyTest {
     @Test
     void shouldReturn404WhenUpdatingNonexistentRoom()
     {
-        String adminToken = tokenService.generate("admin-1");
-
         Response response = target("/admin/rooms/nonexistent")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", adminToken)
@@ -328,7 +324,6 @@ class AdminResourceIntegrationTest extends JerseyTest {
     {
         roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
         roomRepo.save(new StudyRoom("room-2", "自习室B", "图书馆二楼", 20, RoomStatus.OPEN));
-        String adminToken = tokenService.generate("admin-1");
 
         Response response = target("/admin/rooms/room-1")
                 .request(MediaType.APPLICATION_JSON)
@@ -346,7 +341,6 @@ class AdminResourceIntegrationTest extends JerseyTest {
     void shouldAllowUpdatingRoomWithSameName()
     {
         roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
-        String adminToken = tokenService.generate("admin-1");
 
         Response response = target("/admin/rooms/room-1")
                 .request(MediaType.APPLICATION_JSON)
@@ -366,7 +360,6 @@ class AdminResourceIntegrationTest extends JerseyTest {
     void shouldReturn403WhenStudentUpdatesRoom()
     {
         roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
-        String studentToken = tokenService.generate("student-1");
 
         Response response = target("/admin/rooms/room-1")
                 .request(MediaType.APPLICATION_JSON)
@@ -382,7 +375,6 @@ class AdminResourceIntegrationTest extends JerseyTest {
     void shouldReturn200WhenAdminDeletesRoom()
     {
         roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
-        String adminToken = tokenService.generate("admin-1");
 
         Response response = target("/admin/rooms/room-1")
                 .request(MediaType.APPLICATION_JSON)
@@ -404,8 +396,6 @@ class AdminResourceIntegrationTest extends JerseyTest {
     @Test
     void shouldReturn404WhenDeletingNonexistentRoom()
     {
-        String adminToken = tokenService.generate("admin-1");
-
         Response response = target("/admin/rooms/nonexistent")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", adminToken)
@@ -418,7 +408,6 @@ class AdminResourceIntegrationTest extends JerseyTest {
     void shouldReturn409WhenDeletingAlreadyClosedRoom()
     {
         roomRepo.save(new StudyRoom("room-closed", "已关闭", "三楼", 10, RoomStatus.CLOSED));
-        String adminToken = tokenService.generate("admin-1");
 
         Response response = target("/admin/rooms/room-closed")
                 .request(MediaType.APPLICATION_JSON)
@@ -432,7 +421,6 @@ class AdminResourceIntegrationTest extends JerseyTest {
     void shouldReturn403WhenStudentDeletesRoom()
     {
         roomRepo.save(new StudyRoom("room-1", "自习室A", "图书馆一楼", 30, RoomStatus.OPEN));
-        String studentToken = tokenService.generate("student-1");
 
         Response response = target("/admin/rooms/room-1")
                 .request(MediaType.APPLICATION_JSON)

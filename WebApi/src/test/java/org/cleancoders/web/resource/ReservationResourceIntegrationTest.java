@@ -8,8 +8,6 @@ import org.cleancoders.common.domain.User;
 import org.cleancoders.common.domain.UserRole;
 import org.cleancoders.common.outbound.TokenService;
 import org.cleancoders.common.outbound.UserRepository;
-import org.cleancoders.common.usecase.AuthUseCase;
-import org.cleancoders.common.usecase.StudentAuthUseCase;
 import org.cleancoders.common_reservation_seatAndRoom.outbound.SeatRepository;
 import org.cleancoders.common_reservation_seatAndRoom.outbound.TimeSlotRepository;
 import org.cleancoders.infrastructure.persistence.InMemoryReservationRepo;
@@ -18,11 +16,10 @@ import org.cleancoders.infrastructure.persistence.InMemoryTimeSlotRepo;
 import org.cleancoders.infrastructure.persistence.InMemoryUserRepo;
 import org.cleancoders.infrastructure.security.JjwtTokenService;
 import org.cleancoders.reservation.outbound.ReservationRepository;
-import org.cleancoders.reservation.usecase.CancelReservationUseCase;
-import org.cleancoders.reservation.usecase.CheckInUseCase;
-import org.cleancoders.reservation.usecase.CheckOutUseCase;
-import org.cleancoders.reservation.usecase.ListMyReservationsUseCase;
-import org.cleancoders.reservation.usecase.ReserveUseCase;
+import org.cleancoders.web.binder.ReservationBinder;
+import org.cleancoders.web.binder.SeatAndRoomBinder;
+import org.cleancoders.web.binder.UserAndAuthBinder;
+import org.cleancoders.web.binder.WebAppBinder;
 import org.cleancoders.web.filter.CorsFilter;
 import org.cleancoders.web.presenter.WebApiReservationPresenter;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
@@ -43,14 +40,16 @@ import static org.junit.jupiter.api.Assertions.*;
  * Runs a real JerseyTest HTTP server with in-memory repositories,
  * verifying the full stack: HTTP → Resource → UseCase → Presenter → Response.
  */
-class ReservationResourceIntegrationTest extends JerseyTest {
+class ReservationResourceIntegrationTest extends JerseyTest
+{
 
     private String studentToken;
     private String studentId;
     private String otherStudentToken;
 
     @Override
-    protected Application configure() {
+    protected Application configure()
+    {
         // ---- Repositories ----
         InMemoryUserRepo userRepo = new InMemoryUserRepo();
         InMemorySeatRepo seatRepo = new InMemorySeatRepo();
@@ -75,44 +74,36 @@ class ReservationResourceIntegrationTest extends JerseyTest {
         ResourceConfig config = new ResourceConfig();
         config.register(ReservationResource.class);
         config.register(CorsFilter.class);
-        config.register(new AbstractBinder() {
+        config.register(WebAppBinder.class);
+        config.register(UserAndAuthBinder.class);
+        config.register(ReservationBinder.class);
+        config.register(SeatAndRoomBinder.class);
+        config.register(new AbstractBinder()
+        {
             @Override
-            protected void configure() {
+            protected void configure()
+            {
+
                 // Infrastructure → Outbound
                 bind(userRepo).to(UserRepository.class);
                 bind(seatRepo).to(SeatRepository.class);
                 bind(timeSlotRepo).to(TimeSlotRepository.class);
                 bind(reservationRepo).to(ReservationRepository.class);
                 bind(tokenService).to(TokenService.class);
-
-                // Use cases (class-based binding — HK2 creates + injects them)
-                bind(ReserveUseCase.class).to(ReserveUseCase.class);
-                bind(CheckInUseCase.class).to(CheckInUseCase.class);
-                bind(CheckOutUseCase.class).to(CheckOutUseCase.class);
-                bind(CancelReservationUseCase.class).to(CancelReservationUseCase.class);
-                bind(ListMyReservationsUseCase.class).to(ListMyReservationsUseCase.class);
-
-                // Presenter (single instance shared across all interfaces)
-                bind(reservationPresenter).to(WebApiReservationPresenter.class);
-                bind(reservationPresenter).to(ReserveUseCase.Presenter.class);
-                bind(reservationPresenter).to(CheckInUseCase.Presenter.class);
-                bind(reservationPresenter).to(CheckOutUseCase.Presenter.class);
-                bind(reservationPresenter).to(CancelReservationUseCase.Presenter.class);
-                bind(reservationPresenter).to(ListMyReservationsUseCase.Presenter.class);
-                bind(reservationPresenter).to(StudentAuthUseCase.Presenter.class);
-                bind(reservationPresenter).to(AuthUseCase.Presenter.class);
             }
         });
         return config;
     }
 
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() throws Exception
+    {
         super.setUp();
     }
 
     @AfterEach
-    public void tearDown() throws Exception {
+    public void tearDown() throws Exception
+    {
         super.tearDown();
     }
 
@@ -121,7 +112,8 @@ class ReservationResourceIntegrationTest extends JerseyTest {
     // ================================================================
 
     @Test
-    void reserveShouldReturn201AndCreateReservation() {
+    void reserveShouldReturn201AndCreateReservation()
+    {
         Map<String, String> body = Map.of(
                 "seatId", "seat-1",
                 "timeSlotId", "ts-1",
@@ -143,7 +135,8 @@ class ReservationResourceIntegrationTest extends JerseyTest {
     }
 
     @Test
-    void reserveShouldReturn409WhenSeatAlreadyBooked() {
+    void reserveShouldReturn409WhenSeatAlreadyBooked()
+    {
         Map<String, String> body = Map.of(
                 "seatId", "seat-1",
                 "timeSlotId", "ts-1",
@@ -170,7 +163,8 @@ class ReservationResourceIntegrationTest extends JerseyTest {
     }
 
     @Test
-    void reserveShouldReturn409OnDuplicateReservationBySameUser() {
+    void reserveShouldReturn409OnDuplicateReservationBySameUser()
+    {
         Map<String, String> body = Map.of(
                 "seatId", "seat-1",
                 "timeSlotId", "ts-1",
@@ -201,7 +195,8 @@ class ReservationResourceIntegrationTest extends JerseyTest {
     }
 
     @Test
-    void reserveShouldReturn400OnInvalidDateFormat() {
+    void reserveShouldReturn400OnInvalidDateFormat()
+    {
         Map<String, String> body = Map.of(
                 "seatId", "seat-1",
                 "timeSlotId", "ts-1",
@@ -221,7 +216,8 @@ class ReservationResourceIntegrationTest extends JerseyTest {
     }
 
     @Test
-    void reserveShouldReturn404WhenSeatNotFound() {
+    void reserveShouldReturn404WhenSeatNotFound()
+    {
         Map<String, String> body = Map.of(
                 "seatId", "seat-nonexistent",
                 "timeSlotId", "ts-1",
@@ -241,7 +237,8 @@ class ReservationResourceIntegrationTest extends JerseyTest {
     }
 
     @Test
-    void reserveShouldReturn404WhenTimeSlotNotFound() {
+    void reserveShouldReturn404WhenTimeSlotNotFound()
+    {
         Map<String, String> body = Map.of(
                 "seatId", "seat-1",
                 "timeSlotId", "ts-nonexistent",
@@ -261,7 +258,8 @@ class ReservationResourceIntegrationTest extends JerseyTest {
     }
 
     @Test
-    void reserveShouldReturn401ForInvalidToken() {
+    void reserveShouldReturn401ForInvalidToken()
+    {
         Map<String, String> body = Map.of(
                 "seatId", "seat-1",
                 "timeSlotId", "ts-1",
@@ -277,7 +275,8 @@ class ReservationResourceIntegrationTest extends JerseyTest {
     }
 
     @Test
-    void reserveShouldReturn401ForMissingCookie() {
+    void reserveShouldReturn401ForMissingCookie()
+    {
         Map<String, String> body = Map.of(
                 "seatId", "seat-1",
                 "timeSlotId", "ts-1",
@@ -296,7 +295,8 @@ class ReservationResourceIntegrationTest extends JerseyTest {
     // ================================================================
 
     @Test
-    void checkInShouldReturn404WhenReservationNotFound() {
+    void checkInShouldReturn404WhenReservationNotFound()
+    {
         Response response = target("/reservations/nonexistent-id/check-in")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", studentToken)
@@ -306,7 +306,8 @@ class ReservationResourceIntegrationTest extends JerseyTest {
     }
 
     @Test
-    void checkInShouldReturn403WhenNotOwner() {
+    void checkInShouldReturn403WhenNotOwner()
+    {
         String reservationId = createReservation(studentToken, "seat-1", "ts-1", "2026-07-03");
 
         Response response = target("/reservations/" + reservationId + "/check-in")
@@ -318,7 +319,8 @@ class ReservationResourceIntegrationTest extends JerseyTest {
     }
 
     @Test
-    void checkInShouldReturn401ForInvalidToken() {
+    void checkInShouldReturn401ForInvalidToken()
+    {
         Response response = target("/reservations/any-id/check-in")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", "bad.token.here")
@@ -332,7 +334,8 @@ class ReservationResourceIntegrationTest extends JerseyTest {
     // ================================================================
 
     @Test
-    void checkOutShouldReturn404WhenReservationNotFound() {
+    void checkOutShouldReturn404WhenReservationNotFound()
+    {
         Response response = target("/reservations/nonexistent-id/check-out")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", studentToken)
@@ -342,7 +345,8 @@ class ReservationResourceIntegrationTest extends JerseyTest {
     }
 
     @Test
-    void checkOutShouldReturn403WhenNotOwner() {
+    void checkOutShouldReturn403WhenNotOwner()
+    {
         String reservationId = createReservation(studentToken, "seat-1", "ts-1", "2026-07-03");
 
         // Other student tries to check out
@@ -355,7 +359,8 @@ class ReservationResourceIntegrationTest extends JerseyTest {
     }
 
     @Test
-    void checkOutShouldReturn409WhenNotCheckedIn() {
+    void checkOutShouldReturn409WhenNotCheckedIn()
+    {
         String reservationId = createReservation(studentToken, "seat-1", "ts-1", "2026-07-03");
 
         // Try to check out without checking in first
@@ -372,7 +377,8 @@ class ReservationResourceIntegrationTest extends JerseyTest {
     // ================================================================
 
     @Test
-    void cancelShouldSucceedForReservedReservation() {
+    void cancelShouldSucceedForReservedReservation()
+    {
         String reservationId = createReservation(studentToken, "seat-1", "ts-1", "2026-07-03");
 
         Response response = target("/reservations/" + reservationId)
@@ -389,7 +395,8 @@ class ReservationResourceIntegrationTest extends JerseyTest {
     }
 
     @Test
-    void cancelShouldReturn404WhenReservationNotFound() {
+    void cancelShouldReturn404WhenReservationNotFound()
+    {
         Response response = target("/reservations/nonexistent-id")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", studentToken)
@@ -399,7 +406,8 @@ class ReservationResourceIntegrationTest extends JerseyTest {
     }
 
     @Test
-    void cancelShouldReturn403WhenNotOwner() {
+    void cancelShouldReturn403WhenNotOwner()
+    {
         String reservationId = createReservation(studentToken, "seat-1", "ts-1", "2026-07-03");
 
         Response response = target("/reservations/" + reservationId)
@@ -415,7 +423,8 @@ class ReservationResourceIntegrationTest extends JerseyTest {
     // ================================================================
 
     @Test
-    void myReservationsShouldReturnListWithReservations() {
+    void myReservationsShouldReturnListWithReservations()
+    {
         // Create two reservations
         createReservation(studentToken, "seat-1", "ts-1", "2026-07-03");
         createReservation(studentToken, "seat-2", "ts-2", "2026-07-03");
@@ -452,7 +461,8 @@ class ReservationResourceIntegrationTest extends JerseyTest {
     }
 
     @Test
-    void myReservationsShouldReturnEmptyListWhenNoReservations() {
+    void myReservationsShouldReturnEmptyListWhenNoReservations()
+    {
         Response response = target("/reservations/my")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", studentToken)
@@ -469,7 +479,8 @@ class ReservationResourceIntegrationTest extends JerseyTest {
     }
 
     @Test
-    void myReservationsShouldReturn401ForInvalidToken() {
+    void myReservationsShouldReturn401ForInvalidToken()
+    {
         Response response = target("/reservations/my")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", "invalid.token.here")
@@ -479,7 +490,8 @@ class ReservationResourceIntegrationTest extends JerseyTest {
     }
 
     @Test
-    void myReservationsShouldOnlyReturnOwnReservations() {
+    void myReservationsShouldOnlyReturnOwnReservations()
+    {
         // Student creates a reservation
         createReservation(studentToken, "seat-1", "ts-1", "2026-07-03");
         // Other student creates a reservation
@@ -509,7 +521,8 @@ class ReservationResourceIntegrationTest extends JerseyTest {
     /**
      * Creates a reservation via the API and returns the reservation ID.
      */
-    private String createReservation(String token, String seatId, String timeSlotId, String date) {
+    private String createReservation(String token, String seatId, String timeSlotId, String date)
+    {
         Map<String, String> body = Map.of(
                 "seatId", seatId,
                 "timeSlotId", timeSlotId,

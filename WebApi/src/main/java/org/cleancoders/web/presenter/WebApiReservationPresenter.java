@@ -3,8 +3,6 @@ package org.cleancoders.web.presenter;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
 import org.cleancoders.reservation.domain.ReservationStatus;
-import org.cleancoders.reservation.usecase.CheckInUseCase;
-import org.cleancoders.reservation.usecase.ReserveUseCase;
 import org.cleancoders.reservation.usecase.*;
 import org.cleancoders.reservation.usecase.ListMyReservationsUseCase.ReservationItem;
 import org.cleancoders.web.dto.common.ErrorResponse;
@@ -100,17 +98,8 @@ public class WebApiReservationPresenter extends WebApiPresenter implements
     @Override
     public void invalidStatus(ReservationStatus currentStatus)
     {
-        current.set(Response.status(409).entity(new InvalidStatusResponse(
+        responseContext.set(Response.status(409).entity(new InvalidStatusResponse(
                 "当前状态不允许签到", currentStatus)).build());
-    }
-
-    // --- StudentAuthUseCase.Presenter (override default 403 message) ---
-
-    @Override
-    public void forbidden()
-    {
-        current.set(Response.status(403).entity(new ErrorResponse(
-                "权限不足，仅学生可创建预约")).build());
     }
 
     @Override
