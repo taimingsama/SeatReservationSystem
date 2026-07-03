@@ -1,12 +1,12 @@
 package org.cleancoders.seatandroom.usecase;
 
 import jakarta.inject.Inject;
-import org.cleancoders.common.domain.User;
-import org.cleancoders.common.usecase.AdminAuthUseCase;
-import org.cleancoders.common.usecase.AuthUseCase;
-import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
-import org.cleancoders.common_reservation_seatAndRoom.domain.SeatStatus;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.SeatRepository;
+import org.cleancoders.seatandroom.domain.Seat;
+import org.cleancoders.seatandroom.domain.SeatStatus;
+import org.cleancoders.seatandroom.outbound.SeatRepository;
+import org.cleancoders.userandauth.domain.User;
+import org.cleancoders.userandauth.usecase.AdminAuthUseCase;
+import org.cleancoders.userandauth.usecase.AuthUseCase;
 
 /**
  * UC-07: 更新座位状态(管理员)。仅允许 AVAILABLE ↔ MAINTENANCE 切换,

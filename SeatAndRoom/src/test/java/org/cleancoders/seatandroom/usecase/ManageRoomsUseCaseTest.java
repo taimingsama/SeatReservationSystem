@@ -1,14 +1,14 @@
 package org.cleancoders.seatandroom.usecase;
 
-import org.cleancoders.common.domain.User;
-import org.cleancoders.common.domain.UserRole;
-import org.cleancoders.common.usecase.AdminAuthUseCase;
-import org.cleancoders.common.usecase.AuthUseCase;
-import org.cleancoders.common_test_infrastructure.StubTokenService;
-import org.cleancoders.common_test_infrastructure.StubUserRepo;
 import org.cleancoders.seatandroom.domain.RoomStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.test.infrastructure.StubRoomRepo;
+import org.cleancoders.userandauth.domain.User;
+import org.cleancoders.userandauth.domain.UserRole;
+import org.cleancoders.userandauth.usecase.AdminAuthUseCase;
+import org.cleancoders.userandauth.usecase.AuthUseCase;
+import org.cleancoders.userandauth_test_infrastructure.StubTokenService;
+import org.cleancoders.userandauth_test_infrastructure.StubUserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

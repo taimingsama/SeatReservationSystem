@@ -174,7 +174,7 @@ package org.cleancoders.infrastructure.persistence;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.ActiveReservationChecker;
+import org.cleancoders.seatandroom.outbound.ActiveReservationChecker;
 import org.cleancoders.reservation.domain.ReservationStatus;
 import org.cleancoders.reservation.outbound.ReservationRepository;
 
@@ -201,7 +201,7 @@ public class ReservationBasedActiveReservationChecker implements ActiveReservati
 ```java
 package org.cleancoders.infrastructure.persistence;
 
-import org.cleancoders.common_reservation_seatAndRoom.outbound.ActiveReservationChecker;
+import org.cleancoders.seatandroom.outbound.ActiveReservationChecker;
 import org.cleancoders.reservation.domain.Reservation;
 import org.cleancoders.reservation.domain.ReservationStatus;
 import org.cleancoders.reservation.usecase.StubReservationRepo;
@@ -307,13 +307,13 @@ git commit -m "feat(Outbound): 新增 ActiveReservationChecker 窄口 + Reservat
 package org.cleancoders.seatandroom.usecase;
 
 import jakarta.inject.Inject;
-import org.cleancoders.common.domain.User;
-import org.cleancoders.common.usecase.AdminAuthUseCase;
-import org.cleancoders.common.usecase.AuthUseCase;
-import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
-import org.cleancoders.common_reservation_seatAndRoom.domain.SeatStatus;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.ActiveReservationChecker;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.SeatRepository;
+import org.cleancoders.userandauth.domain.User;
+import org.cleancoders.userandauth.usecase.AdminAuthUseCase;
+import org.cleancoders.userandauth.usecase.AuthUseCase;
+import org.cleancoders.seatandroom.domain.Seat;
+import org.cleancoders.seatandroom.domain.SeatStatus;
+import org.cleancoders.seatandroom.outbound.ActiveReservationChecker;
+import org.cleancoders.seatandroom.outbound.SeatRepository;
 
 /**
  * UC-07: 删除座位(管理员,软删除)。
@@ -428,16 +428,16 @@ git commit -m "feat(SeatAndRoom): 新增 DeleteSeatUseCase (UC-07 软删除座�
 ```java
 package org.cleancoders.seatandroom.usecase;
 
-import org.cleancoders.common.domain.User;
-import org.cleancoders.common.domain.UserRole;
-import org.cleancoders.common.usecase.AdminAuthUseCase;
-import org.cleancoders.common.usecase.AuthUseCase;
-import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
-import org.cleancoders.common_reservation_seatAndRoom.domain.SeatStatus;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.ActiveReservationChecker;
-import org.cleancoders.common_reservation_seatandroom_test_infrastructure.StubSeatRepo;
-import org.cleancoders.common_test_infrastructure.StubTokenService;
-import org.cleancoders.common_test_infrastructure.StubUserRepo;
+import org.cleancoders.userandauth.domain.User;
+import org.cleancoders.userandauth.domain.UserRole;
+import org.cleancoders.userandauth.usecase.AdminAuthUseCase;
+import org.cleancoders.userandauth.usecase.AuthUseCase;
+import org.cleancoders.seatandroom.domain.Seat;
+import org.cleancoders.seatandroom.domain.SeatStatus;
+import org.cleancoders.seatandroom.outbound.ActiveReservationChecker;
+import org.cleancoders.seatandroom_test_infrastructure.StubSeatRepo;
+import org.cleancoders.userandauth_test_infrastructure.StubTokenService;
+import org.cleancoders.userandauth_test_infrastructure.StubUserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -841,7 +841,7 @@ import org.cleancoders.seatandroom.usecase.DeleteSeatUseCase;
 在 `WebApi/src/main/java/org/cleancoders/web/binder/SeatAndRoomBinder.java` 中添加 import:
 
 ```java
-import org.cleancoders.common_reservation_seatAndRoom.outbound.ActiveReservationChecker;
+import org.cleancoders.seatandroom.outbound.ActiveReservationChecker;
 import org.cleancoders.infrastructure.persistence.ReservationBasedActiveReservationChecker;
 ```
 
@@ -867,7 +867,7 @@ import org.cleancoders.infrastructure.persistence.ReservationBasedActiveReservat
 
 ```java
     @Override
-    protected void configure()
+    private void configure()
     {
         // === UseCases ===
         bind(ListRoomsUseCase.class).to(ListRoomsUseCase.class);

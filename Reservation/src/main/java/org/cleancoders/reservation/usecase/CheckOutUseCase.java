@@ -1,16 +1,16 @@
 package org.cleancoders.reservation.usecase;
 
 import jakarta.inject.Inject;
-import org.cleancoders.common.domain.User;
 import org.cleancoders.reservation.domain.Reservation;
 import org.cleancoders.reservation.domain.ReservationStatus;
-import org.cleancoders.common.usecase.AuthUseCase;
-import org.cleancoders.common.usecase.StudentAuthUseCase;
-import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
-import org.cleancoders.common_reservation_seatAndRoom.domain.TimeSlot;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.SeatRepository;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.TimeSlotRepository;
 import org.cleancoders.reservation.outbound.ReservationRepository;
+import org.cleancoders.seatandroom.domain.Seat;
+import org.cleancoders.seatandroom.domain.TimeSlot;
+import org.cleancoders.seatandroom.outbound.SeatRepository;
+import org.cleancoders.seatandroom.outbound.TimeSlotRepository;
+import org.cleancoders.userandauth.domain.User;
+import org.cleancoders.userandauth.usecase.AuthUseCase;
+import org.cleancoders.userandauth.usecase.StudentAuthUseCase;
 
 /**
  * UC-10: 退座。
@@ -23,7 +23,8 @@ import org.cleancoders.reservation.outbound.ReservationRepository;
  *   <li>座位状态 → AVAILABLE</li>
  * </ul>
  */
-public class CheckOutUseCase extends StudentAuthUseCase<CheckOutUseCase.Request, CheckOutUseCase.Output> {
+public class CheckOutUseCase extends StudentAuthUseCase<CheckOutUseCase.Request, CheckOutUseCase.Output>
+{
 
     @Inject
     protected Presenter presenter;
@@ -39,32 +40,13 @@ public class CheckOutUseCase extends StudentAuthUseCase<CheckOutUseCase.Request,
 
     // --- Presenter ---
 
-    public interface Presenter {
-        void success(String reservationId, String seatNumber, String timeSlot);
-
-        void reservationNotFound(String reservationId);
-
-        void notYourReservation();
-
-        void invalidStatus(ReservationStatus currentStatus);
-    }
-
-    // --- Request / Output ---
-
-    public record Request(String token, String reservationId)
-            implements AuthUseCase.Request {
-    }
-
-    public record Output(String reservationId) {
-    }
-
-    // --- Business Logic ---
-
     @Override
-    protected Output doExecute(User user, Request req) {
+    protected Output doExecute(User user, Request req)
+    {
         // 1. Find reservation
         var reservationOpt = reservationRepo.findById(req.reservationId());
-        if (reservationOpt.isEmpty()) {
+        if (reservationOpt.isEmpty())
+        {
             presenter.reservationNotFound(req.reservationId());
             return null;
         }
@@ -72,13 +54,15 @@ public class CheckOutUseCase extends StudentAuthUseCase<CheckOutUseCase.Request,
         Reservation reservation = reservationOpt.get();
 
         // 2. Check ownership
-        if (!reservation.userId().equals(user.id())) {
+        if (!reservation.userId().equals(user.id()))
+        {
             presenter.notYourReservation();
             return null;
         }
 
         // 3. Check status is CHECKED_IN
-        if (reservation.status() != ReservationStatus.CHECKED_IN) {
+        if (reservation.status() != ReservationStatus.CHECKED_IN)
+        {
             presenter.invalidStatus(reservation.status());
             return null;
         }
@@ -90,7 +74,8 @@ public class CheckOutUseCase extends StudentAuthUseCase<CheckOutUseCase.Request,
         // 5. Release the seat
         var seatOpt = seatRepo.findById(reservation.seatId());
         String seatNumber = "未知";
-        if (seatOpt.isPresent()) {
+        if (seatOpt.isPresent())
+        {
             Seat seat = seatOpt.get();
             seat.release();
             seatRepo.save(seat);
@@ -103,5 +88,29 @@ public class CheckOutUseCase extends StudentAuthUseCase<CheckOutUseCase.Request,
 
         presenter.success(reservation.id(), seatNumber, timeSlotLabel);
         return new Output(reservation.id());
+    }
+
+    // --- Request / Output ---
+
+    public interface Presenter
+    {
+        void success(String reservationId, String seatNumber, String timeSlot);
+
+        void reservationNotFound(String reservationId);
+
+        void notYourReservation();
+
+        void invalidStatus(ReservationStatus currentStatus);
+    }
+
+    public record Request(String token, String reservationId)
+            implements AuthUseCase.Request
+    {
+    }
+
+    // --- Business Logic ---
+
+    public record Output(String reservationId)
+    {
     }
 }

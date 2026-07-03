@@ -44,6 +44,12 @@ public class StubRoomRepo implements RoomRepository
     }
 
     @Override
+    public List<StudyRoom> findAll()
+    {
+        return rooms.values().stream().toList();
+    }
+
+    @Override
     public StudyRoom save(StudyRoom room)
     {
         rooms.put(room.id(), room);

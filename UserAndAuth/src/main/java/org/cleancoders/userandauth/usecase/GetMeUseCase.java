@@ -1,12 +1,7 @@
 package org.cleancoders.userandauth.usecase;
 
 import jakarta.inject.Inject;
-import org.cleancoders.common.domain.User;
-import org.cleancoders.common.outbound.TokenPayload;
-import org.cleancoders.common.outbound.TokenService;
-import org.cleancoders.common.outbound.TokenValidationException;
-import org.cleancoders.common.outbound.UserRepository;
-import org.cleancoders.common.usecase.AuthUseCase;
+import org.cleancoders.userandauth.domain.User;
 
 /**
  * UC-03: 获取当前登录用户信息。

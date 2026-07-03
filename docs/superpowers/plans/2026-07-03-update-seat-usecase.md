@@ -56,12 +56,12 @@ Create `SeatAndRoom/src/main/java/org/cleancoders/seatandroom/usecase/UpdateSeat
 package org.cleancoders.seatandroom.usecase;
 
 import jakarta.inject.Inject;
-import org.cleancoders.common.domain.User;
-import org.cleancoders.common.usecase.AdminAuthUseCase;
-import org.cleancoders.common.usecase.AuthUseCase;
-import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
-import org.cleancoders.common_reservation_seatAndRoom.domain.SeatStatus;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.SeatRepository;
+import org.cleancoders.userandauth.domain.User;
+import org.cleancoders.userandauth.usecase.AdminAuthUseCase;
+import org.cleancoders.userandauth.usecase.AuthUseCase;
+import org.cleancoders.seatandroom.domain.Seat;
+import org.cleancoders.seatandroom.domain.SeatStatus;
+import org.cleancoders.seatandroom.outbound.SeatRepository;
 
 /**
  * UC-07: 更新座位状态(管理员)。仅允许 AVAILABLE ↔ MAINTENANCE 切换,
@@ -110,15 +110,15 @@ Create `SeatAndRoom/src/test/java/org/cleancoders/seatandroom/usecase/UpdateSeat
 ```java
 package org.cleancoders.seatandroom.usecase;
 
-import org.cleancoders.common.domain.User;
-import org.cleancoders.common.domain.UserRole;
-import org.cleancoders.common.usecase.AdminAuthUseCase;
-import org.cleancoders.common.usecase.AuthUseCase;
-import org.cleancoders.common_test_infrastructure.StubTokenService;
-import org.cleancoders.common_test_infrastructure.StubUserRepo;
-import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
-import org.cleancoders.common_reservation_seatAndRoom.domain.SeatStatus;
-import org.cleancoders.common_reservation_seatandroom_test_infrastructure.StubSeatRepo;
+import org.cleancoders.userandauth.domain.User;
+import org.cleancoders.userandauth.domain.UserRole;
+import org.cleancoders.userandauth.usecase.AdminAuthUseCase;
+import org.cleancoders.userandauth.usecase.AuthUseCase;
+import org.cleancoders.userandauth_test_infrastructure.StubTokenService;
+import org.cleancoders.userandauth_test_infrastructure.StubUserRepo;
+import org.cleancoders.seatandroom.domain.Seat;
+import org.cleancoders.seatandroom.domain.SeatStatus;
+import org.cleancoders.seatandroom_test_infrastructure.StubSeatRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -226,13 +226,22 @@ class UpdateSeatUseCaseTest
         }
 
         @Override
-        public void forbidden() { forbiddenCalled = true; }
+        public void forbidden()
+        {
+            forbiddenCalled = true;
+        }
 
         @Override
-        public void invalidToken() { fail("invalidToken() must not be called"); }
+        public void invalidToken()
+        {
+            fail("invalidToken() must not be called");
+        }
 
         @Override
-        public void userNotFound() { fail("userNotFound() must not be called"); }
+        public void userNotFound()
+        {
+            fail("userNotFound() must not be called");
+        }
     }
 }
 ```
@@ -248,7 +257,7 @@ Replace the `doExecute` 方法体(及顶部 imports 已含 `SeatStatus`)为:
 
 ```java
     @Override
-    protected Output doExecute(User user, Request req)
+    private Output doExecute(User user, Request req)
     {
         var existing = seatRepo.findById(req.seatId());
         if (existing.isEmpty())
@@ -520,7 +529,10 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
 {
 ```
 
-> 注:`UpdateSeatUseCase` 由 `import org.cleancoders.seatandroom.usecase.*;` 覆盖,无需新增 import。需新增 `import org.cleancoders.common_reservation_seatAndRoom.domain.SeatStatus;`(presenter 方法用到 `SeatStatus` 参数,但仅作传递,实际不需要 —— 检查:方法签名 `invalidStatusTransition(String, SeatStatus, SeatStatus)` 需要类型可见)。**新增 import**:`import org.cleancoders.common_reservation_seatAndRoom.domain.SeatStatus;`。
+> 注:`UpdateSeatUseCase` 由 `import org.cleancoders.seatandroom.usecase.*;` 覆盖,无需新增 import。需新增
+`import org.cleancoders.seatandroom.domain.SeatStatus;`(presenter 方法用到 `SeatStatus` 参数,但仅作传递,实际不需要 ——
+> 检查:方法签名 `invalidStatusTransition(String, SeatStatus, SeatStatus)` 需要类型可见)。**新增 import**:
+`import org.cleancoders.seatandroom.domain.SeatStatus;`。
 
 (b) 在文件末尾(现有 `seatNumberAlreadyExists` 方法之后、类结束 `}` 之前)追加:
 
@@ -781,8 +793,8 @@ Modify `WebApi/src/test/java/org/cleancoders/web/resource/AdminResourceIntegrati
 
 追加 import(在测试类 import 区):
 ```java
-import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
-import org.cleancoders.common_reservation_seatAndRoom.domain.SeatStatus;
+import org.cleancoders.seatandroom.domain.Seat;
+import org.cleancoders.seatandroom.domain.SeatStatus;
 ```
 
 - [ ] **Step 10: 运行全部 seat-update 集成测试,确认通过**

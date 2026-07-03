@@ -1,12 +1,12 @@
 package org.cleancoders.seatandroom.usecase;
 
 import jakarta.inject.Inject;
-import org.cleancoders.common.domain.User;
-import org.cleancoders.common.usecase.AdminAuthUseCase;
-import org.cleancoders.common.usecase.AuthUseCase;
 import org.cleancoders.seatandroom.domain.RoomStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.outbound.RoomRepository;
+import org.cleancoders.userandauth.domain.User;
+import org.cleancoders.userandauth.usecase.AdminAuthUseCase;
+import org.cleancoders.userandauth.usecase.AuthUseCase;
 
 /**
  * UC-06: 删除自习室（管理员）。

@@ -1,12 +1,11 @@
 package org.cleancoders.userandauth.usecase;
 
-import org.cleancoders.common.domain.User;
-import org.cleancoders.common.domain.UserRole;
-import org.cleancoders.common.outbound.TokenPayload;
-import org.cleancoders.common.outbound.TokenService;
-import org.cleancoders.common.outbound.TokenValidationException;
-import org.cleancoders.common_test_infrastructure.StubUserRepo;
+import org.cleancoders.userandauth.domain.User;
+import org.cleancoders.userandauth.domain.UserRole;
 import org.cleancoders.userandauth.outbound.PasswordEncoder;
+import org.cleancoders.userandauth.outbound.TokenPayload;
+import org.cleancoders.userandauth.outbound.TokenService;
+import org.cleancoders.userandauth.outbound.TokenValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

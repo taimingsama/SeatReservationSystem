@@ -1,7 +1,7 @@
 package org.cleancoders.infrastructure.persistence;
 
-import org.cleancoders.common.domain.User;
-import org.cleancoders.common.domain.UserRole;
+import org.cleancoders.userandauth.domain.User;
+import org.cleancoders.userandauth.domain.UserRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

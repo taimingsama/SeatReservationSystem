@@ -2,9 +2,9 @@ package org.cleancoders.infrastructure.persistence;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.ActiveReservationChecker;
 import org.cleancoders.reservation.domain.ReservationStatus;
 import org.cleancoders.reservation.outbound.ReservationRepository;
+import org.cleancoders.seatandroom.outbound.ActiveReservationChecker;
 
 import java.util.Set;
 

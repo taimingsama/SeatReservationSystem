@@ -176,7 +176,7 @@ package org.cleancoders.infrastructure.persistence;
 
 import jakarta.inject.Singleton;
 import jakarta.inject.Inject;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.ActiveReservationChecker;
+import org.cleancoders.seatandroom.outbound.ActiveReservationChecker;
 import org.cleancoders.reservation.outbound.ReservationRepository;
 import org.cleancoders.reservation.domain.ReservationStatus;
 

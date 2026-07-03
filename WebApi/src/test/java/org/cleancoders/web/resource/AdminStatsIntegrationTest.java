@@ -4,24 +4,16 @@ import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.cleancoders.common.domain.User;
-import org.cleancoders.common.domain.UserRole;
-import org.cleancoders.common.outbound.UserRepository;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.SeatRepository;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.TimeSlotRepository;
-import org.cleancoders.infrastructure.persistence.InMemoryReservationRepo;
-import org.cleancoders.infrastructure.persistence.InMemoryRoomRepo;
-import org.cleancoders.infrastructure.persistence.InMemorySeatRepo;
-import org.cleancoders.infrastructure.persistence.InMemoryTimeSlotRepo;
-import org.cleancoders.infrastructure.persistence.InMemoryUserRepo;
+import org.cleancoders.infrastructure.persistence.*;
 import org.cleancoders.infrastructure.security.JjwtTokenService;
 import org.cleancoders.reservation.outbound.ReservationRepository;
 import org.cleancoders.seatandroom.outbound.RoomRepository;
-import org.cleancoders.web.binder.ReservationBinder;
-import org.cleancoders.web.binder.SeatAndRoomBinder;
-import org.cleancoders.web.binder.SystemTaskBinder;
-import org.cleancoders.web.binder.UserAndAuthBinder;
-import org.cleancoders.web.binder.WebAppBinder;
+import org.cleancoders.seatandroom.outbound.SeatRepository;
+import org.cleancoders.seatandroom.outbound.TimeSlotRepository;
+import org.cleancoders.userandauth.domain.User;
+import org.cleancoders.userandauth.domain.UserRole;
+import org.cleancoders.userandauth.outbound.UserRepository;
+import org.cleancoders.web.binder.*;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
@@ -32,7 +24,8 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class AdminStatsIntegrationTest extends JerseyTest
 {

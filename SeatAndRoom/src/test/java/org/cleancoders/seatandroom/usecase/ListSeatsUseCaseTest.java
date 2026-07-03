@@ -1,11 +1,11 @@
 package org.cleancoders.seatandroom.usecase;
 
-import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
-import org.cleancoders.common_reservation_seatAndRoom.domain.SeatStatus;
-import org.cleancoders.common_reservation_seatandroom_test_infrastructure.StubSeatRepo;
 import org.cleancoders.seatandroom.domain.RoomStatus;
+import org.cleancoders.seatandroom.domain.Seat;
+import org.cleancoders.seatandroom.domain.SeatStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.test.infrastructure.StubRoomRepo;
+import org.cleancoders.seatandroom.test.infrastructure.StubSeatRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

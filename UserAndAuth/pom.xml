@@ -12,17 +12,5 @@
     <artifactId>UserAndAuth</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>org.cleancoders</groupId>
-            <artifactId>Common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.cleancoders</groupId>
-            <artifactId>Common_Test_Infrastructure</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
-
 </project>

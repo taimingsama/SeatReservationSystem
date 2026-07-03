@@ -1,19 +1,22 @@
 package org.cleancoders.systemtask.usecase;
 
-import org.cleancoders.common.domain.User;
-import org.cleancoders.common.domain.UserRole;
-import org.cleancoders.common.usecase.AdminAuthUseCase;
-import org.cleancoders.common.usecase.AuthUseCase;
-import org.cleancoders.common_reservation_seatAndRoom.domain.TimeSlot;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.TimeSlotRepository;
-import org.cleancoders.common_test_infrastructure.StubTokenService;
-import org.cleancoders.common_test_infrastructure.StubUserRepo;
 import org.cleancoders.reservation.domain.Reservation;
+import org.cleancoders.seatandroom.domain.TimeSlot;
+import org.cleancoders.seatandroom.outbound.TimeSlotRepository;
+import org.cleancoders.userandauth.domain.User;
+import org.cleancoders.userandauth.domain.UserRole;
+import org.cleancoders.userandauth.usecase.AdminAuthUseCase;
+import org.cleancoders.userandauth.usecase.AuthUseCase;
+import org.cleancoders.userandauth_test_infrastructure.StubTokenService;
+import org.cleancoders.userandauth_test_infrastructure.StubUserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 

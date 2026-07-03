@@ -1,18 +1,13 @@
 package org.cleancoders.web.binder;
 
 import jakarta.inject.Singleton;
-import org.cleancoders.common.outbound.TokenService;
-import org.cleancoders.common.outbound.UserRepository;
-import org.cleancoders.common.usecase.AdminAuthUseCase;
-import org.cleancoders.common.usecase.AuthUseCase;
-import org.cleancoders.common.usecase.StudentAuthUseCase;
 import org.cleancoders.infrastructure.persistence.testdata.TestDataUserRepo;
 import org.cleancoders.infrastructure.security.JjwtTokenService;
 import org.cleancoders.infrastructure.security.RawPasswordEncoder;
 import org.cleancoders.userandauth.outbound.PasswordEncoder;
-import org.cleancoders.userandauth.usecase.GetMeUseCase;
-import org.cleancoders.userandauth.usecase.LoginUseCase;
-import org.cleancoders.userandauth.usecase.RegisterUseCase;
+import org.cleancoders.userandauth.outbound.TokenService;
+import org.cleancoders.userandauth.outbound.UserRepository;
+import org.cleancoders.userandauth.usecase.*;
 import org.cleancoders.web.presenter.WebApiAuthPresenter;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 

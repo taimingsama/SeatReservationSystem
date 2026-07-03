@@ -1,17 +1,17 @@
 package org.cleancoders.reservation.usecase;
 
-import org.cleancoders.common.domain.User;
-import org.cleancoders.common.domain.UserRole;
-import org.cleancoders.common.usecase.AuthUseCase;
-import org.cleancoders.common.usecase.StudentAuthUseCase;
-import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
-import org.cleancoders.common_reservation_seatAndRoom.domain.SeatStatus;
-import org.cleancoders.common_reservation_seatAndRoom.domain.TimeSlot;
-import org.cleancoders.common_reservation_seatandroom_test_infrastructure.StubSeatRepo;
-import org.cleancoders.common_reservation_seatandroom_test_infrastructure.StubTimeSlotRepo;
-import org.cleancoders.common_test_infrastructure.StubTokenService;
 import org.cleancoders.reservation.domain.Reservation;
 import org.cleancoders.reservation.domain.ReservationStatus;
+import org.cleancoders.seatandroom.domain.Seat;
+import org.cleancoders.seatandroom.domain.SeatStatus;
+import org.cleancoders.seatandroom.domain.TimeSlot;
+import org.cleancoders.seatandroom_test_infrastructure.StubSeatRepo;
+import org.cleancoders.seatandroom_test_infrastructure.StubTimeSlotRepo;
+import org.cleancoders.userandauth.domain.User;
+import org.cleancoders.userandauth.domain.UserRole;
+import org.cleancoders.userandauth.usecase.AuthUseCase;
+import org.cleancoders.userandauth.usecase.StudentAuthUseCase;
+import org.cleancoders.userandauth_test_infrastructure.StubTokenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +36,7 @@ class CheckInUseCaseTest
     private static final LocalTime SLOT_END = LocalTime.of(12, 0);
     private TestableCheckInUseCase useCase;
     private StubTokenService tokenService;
-    private org.cleancoders.common_test_infrastructure.StubUserRepo userRepo;
+    private org.cleancoders.userandauth_test_infrastructure.StubUserRepo userRepo;
     private StubReservationRepo reservationRepo;
     private StubTimeSlotRepo timeSlotRepo;
     private StubSeatRepo seatRepo;
@@ -47,7 +47,7 @@ class CheckInUseCaseTest
     {
         tokenService = new StubTokenService();
         tokenService.setUserId(STUDENT_ID);
-        userRepo = new org.cleancoders.common_test_infrastructure.StubUserRepo();
+        userRepo = new org.cleancoders.userandauth_test_infrastructure.StubUserRepo();
         reservationRepo = new StubReservationRepo();
         timeSlotRepo = new StubTimeSlotRepo();
         seatRepo = new StubSeatRepo();

@@ -1,14 +1,14 @@
 package org.cleancoders.web.binder;
 
 import jakarta.inject.Singleton;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.ActiveReservationChecker;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.SeatRepository;
-import org.cleancoders.common_reservation_seatAndRoom.outbound.TimeSlotRepository;
 import org.cleancoders.infrastructure.persistence.ReservationBasedActiveReservationChecker;
 import org.cleancoders.infrastructure.persistence.testdata.TestDataRoomRepo;
 import org.cleancoders.infrastructure.persistence.testdata.TestDataSeatRepo;
 import org.cleancoders.infrastructure.persistence.testdata.TestDataTimeSlotRepo;
+import org.cleancoders.seatandroom.outbound.ActiveReservationChecker;
 import org.cleancoders.seatandroom.outbound.RoomRepository;
+import org.cleancoders.seatandroom.outbound.SeatRepository;
+import org.cleancoders.seatandroom.outbound.TimeSlotRepository;
 import org.cleancoders.seatandroom.usecase.*;
 import org.cleancoders.web.presenter.WebApiRoomPresenter;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;

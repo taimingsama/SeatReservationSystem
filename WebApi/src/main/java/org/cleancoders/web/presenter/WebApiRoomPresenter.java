@@ -2,10 +2,12 @@ package org.cleancoders.web.presenter;
 
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
-import org.cleancoders.common_reservation_seatAndRoom.domain.Seat;
-import org.cleancoders.common_reservation_seatAndRoom.domain.SeatStatus;
+import org.cleancoders.seatandroom.domain.Seat;
+import org.cleancoders.seatandroom.domain.SeatStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.usecase.*;
+import org.cleancoders.userandauth.usecase.AdminAuthUseCase;
+import org.cleancoders.userandauth.usecase.AuthUseCase;
 import org.cleancoders.web.dto.room.RoomListResponse;
 import org.cleancoders.web.dto.room.RoomResponse;
 import org.cleancoders.web.dto.seat.SeatListResponse;
@@ -22,8 +24,8 @@ import java.util.Map;
  * Implements each use case's own {@code Presenter} (success / business-error
  * branches). Auth-related branches (401 invalid token, 404 user not found,
  * 403 forbidden) are handled by {@link WebApiAuthPresenter}, which is bound
- * to {@link org.cleancoders.common.usecase.AuthUseCase.Presenter} /
- * {@link org.cleancoders.common.usecase.AdminAuthUseCase.Presenter} and
+ * to {@link AuthUseCase.Presenter} /
+ * {@link AdminAuthUseCase.Presenter} and
  * injected into the base-class presenter fields.
  */
 @Singleton

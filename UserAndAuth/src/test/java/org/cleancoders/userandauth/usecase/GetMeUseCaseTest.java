@@ -1,10 +1,7 @@
 package org.cleancoders.userandauth.usecase;
 
-import org.cleancoders.common.domain.User;
-import org.cleancoders.common.domain.UserRole;
-import org.cleancoders.common.usecase.AuthUseCase;
-import org.cleancoders.common_test_infrastructure.StubTokenService;
-import org.cleancoders.common_test_infrastructure.StubUserRepo;
+import org.cleancoders.userandauth.domain.User;
+import org.cleancoders.userandauth.domain.UserRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -40,7 +37,6 @@ class GetMeUseCaseTest
         userRepo = new StubUserRepo();
         presenter = new StubPresenter();
         tokenService = new StubTokenService();
-        tokenService.setUserId(STUDENT_ID);
 
         // GetMeUseCase re-declares (shadows) userRepo/tokenService/presenter, so the
         // subclass-level fields are the ones its own code reads. authenticate() in the
@@ -77,7 +73,6 @@ class GetMeUseCaseTest
     @Test
     void shouldPresentAdminAndReturnOutput()
     {
-        tokenService.setUserId(ADMIN_ID);
         var output = useCase.execute(new GetMeUseCase.Request(ADMIN_TOKEN));
 
         assertNotNull(output);
