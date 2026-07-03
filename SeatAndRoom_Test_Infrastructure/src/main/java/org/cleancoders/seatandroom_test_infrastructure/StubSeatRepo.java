@@ -10,21 +10,25 @@ public class StubSeatRepo implements SeatRepository
 {
     private final java.util.Map<String, Seat> seats = new java.util.LinkedHashMap<>();
 
+    private static String key(String roomId, int seatId) {
+        return roomId + ":" + seatId;
+    }
+
     public void addSeat(Seat seat)
     {
-        seats.put(seat.id(), seat);
+        seats.put(key(seat.roomId(), seat.id()), seat);
     }
 
     @Override
-    public Optional<Seat> findById(String id)
+    public Optional<Seat> findByRoomIdAndSeatId(String roomId, int seatId)
     {
-        return Optional.ofNullable(seats.get(id));
+        return Optional.ofNullable(seats.get(key(roomId, seatId)));
     }
 
     @Override
     public Seat save(Seat seat)
     {
-        seats.put(seat.id(), seat);
+        seats.put(key(seat.roomId(), seat.id()), seat);
         return seat;
     }
 
@@ -40,5 +44,11 @@ public class StubSeatRepo implements SeatRepository
     public List<Seat> findAll()
     {
         return List.copyOf(seats.values());
+    }
+
+    @Override
+    public void deleteByRoomId(String roomId)
+    {
+        seats.entrySet().removeIf(e -> e.getValue().roomId().equals(roomId));
     }
 }

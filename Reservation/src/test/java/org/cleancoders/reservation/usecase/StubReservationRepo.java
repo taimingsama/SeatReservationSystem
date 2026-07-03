@@ -48,10 +48,11 @@ class StubReservationRepo implements ReservationRepository
 
     @Override
     public Optional<Reservation> findBySeatIdAndDateAndTimeSlotIdAndStatusIn(
-            String seatId, LocalDate date, String timeSlotId, Set<ReservationStatus> statuses)
+            String roomId, int seatId, LocalDate date, String timeSlotId, Set<ReservationStatus> statuses)
     {
         return reservations.values().stream()
-                .filter(r -> r.seatId().equals(seatId))
+                .filter(r -> r.roomId().equals(roomId))
+                .filter(r -> r.seatId() == seatId)
                 .filter(r -> r.date().equals(date))
                 .filter(r -> r.timeSlotId().equals(timeSlotId))
                 .filter(r -> statuses.contains(r.status()))
@@ -67,9 +68,10 @@ class StubReservationRepo implements ReservationRepository
     }
 
     @Override
-    public List<Reservation> findBySeatIdAndStatusIn(String seatId, Set<ReservationStatus> statuses) {
+    public List<Reservation> findBySeatIdAndStatusIn(String roomId, int seatId, Set<ReservationStatus> statuses) {
         return reservations.values().stream()
-                .filter(r -> r.seatId().equals(seatId))
+                .filter(r -> r.roomId().equals(roomId))
+                .filter(r -> r.seatId() == seatId)
                 .filter(r -> statuses.contains(r.status()))
                 .toList();
     }
