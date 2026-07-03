@@ -7,5 +7,6 @@ public enum SeatStatus {
     AVAILABLE,
     RESERVED,
     OCCUPIED,
-    MAINTENANCE
+    MAINTENANCE,
+    REMOVED
 }

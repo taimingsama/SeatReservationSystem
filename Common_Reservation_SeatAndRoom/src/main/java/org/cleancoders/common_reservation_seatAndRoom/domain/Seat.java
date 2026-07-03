@@ -87,6 +87,20 @@ public class Seat {
         this.status = SeatStatus.AVAILABLE;
     }
 
+    /**
+     * Soft-deletes the seat. Only {@link SeatStatus#AVAILABLE} or
+     * {@link SeatStatus#MAINTENANCE} seats can be removed.
+     *
+     * @throws IllegalStateException if the seat is not AVAILABLE or MAINTENANCE
+     */
+    public void markRemoved() {
+        if (status != SeatStatus.AVAILABLE && status != SeatStatus.MAINTENANCE) {
+            throw new IllegalStateException(
+                    "只有可用或维护中的座位才能删除，当前状态: " + status);
+        }
+        this.status = SeatStatus.REMOVED;
+    }
+
     // --- getters ---
 
     public String id() {
