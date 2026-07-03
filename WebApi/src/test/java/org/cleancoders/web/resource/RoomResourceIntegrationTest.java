@@ -133,10 +133,10 @@ class RoomResourceIntegrationTest extends JerseyTest
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> seats = (List<Map<String, Object>>) body.get("seats");
         assertEquals(8, seats.size());
-        // Verify seat numbers belong to room-1
-        List<String> seatNumbers = seats.stream().map(s -> (String) s.get("seatNumber")).toList();
-        assertTrue(seatNumbers.contains("A-1"));
-        assertTrue(seatNumbers.contains("A-8"));
+        // Verify seat IDs belong to room-1 (pre-seeded: room-1 has seats 1-8)
+        List<Integer> seatIds = seats.stream().map(s -> (Integer) s.get("id")).toList();
+        assertTrue(seatIds.contains(1));
+        assertTrue(seatIds.contains(8));
     }
 
     @Test

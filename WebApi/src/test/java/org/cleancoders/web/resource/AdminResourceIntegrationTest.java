@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.Map;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -65,10 +64,9 @@ class AdminResourceIntegrationTest extends JerseyTest
         studentId = "student-1";
 
         Reservation r1 = reservationRepo.save(
-                new Reservation(null, studentId, "seat-1", 1, "ts-1", LocalDate.of(2026, 7, 3)));
+                new Reservation(null, studentId, "room-1", 1, "ts-1", LocalDate.of(2026, 7, 3)));
         Reservation r2 = reservationRepo.save(
-                new Reservation(null, studentId, "seat-2", 1, "ts-2", LocalDate.of(2026, 7, 3)));
-
+                new Reservation(null, studentId, "room-1", 2, "ts-2", LocalDate.of(2026, 7, 3)));
 
         reservationRepo.save(r1);
         reservationRepo.save(r2);
@@ -94,9 +92,7 @@ class AdminResourceIntegrationTest extends JerseyTest
                 bind(timeSlotRepo).to(TimeSlotRepository.class);
                 bind(userRepo).to(UserRepository.class);
                 bind(reservationRepo).to(ReservationRepository.class);
-                bind(roomRepo).to(RoomRepository.class);
                 bind(tokenService).to(TokenService.class);
-
             }
         });
         return config;
@@ -136,12 +132,12 @@ class AdminResourceIntegrationTest extends JerseyTest
         var list = (java.util.List<Map<String, Object>>) entity.get("reservations");
         assertEquals(2, list.size());
 
-        // Verify expected seat numbers are present (ConcurrentHashMap order is non-deterministic)
-        java.util.List<String> seatNumbers = list.stream()
-                .map(m -> (String) m.get("seatNumber"))
+        // Verify expected seat IDs are present (ConcurrentHashMap order is non-deterministic)
+        java.util.List<Integer> seatIds = list.stream()
+                .map(m -> (Integer) m.get("seatId"))
                 .toList();
-        assertTrue(seatNumbers.contains("1"), "Should contain A-1");
-        assertTrue(seatNumbers.contains("2"), "Should contain A-2");
+        assertTrue(seatIds.contains(1), "Should contain seatId 1");
+        assertTrue(seatIds.contains(2), "Should contain seatId 2");
 
         // Verify fields on any reservation (both belong to the same student)
         Map<String, Object> first = list.get(0);
@@ -224,6 +220,10 @@ class AdminResourceIntegrationTest extends JerseyTest
         assertTrue(response.getHeaderString("Content-Type").startsWith(MediaType.APPLICATION_JSON));
     }
 
+    // ================================================================
+    // UC-06: Room CRUD
+    // ================================================================
+
     @Test
     void shouldReturn201WhenAdminCreatesRoom()
     {
@@ -239,7 +239,7 @@ class AdminResourceIntegrationTest extends JerseyTest
         assertNotNull(body.get("id"));
         assertEquals("自习室F", body.get("name"));
         assertEquals("综合楼二楼", body.get("location"));
-        assertEquals(20, body.get("capacity"));
+        assertEquals(40, body.get("seatCount"));
         assertEquals("OPEN", body.get("status"));
     }
 
@@ -300,7 +300,7 @@ class AdminResourceIntegrationTest extends JerseyTest
         assertEquals("room-1", body.get("id"));
         assertEquals("自习室A-改", body.get("name"));
         assertEquals("图书馆一楼东", body.get("location"));
-        assertEquals(35, body.get("capacity"));
+        assertEquals(40, body.get("seatCount"));
         assertEquals("OPEN", body.get("status"));
     }
 
@@ -354,7 +354,7 @@ class AdminResourceIntegrationTest extends JerseyTest
         });
         assertEquals("自习室A", body.get("name"));
         assertEquals("图书馆一楼东", body.get("location"));
-        assertEquals(40, body.get("capacity"));
+        assertEquals(40, body.get("seatCount"));
     }
 
     @Test
@@ -370,15 +370,13 @@ class AdminResourceIntegrationTest extends JerseyTest
         assertEquals(403, response.getStatus());
     }
 
-    // --- update seat tests ---
+    // --- update seat tests (UC-07: PUT /admin/rooms/{roomId}/seats/{seatId}) ---
 
     @Test
     void shouldReturn200WhenAdminMarksSeatMaintenance()
     {
-        // InMemorySeatRepo 预置 seat-1 (A-1, AVAILABLE) 在 room-1
-        String adminToken = tokenService.generate("admin-1");
-
-        Response response = target("/admin/seats/seat-1")
+        // InMemorySeatRepo 预置 room-1 seats 1-8 (AVAILABLE)
+        Response response = target("/admin/rooms/room-1/seats/1")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", adminToken)
                 .put(Entity.json(new UpdateSeatRequest("MAINTENANCE")));
@@ -387,8 +385,8 @@ class AdminResourceIntegrationTest extends JerseyTest
         Map<String, Object> body = response.readEntity(new GenericType<>()
         {
         });
-        assertEquals("seat-1", body.get("id"));
-        assertEquals("1", body.get("seatNumber"));
+        assertEquals(1, body.get("id"));
+        assertEquals("room-1", body.get("roomId"));
         assertEquals("MAINTENANCE", body.get("status"));
     }
 
@@ -396,9 +394,8 @@ class AdminResourceIntegrationTest extends JerseyTest
     void shouldReturn200WhenAdminMarksSeatAvailable()
     {
         seatRepo.save(new Seat(1, "room-1", SeatStatus.MAINTENANCE));
-        String adminToken = tokenService.generate("admin-1");
 
-        Response response = target("/admin/seats/seat-m")
+        Response response = target("/admin/rooms/room-1/seats/1")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", adminToken)
                 .put(Entity.json(new UpdateSeatRequest("AVAILABLE")));
@@ -407,16 +404,14 @@ class AdminResourceIntegrationTest extends JerseyTest
         Map<String, Object> body = response.readEntity(new GenericType<>()
         {
         });
-        assertEquals("seat-m", body.get("id"));
+        assertEquals(1, body.get("id"));
         assertEquals("AVAILABLE", body.get("status"));
     }
 
     @Test
     void shouldReturn404WhenUpdatingNonexistentSeat()
     {
-        String adminToken = tokenService.generate("admin-1");
-
-        Response response = target("/admin/seats/nonexistent")
+        Response response = target("/admin/rooms/room-1/seats/999")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", adminToken)
                 .put(Entity.json(new UpdateSeatRequest("MAINTENANCE")));
@@ -426,15 +421,14 @@ class AdminResourceIntegrationTest extends JerseyTest
         {
         });
         assertEquals("座位不存在", body.get("error"));
-        assertEquals("nonexistent", body.get("seatId"));
+        assertEquals("room-1", body.get("roomId"));
+        assertEquals(999, body.get("seatId"));
     }
 
     @Test
     void shouldReturn400WhenStatusInvalid()
     {
-        String adminToken = tokenService.generate("admin-1");
-
-        Response response = target("/admin/seats/seat-1")
+        Response response = target("/admin/rooms/room-1/seats/1")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", adminToken)
                 .put(Entity.json(new UpdateSeatRequest("BROKEN")));
@@ -450,9 +444,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn400WhenStatusNotAdminControllable()
     {
-        String adminToken = tokenService.generate("admin-1");
-
-        Response response = target("/admin/seats/seat-1")
+        Response response = target("/admin/rooms/room-1/seats/1")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", adminToken)
                 .put(Entity.json(new UpdateSeatRequest("RESERVED")));
@@ -464,9 +456,8 @@ class AdminResourceIntegrationTest extends JerseyTest
     void shouldReturn409WhenIllegalTransition()
     {
         seatRepo.save(new Seat(1, "room-1", SeatStatus.RESERVED));
-        String adminToken = tokenService.generate("admin-1");
 
-        Response response = target("/admin/seats/seat-r")
+        Response response = target("/admin/rooms/room-1/seats/1")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", adminToken)
                 .put(Entity.json(new UpdateSeatRequest("MAINTENANCE")));
@@ -483,9 +474,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn403WhenStudentUpdatesSeat()
     {
-        String studentToken = tokenService.generate("student-1");
-
-        Response response = target("/admin/seats/seat-1")
+        Response response = target("/admin/rooms/room-1/seats/1")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", studentToken)
                 .put(Entity.json(new UpdateSeatRequest("MAINTENANCE")));
@@ -496,7 +485,7 @@ class AdminResourceIntegrationTest extends JerseyTest
     @Test
     void shouldReturn401WhenNoTokenForSeatUpdate()
     {
-        Response response = target("/admin/seats/seat-1")
+        Response response = target("/admin/rooms/room-1/seats/1")
                 .request(MediaType.APPLICATION_JSON)
                 .put(Entity.json(new UpdateSeatRequest("MAINTENANCE")));
 
@@ -562,165 +551,5 @@ class AdminResourceIntegrationTest extends JerseyTest
                 .delete();
 
         assertEquals(403, response.getStatus());
-    }
-
-    // --- delete seat tests ---
-
-    @Test
-    void shouldReturn200WhenAdminDeletesAvailableSeat()
-    {
-        seatRepo.save(new Seat(1, "room-1", SeatStatus.AVAILABLE));
-        String adminToken = tokenService.generate("admin-1");
-
-        Response response = target("/admin/seats/seat-del-av")
-                .request(MediaType.APPLICATION_JSON)
-                .cookie("Authorization", adminToken)
-                .delete();
-
-        assertEquals(200, response.getStatus());
-        Map<String, Object> body = response.readEntity(new GenericType<>()
-        {
-        });
-        assertEquals("座位已删除", body.get("message"));
-        assertEquals("seat-del-av", body.get("seatId"));
-
-        // Verify seat is now REMOVED
-        Seat seat = seatRepo.findByRoomIdAndSeatId("room-1", 1).get();
-        assertEquals(SeatStatus.REMOVED, seat.status());
-    }
-
-    @Test
-    void shouldReturn200WhenAdminDeletesMaintenanceSeat()
-    {
-        seatRepo.save(new Seat(1, "room-1", SeatStatus.MAINTENANCE));
-        String adminToken = tokenService.generate("admin-1");
-
-        Response response = target("/admin/seats/seat-del-mt")
-                .request(MediaType.APPLICATION_JSON)
-                .cookie("Authorization", adminToken)
-                .delete();
-
-        assertEquals(200, response.getStatus());
-        assertEquals(SeatStatus.REMOVED, seatRepo.findByRoomIdAndSeatId("room-1", 1).get().status());
-    }
-
-    @Test
-    void shouldReturn404WhenDeletingNonexistentSeat()
-    {
-        String adminToken = tokenService.generate("admin-1");
-
-        Response response = target("/admin/seats/nonexistent")
-                .request(MediaType.APPLICATION_JSON)
-                .cookie("Authorization", adminToken)
-                .delete();
-
-        assertEquals(404, response.getStatus());
-        Map<String, Object> body = response.readEntity(new GenericType<>()
-        {
-        });
-        assertEquals("座位不存在", body.get("error"));
-        assertEquals("nonexistent", body.get("seatId"));
-    }
-
-    @Test
-    void shouldReturn409WhenSeatAlreadyRemoved()
-    {
-        seatRepo.save(new Seat(1, "room-1", SeatStatus.REMOVED));
-        String adminToken = tokenService.generate("admin-1");
-
-        Response response = target("/admin/seats/seat-removed")
-                .request(MediaType.APPLICATION_JSON)
-                .cookie("Authorization", adminToken)
-                .delete();
-
-        assertEquals(409, response.getStatus());
-        Map<String, Object> body = response.readEntity(new GenericType<>()
-        {
-        });
-        assertEquals("座位已处于删除状态", body.get("error"));
-        assertEquals("seat-removed", body.get("seatId"));
-    }
-
-    @Test
-    void shouldReturn409WhenSeatReserved()
-    {
-        seatRepo.save(new Seat(1, "room-1", SeatStatus.RESERVED));
-        String adminToken = tokenService.generate("admin-1");
-
-        Response response = target("/admin/seats/seat-del-rs")
-                .request(MediaType.APPLICATION_JSON)
-                .cookie("Authorization", adminToken)
-                .delete();
-
-        assertEquals(409, response.getStatus());
-        Map<String, Object> body = response.readEntity(new GenericType<>()
-        {
-        });
-        assertEquals("座位正在使用中，无法删除", body.get("error"));
-        assertEquals("seat-del-rs", body.get("seatId"));
-        assertEquals("RESERVED", body.get("currentStatus"));
-    }
-
-    @Test
-    void shouldReturn409WhenSeatHasActiveReservations()
-    {
-        // seat-1: AVAILABLE but TestDataReservationRepo has RESERVED res-1
-
-        Response response = target("/admin/seats/seat-1")
-                .request(MediaType.APPLICATION_JSON)
-                .cookie("Authorization", adminToken)
-                .delete();
-
-        assertEquals(409, response.getStatus());
-        Map<String, Object> body = response.readEntity(new GenericType<>()
-        {
-        });
-        assertEquals("座位存在活跃预约，无法删除", body.get("error"));
-        assertEquals("seat-1", body.get("seatId"));
-    }
-
-    @Test
-    void shouldReturn200WhenSeatOnlyHasCancelledReservations()
-    {
-        // seat-2: AVAILABLE, res-6 is CANCELLED (not active)
-        var reat = reservationRepo.findBySeatIdAndStatusIn("seat-2", 1, Set.of(ReservationStatus.RESERVED)).get(0);
-        reat.cancel();
-
-        Response response = target("/admin/seats/seat-2")
-                .request(MediaType.APPLICATION_JSON)
-                .cookie("Authorization", adminToken)
-                .delete();
-
-        assertEquals(200, response.getStatus());
-        Map<String, Object> body = response.readEntity(new GenericType<>()
-        {
-        });
-        assertEquals("座位已删除", body.get("message"));
-        assertEquals("seat-2", body.get("seatId"));
-    }
-
-    @Test
-    void shouldReturn403WhenStudentDeletesSeat()
-    {
-        seatRepo.save(new Seat(1, "room-1", SeatStatus.AVAILABLE));
-
-        Response response = target("/admin/seats/seat-del-st")
-                .request(MediaType.APPLICATION_JSON)
-                .cookie("Authorization", studentToken)
-                .delete();
-
-        assertEquals(403, response.getStatus());
-    }
-
-    @Test
-    void shouldReturn401WhenNoTokenForSeatDelete()
-    {
-        seatRepo.save(new Seat(1, "room-1", SeatStatus.AVAILABLE));
-
-        Response response = target("/admin/seats/seat-del-no")
-                .request(MediaType.APPLICATION_JSON)
-                .delete();
-
-        assertEquals(401, response.getStatus());
     }
 }

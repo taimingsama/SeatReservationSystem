@@ -114,8 +114,9 @@ class ReservationResourceIntegrationTest extends JerseyTest
     @Test
     void reserveShouldReturn201AndCreateReservation()
     {
-        Map<String, String> body = Map.of(
-                "seatId", "seat-1",
+        Map<String, Object> body = Map.of(
+                "roomId", "room-1",
+                "seatId", 1,
                 "timeSlotId", "ts-1",
                 "date", "2026-07-03"
         );
@@ -130,15 +131,16 @@ class ReservationResourceIntegrationTest extends JerseyTest
         @SuppressWarnings("unchecked")
         Map<String, Object> entity = response.readEntity(Map.class);
         assertNotNull(entity.get("reservationId"));
-        assertEquals("A-1", entity.get("seatNumber"));
+        assertEquals("1", entity.get("seatNumber"));
         assertEquals("上午 08:00-12:00", entity.get("timeSlot"));
     }
 
     @Test
     void reserveShouldReturn409WhenSeatAlreadyBooked()
     {
-        Map<String, String> body = Map.of(
-                "seatId", "seat-1",
+        Map<String, Object> body = Map.of(
+                "roomId", "room-1",
+                "seatId", 1,
                 "timeSlotId", "ts-1",
                 "date", "2026-07-03"
         );
@@ -159,14 +161,15 @@ class ReservationResourceIntegrationTest extends JerseyTest
         @SuppressWarnings("unchecked")
         Map<String, Object> entity = response.readEntity(Map.class);
         assertEquals("座位已被预约", entity.get("error"));
-        assertEquals("seat-1", entity.get("seatId"));
+        assertEquals("room-1:1", entity.get("seatId"));
     }
 
     @Test
     void reserveShouldReturn409OnDuplicateReservationBySameUser()
     {
-        Map<String, String> body = Map.of(
-                "seatId", "seat-1",
+        Map<String, Object> body = Map.of(
+                "roomId", "room-1",
+                "seatId", 1,
                 "timeSlotId", "ts-1",
                 "date", "2026-07-03"
         );
@@ -177,8 +180,9 @@ class ReservationResourceIntegrationTest extends JerseyTest
                 .post(Entity.json(body));
 
         // Same user tries different seat but same timeslot+date
-        Map<String, String> body2 = Map.of(
-                "seatId", "seat-2",
+        Map<String, Object> body2 = Map.of(
+                "roomId", "room-1",
+                "seatId", 2,
                 "timeSlotId", "ts-1",
                 "date", "2026-07-03"
         );
@@ -197,8 +201,9 @@ class ReservationResourceIntegrationTest extends JerseyTest
     @Test
     void reserveShouldReturn400OnInvalidDateFormat()
     {
-        Map<String, String> body = Map.of(
-                "seatId", "seat-1",
+        Map<String, Object> body = Map.of(
+                "roomId", "room-1",
+                "seatId", 1,
                 "timeSlotId", "ts-1",
                 "date", "not-a-date"
         );
@@ -218,8 +223,9 @@ class ReservationResourceIntegrationTest extends JerseyTest
     @Test
     void reserveShouldReturn404WhenSeatNotFound()
     {
-        Map<String, String> body = Map.of(
-                "seatId", "seat-nonexistent",
+        Map<String, Object> body = Map.of(
+                "roomId", "room-1",
+                "seatId", 999,
                 "timeSlotId", "ts-1",
                 "date", "2026-07-03"
         );
@@ -239,8 +245,9 @@ class ReservationResourceIntegrationTest extends JerseyTest
     @Test
     void reserveShouldReturn404WhenTimeSlotNotFound()
     {
-        Map<String, String> body = Map.of(
-                "seatId", "seat-1",
+        Map<String, Object> body = Map.of(
+                "roomId", "room-1",
+                "seatId", 1,
                 "timeSlotId", "ts-nonexistent",
                 "date", "2026-07-03"
         );
@@ -260,8 +267,9 @@ class ReservationResourceIntegrationTest extends JerseyTest
     @Test
     void reserveShouldReturn401ForInvalidToken()
     {
-        Map<String, String> body = Map.of(
-                "seatId", "seat-1",
+        Map<String, Object> body = Map.of(
+                "roomId", "room-1",
+                "seatId", 1,
                 "timeSlotId", "ts-1",
                 "date", "2026-07-03"
         );
@@ -277,8 +285,9 @@ class ReservationResourceIntegrationTest extends JerseyTest
     @Test
     void reserveShouldReturn401ForMissingCookie()
     {
-        Map<String, String> body = Map.of(
-                "seatId", "seat-1",
+        Map<String, Object> body = Map.of(
+                "roomId", "room-1",
+                "seatId", 1,
                 "timeSlotId", "ts-1",
                 "date", "2026-07-03"
         );
@@ -308,7 +317,7 @@ class ReservationResourceIntegrationTest extends JerseyTest
     @Test
     void checkInShouldReturn403WhenNotOwner()
     {
-        String reservationId = createReservation(studentToken, "seat-1", "ts-1", "2026-07-03");
+        String reservationId = createReservation(studentToken, "room-1", 1, "ts-1", "2026-07-03");
 
         Response response = target("/reservations/" + reservationId + "/check-in")
                 .request(MediaType.APPLICATION_JSON)
@@ -347,7 +356,7 @@ class ReservationResourceIntegrationTest extends JerseyTest
     @Test
     void checkOutShouldReturn403WhenNotOwner()
     {
-        String reservationId = createReservation(studentToken, "seat-1", "ts-1", "2026-07-03");
+        String reservationId = createReservation(studentToken, "room-1", 1, "ts-1", "2026-07-03");
 
         // Other student tries to check out
         Response response = target("/reservations/" + reservationId + "/check-out")
@@ -361,7 +370,7 @@ class ReservationResourceIntegrationTest extends JerseyTest
     @Test
     void checkOutShouldReturn409WhenNotCheckedIn()
     {
-        String reservationId = createReservation(studentToken, "seat-1", "ts-1", "2026-07-03");
+        String reservationId = createReservation(studentToken, "room-1", 1, "ts-1", "2026-07-03");
 
         // Try to check out without checking in first
         Response response = target("/reservations/" + reservationId + "/check-out")
@@ -379,7 +388,7 @@ class ReservationResourceIntegrationTest extends JerseyTest
     @Test
     void cancelShouldSucceedForReservedReservation()
     {
-        String reservationId = createReservation(studentToken, "seat-1", "ts-1", "2026-07-03");
+        String reservationId = createReservation(studentToken, "room-1", 1, "ts-1", "2026-07-03");
 
         Response response = target("/reservations/" + reservationId)
                 .request(MediaType.APPLICATION_JSON)
@@ -408,7 +417,7 @@ class ReservationResourceIntegrationTest extends JerseyTest
     @Test
     void cancelShouldReturn403WhenNotOwner()
     {
-        String reservationId = createReservation(studentToken, "seat-1", "ts-1", "2026-07-03");
+        String reservationId = createReservation(studentToken, "room-1", 1, "ts-1", "2026-07-03");
 
         Response response = target("/reservations/" + reservationId)
                 .request(MediaType.APPLICATION_JSON)
@@ -426,8 +435,8 @@ class ReservationResourceIntegrationTest extends JerseyTest
     void myReservationsShouldReturnListWithReservations()
     {
         // Create two reservations
-        createReservation(studentToken, "seat-1", "ts-1", "2026-07-03");
-        createReservation(studentToken, "seat-2", "ts-2", "2026-07-03");
+        createReservation(studentToken, "room-1", 1, "ts-1", "2026-07-03");
+        createReservation(studentToken, "room-1", 2, "ts-2", "2026-07-03");
 
         Response response = target("/reservations/my")
                 .request(MediaType.APPLICATION_JSON)
@@ -444,12 +453,12 @@ class ReservationResourceIntegrationTest extends JerseyTest
         var list = (List<Map<String, Object>>) entity.get("reservations");
         assertEquals(2, list.size());
 
-        // Verify expected seat numbers are present (order is non-deterministic in ConcurrentHashMap)
-        List<String> seatNumbers = list.stream()
-                .map(m -> (String) m.get("seatNumber"))
+        // Verify expected seat IDs are present (order is non-deterministic in ConcurrentHashMap)
+        List<Integer> seatIds = list.stream()
+                .map(m -> (Integer) m.get("seatId"))
                 .toList();
-        assertTrue(seatNumbers.contains("A-1"), "Should contain A-1");
-        assertTrue(seatNumbers.contains("A-2"), "Should contain A-2");
+        assertTrue(seatIds.contains(1), "Should contain seatId 1");
+        assertTrue(seatIds.contains(2), "Should contain seatId 2");
 
         // Verify common fields on one reservation
         Map<String, Object> first = list.get(0);
@@ -493,9 +502,9 @@ class ReservationResourceIntegrationTest extends JerseyTest
     void myReservationsShouldOnlyReturnOwnReservations()
     {
         // Student creates a reservation
-        createReservation(studentToken, "seat-1", "ts-1", "2026-07-03");
+        createReservation(studentToken, "room-1", 1, "ts-1", "2026-07-03");
         // Other student creates a reservation
-        createReservation(otherStudentToken, "seat-2", "ts-2", "2026-07-03");
+        createReservation(otherStudentToken, "room-1", 2, "ts-2", "2026-07-03");
 
         // Student sees only their own reservation
         Response response = target("/reservations/my")
@@ -511,7 +520,7 @@ class ReservationResourceIntegrationTest extends JerseyTest
         @SuppressWarnings("unchecked")
         var list = (List<Map<String, Object>>) entity.get("reservations");
         assertEquals(1, list.size());
-        assertEquals("A-1", list.get(0).get("seatNumber"));
+        assertEquals(1, list.get(0).get("seatId"));
     }
 
     // ================================================================
@@ -521,9 +530,10 @@ class ReservationResourceIntegrationTest extends JerseyTest
     /**
      * Creates a reservation via the API and returns the reservation ID.
      */
-    private String createReservation(String token, String seatId, String timeSlotId, String date)
+    private String createReservation(String token, String roomId, int seatId, String timeSlotId, String date)
     {
-        Map<String, String> body = Map.of(
+        Map<String, Object> body = Map.of(
+                "roomId", roomId,
                 "seatId", seatId,
                 "timeSlotId", timeSlotId,
                 "date", date

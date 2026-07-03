@@ -52,7 +52,7 @@ class ReservationResourceTest {
 
         assertTrue(executeCalled);
         assertEquals("jwt.token.here", lastRequest.token());
-        assertEquals("seat-1", lastRequest.seatId());
+        assertEquals(1, lastRequest.seatId());
         assertEquals("ts-1", lastRequest.timeSlotId());
         assertEquals(LocalDate.of(2026, 7, 2), lastRequest.date());
         assertEquals(201, response.getStatus());

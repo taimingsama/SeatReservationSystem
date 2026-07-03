@@ -1,20 +1,16 @@
 package org.cleancoders.web.resource;
 
 import jakarta.ws.rs.core.Response;
-import org.cleancoders.seatandroom.domain.RoomStatus;
-import org.cleancoders.seatandroom.domain.RoomLayout;
-import org.cleancoders.seatandroom.domain.Seat;
-import org.cleancoders.seatandroom.domain.SeatStatus;
-import org.cleancoders.seatandroom.domain.StudyRoom;
+import org.cleancoders.seatandroom.domain.*;
 import org.cleancoders.seatandroom.usecase.ListRoomsUseCase;
 import org.cleancoders.seatandroom.usecase.ListSeatsUseCase;
+import org.cleancoders.web.dto.room.RoomNotFoundResponse;
 import org.cleancoders.web.presenter.ResponseContext;
 import org.cleancoders.web.presenter.WebApiRoomPresenter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -136,8 +132,8 @@ class RoomResourceTest
 
         assertEquals(404, response.getStatus());
         @SuppressWarnings("unchecked")
-        Map<String, Object> body = (Map<String, Object>) response.getEntity();
-        assertEquals("自习室不存在", body.get("error"));
-        assertEquals("nonexistent", body.get("roomId"));
+        RoomNotFoundResponse body = (RoomNotFoundResponse) response.getEntity();
+        assertEquals("自习室不存在", body.error());
+        assertEquals("nonexistent", body.roomId());
     }
 }

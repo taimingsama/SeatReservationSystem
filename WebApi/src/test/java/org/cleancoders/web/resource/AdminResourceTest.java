@@ -8,12 +8,12 @@ import org.cleancoders.seatandroom.usecase.DeleteRoomUseCase;
 import org.cleancoders.seatandroom.usecase.ManageRoomsUseCase;
 import org.cleancoders.seatandroom.usecase.UpdateRoomUseCase;
 import org.cleancoders.web.dto.admin.CreateRoomRequest;
+import org.cleancoders.web.dto.room.RoomNameConflictResponse;
+import org.cleancoders.web.dto.room.RoomNotFoundResponse;
 import org.cleancoders.web.presenter.ResponseContext;
 import org.cleancoders.web.presenter.WebApiRoomPresenter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -123,10 +123,9 @@ class AdminResourceTest
                 new CreateRoomRequest("自习室F", "综合楼二楼", "SMALL"));
 
         assertEquals(409, response.getStatus());
-        @SuppressWarnings("unchecked")
-        Map<String, Object> body = (Map<String, Object>) response.getEntity();
-        assertEquals("自习室名称已存在", body.get("error"));
-        assertEquals("自习室F", body.get("name"));
+        RoomNameConflictResponse body = (RoomNameConflictResponse) response.getEntity();
+        assertEquals("自习室名称已存在", body.error());
+        assertEquals("自习室F", body.name());
     }
 
     // --- update room tests ---
@@ -173,10 +172,9 @@ class AdminResourceTest
                 new CreateRoomRequest("自习室X", "一楼", "SMALL"));
 
         assertEquals(404, response.getStatus());
-        @SuppressWarnings("unchecked")
-        Map<String, Object> body = (Map<String, Object>) response.getEntity();
-        assertEquals("自习室不存在", body.get("error"));
-        assertEquals("nonexistent", body.get("roomId"));
+        RoomNotFoundResponse body = (RoomNotFoundResponse) response.getEntity();
+        assertEquals("自习室不存在", body.error());
+        assertEquals("nonexistent", body.roomId());
     }
 
     @Test
