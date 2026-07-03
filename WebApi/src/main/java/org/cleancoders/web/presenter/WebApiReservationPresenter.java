@@ -8,9 +8,7 @@ import org.cleancoders.reservation.usecase.ListMyReservationsUseCase.Reservation
 import org.cleancoders.web.dto.common.ErrorResponse;
 import org.cleancoders.web.dto.reservation.*;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * WebApi presenter implementation for all reservation-related use cases.
@@ -102,20 +100,20 @@ public class WebApiReservationPresenter extends WebApiPresenter implements
     @Override
     public void presentReservations(List<ReservationItem> items)
     {
-        var list = items.stream()
-                .map(item -> Map.of(
-                        "reservationId", item.reservationId(),
-                        "roomId", item.roomId(),
-                        "seatId", item.seatId(),
-                        "timeSlotId", item.timeSlotId(),
-                        "timeSlotLabel", item.timeSlotLabel(),
-                        "date", item.date().toString(),
-                        "status", item.status(),
-                        "createdAt", item.createdAt().toString()
+        List<ReservationItemResponse> dtos = items.stream()
+                .map(item -> new ReservationItemResponse(
+                        item.reservationId(),
+                        item.roomId(),
+                        item.seatId(),
+                        item.timeSlotId(),
+                        item.timeSlotLabel(),
+                        item.date().toString(),
+                        item.status(),
+                        item.createdAt().toString()
                 ))
                 .toList();
 
-        responseContext.set(Response.ok(Map.of("reservations", list)).build());
+        responseContext.set(Response.ok(new ReservationListResponse(dtos)).build());
     }
 
     // --- ManageReservationsUseCase.Presenter ---
@@ -123,25 +121,23 @@ public class WebApiReservationPresenter extends WebApiPresenter implements
     @Override
     public void presentAllReservations(List<ManageReservationsUseCase.ReservationItem> items)
     {
-        var list = items.stream()
-                .map(item -> {
-                    var m = new LinkedHashMap<String, Object>();
-                    m.put("reservationId", item.reservationId());
-                    m.put("userId", item.userId());
-                    m.put("username", item.username());
-                    m.put("roomId", item.roomId());
-                    m.put("seatId", item.seatId());
-                    m.put("timeSlotId", item.timeSlotId());
-                    m.put("timeSlotLabel", item.timeSlotLabel());
-                    m.put("date", item.date().toString());
-                    m.put("status", item.status());
-                    m.put("createdAt", item.createdAt() != null ? item.createdAt().toString() : null);
-                    m.put("checkInAt", item.checkInAt() != null ? item.checkInAt().toString() : null);
-                    m.put("checkOutAt", item.checkOutAt() != null ? item.checkOutAt().toString() : null);
-                    return m;
-                })
+        List<AdminReservationItemResponse> dtos = items.stream()
+                .map(item -> new AdminReservationItemResponse(
+                        item.reservationId(),
+                        item.userId(),
+                        item.username(),
+                        item.roomId(),
+                        item.seatId(),
+                        item.timeSlotId(),
+                        item.timeSlotLabel(),
+                        item.date().toString(),
+                        item.status(),
+                        item.createdAt() != null ? item.createdAt().toString() : null,
+                        item.checkInAt() != null ? item.checkInAt().toString() : null,
+                        item.checkOutAt() != null ? item.checkOutAt().toString() : null
+                ))
                 .toList();
 
-        responseContext.set(Response.ok(Map.of("reservations", list)).build());
+        responseContext.set(Response.ok(new AdminReservationListResponse(dtos)).build());
     }
 }

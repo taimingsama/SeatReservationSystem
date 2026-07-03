@@ -6,13 +6,10 @@ import org.cleancoders.seatandroom.domain.Seat;
 import org.cleancoders.seatandroom.domain.SeatStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.usecase.*;
-import org.cleancoders.web.dto.room.RoomListResponse;
-import org.cleancoders.web.dto.room.RoomResponse;
-import org.cleancoders.web.dto.seat.SeatListResponse;
-import org.cleancoders.web.dto.seat.SeatResponse;
+import org.cleancoders.web.dto.room.*;
+import org.cleancoders.web.dto.seat.*;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * WebApi presenter for room and seat use cases.
@@ -49,10 +46,9 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
     @Override
     public void roomNotFound(String roomId)
     {
-        responseContext.set(Response.status(404).entity(Map.of(
-                "error", "自习室不存在",
-                "roomId", roomId
-        )).build());
+        responseContext.set(Response.status(404).entity(
+                new RoomNotFoundResponse("自习室不存在", roomId)
+        ).build());
     }
 
     @Override
@@ -76,38 +72,34 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
     @Override
     public void roomNameAlreadyExists(String name)
     {
-        responseContext.set(Response.status(409).entity(Map.of(
-                "error", "自习室名称已存在",
-                "name", name
-        )).build());
+        responseContext.set(Response.status(409).entity(
+                new RoomNameConflictResponse("自习室名称已存在", name)
+        ).build());
     }
 
     @Override
     public void invalidLayout(String layout)
     {
-        responseContext.set(Response.status(400).entity(Map.of(
-                "error", "无效的布局类型",
-                "layout", layout,
-                "validValues", new String[]{"SMALL", "MEDIUM", "LARGE"}
-        )).build());
+        responseContext.set(Response.status(400).entity(
+                new InvalidLayoutResponse("无效的布局类型", layout,
+                        new String[]{"SMALL", "MEDIUM", "LARGE"})
+        ).build());
     }
 
     @Override
     public void deleteSuccess(String roomId)
     {
-        responseContext.set(Response.status(200).entity(Map.of(
-                "message", "自习室已删除",
-                "roomId", roomId
-        )).build());
+        responseContext.set(Response.status(200).entity(
+                new RoomDeletedResponse("自习室已删除", roomId)
+        ).build());
     }
 
     @Override
     public void roomAlreadyClosed(String roomId)
     {
-        responseContext.set(Response.status(409).entity(Map.of(
-                "error", "自习室已处于关闭状态",
-                "roomId", roomId
-        )).build());
+        responseContext.set(Response.status(409).entity(
+                new RoomAlreadyClosedResponse("自习室已处于关闭状态", roomId)
+        ).build());
     }
 
     // --- UpdateSeatUseCase ---
@@ -123,33 +115,26 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
     @Override
     public void seatNotFound(String roomId, int seatId)
     {
-        responseContext.set(Response.status(404).entity(Map.of(
-                "error", "座位不存在",
-                "roomId", roomId,
-                "seatId", seatId
-        )).build());
+        responseContext.set(Response.status(404).entity(
+                new SeatNotFoundInRoomResponse("座位不存在", roomId, seatId)
+        ).build());
     }
 
     @Override
     public void invalidStatusTransition(String roomId, int seatId, SeatStatus current, SeatStatus target)
     {
-        responseContext.set(Response.status(409).entity(Map.of(
-                "error", "非法状态转换",
-                "roomId", roomId,
-                "seatId", seatId,
-                "currentStatus", current.name(),
-                "targetStatus", target.name()
-        )).build());
+        responseContext.set(Response.status(409).entity(
+                new InvalidStatusTransitionResponse("非法状态转换", roomId, seatId,
+                        current.name(), target.name())
+        ).build());
     }
 
     @Override
     public void invalidStatus(String roomId, int seatId, String status)
     {
-        responseContext.set(Response.status(400).entity(Map.of(
-                "error", "非法座位状态",
-                "roomId", roomId,
-                "seatId", seatId,
-                "status", status == null ? "null" : status
-        )).build());
+        responseContext.set(Response.status(400).entity(
+                new InvalidSeatStatusResponse("非法座位状态", roomId, seatId,
+                        status == null ? "null" : status)
+        ).build());
     }
 }
