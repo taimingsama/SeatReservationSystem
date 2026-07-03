@@ -25,7 +25,6 @@ public class SystemTaskBinder extends AbstractBinder
                 .to(GetPopularRoomsStatsUseCase.Presenter.class)
                 .to(GetCheckInRateStatsUseCase.Presenter.class)
                 .to(GetNoShowRateStatsUseCase.Presenter.class)
-                .to(ProcessExpiredReservationsUseCase.Presenter.class)
                 .in(Singleton.class);
     }
 }

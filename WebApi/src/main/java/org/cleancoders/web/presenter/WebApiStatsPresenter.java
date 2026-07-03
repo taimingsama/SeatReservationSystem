@@ -7,7 +7,6 @@ import org.cleancoders.web.dto.stats.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 @Singleton
 public class WebApiStatsPresenter extends WebApiPresenter implements
@@ -15,8 +14,7 @@ public class WebApiStatsPresenter extends WebApiPresenter implements
         GetTimeSlotStatsUseCase.Presenter,
         GetPopularRoomsStatsUseCase.Presenter,
         GetCheckInRateStatsUseCase.Presenter,
-        GetNoShowRateStatsUseCase.Presenter,
-        ProcessExpiredReservationsUseCase.Presenter
+        GetNoShowRateStatsUseCase.Presenter
 {
 
     @Override
@@ -69,15 +67,4 @@ public class WebApiStatsPresenter extends WebApiPresenter implements
         ).build());
     }
 
-    // --- ProcessExpiredReservationsUseCase.Presenter ---
-
-    @Override
-    public void onCompleted(LocalDate date, int autoCheckedOut, int expired)
-    {
-        responseContext.set(Response.ok(
-                Map.of("date", date.toString(),
-                        "autoCheckedOut", autoCheckedOut,
-                        "expired", expired)
-        ).build());
-    }
 }

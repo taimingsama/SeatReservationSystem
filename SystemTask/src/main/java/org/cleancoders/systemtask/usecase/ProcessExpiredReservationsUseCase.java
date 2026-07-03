@@ -19,6 +19,8 @@ import java.util.List;
 /**
  * 系统定时任务：处理当日已过期的预约。
  * <p>
+ * 由 {@link org.cleancoders.web.scheduler.ReservationScheduler} 每分钟自动调用。
+ * <p>
  * 在时段结束后：
  * <ul>
  *   <li>已签到 (CHECKED_IN) → 自动退座，信用分 +5</li>
@@ -40,9 +42,6 @@ public class ProcessExpiredReservationsUseCase
     @Inject
     UserRepository userRepo;
 
-    @Inject
-    Presenter presenter;
-
     /**
      * Returns the current time. Exposed for testability.
      */
@@ -51,9 +50,9 @@ public class ProcessExpiredReservationsUseCase
         return LocalDateTime.now();
     }
 
-    public Output execute(Request request)
+    public Output execute()
     {
-        LocalDate today = request.date() != null ? request.date() : LocalDate.now();
+        LocalDate today = LocalDate.now();
         LocalDateTime now = getCurrentTime();
 
         List<Reservation> todayReservations = reservationRepo.findAll().stream()
@@ -130,21 +129,7 @@ public class ProcessExpiredReservationsUseCase
             }
         }
 
-        presenter.onCompleted(today, autoCheckedOut, expired);
         return new Output(today, autoCheckedOut, expired);
-    }
-
-    public interface Presenter
-    {
-        void onCompleted(LocalDate date, int autoCheckedOut, int expired);
-    }
-
-    public record Request(LocalDate date)
-    {
-        public Request()
-        {
-            this(null);
-        }
     }
 
     public record Output(LocalDate date, int autoCheckedOut, int expired)

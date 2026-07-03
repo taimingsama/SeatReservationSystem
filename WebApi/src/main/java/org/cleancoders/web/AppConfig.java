@@ -10,6 +10,7 @@ import org.cleancoders.web.binder.UserAndAuthBinder;
 import org.cleancoders.web.binder.WebAppBinder;
 import org.cleancoders.web.filter.CorsFilter;
 import org.cleancoders.web.resource.*;
+import org.cleancoders.web.scheduler.ReservationScheduler;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -39,6 +40,8 @@ public class AppConfig extends Application
         classes.add(AcceptHeaderOpenApiResource.class);
         // Providers / Filters
         classes.add(CorsFilter.class);
+        // Scheduler
+        classes.add(ReservationScheduler.class);
         // HK2 Binder (must be registered as a class so Jersey discovers it)
         classes.add(WebAppBinder.class);
         classes.add(ReservationBinder.class);
