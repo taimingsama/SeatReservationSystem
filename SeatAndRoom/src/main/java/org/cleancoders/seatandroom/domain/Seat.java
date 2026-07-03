@@ -3,30 +3,24 @@ package org.cleancoders.seatandroom.domain;
 /**
  * A seat within a study room.
  * <p>
- * Mutable class — status transitions are domain operations that validate
- * the current state before allowing the change.
+ * Identified by (roomId, id) composite key — id is a sequential number (1..N)
+ * within the room. Mutable class — status transitions are domain operations
+ * that validate the current state before allowing the change.
  */
 public class Seat {
 
-    private String id;
+    private final int id;
     private final String roomId;
-    private final String seatNumber;
     private SeatStatus status;
 
-    public Seat(String id, String roomId, String seatNumber, SeatStatus status) {
+    public Seat(int id, String roomId, SeatStatus status) {
         this.id = id;
         this.roomId = roomId;
-        this.seatNumber = seatNumber;
         this.status = status;
     }
 
     // --- domain business logic ---
 
-    /**
-     * Marks the seat as reserved.
-     *
-     * @throws IllegalStateException if the seat is not {@link SeatStatus#AVAILABLE}
-     */
     public void reserve() {
         if (status != SeatStatus.AVAILABLE) {
             throw new IllegalStateException(
@@ -35,11 +29,6 @@ public class Seat {
         this.status = SeatStatus.RESERVED;
     }
 
-    /**
-     * Releases the seat back to available.
-     *
-     * @throws IllegalStateException if the seat is not in a reservable/occupied state
-     */
     public void release() {
         if (status != SeatStatus.RESERVED && status != SeatStatus.OCCUPIED) {
             throw new IllegalStateException(
@@ -48,11 +37,6 @@ public class Seat {
         this.status = SeatStatus.AVAILABLE;
     }
 
-    /**
-     * Marks the seat as occupied (after check-in).
-     *
-     * @throws IllegalStateException if the seat is not {@link SeatStatus#RESERVED}
-     */
     public void occupy() {
         if (status != SeatStatus.RESERVED) {
             throw new IllegalStateException(
@@ -61,11 +45,6 @@ public class Seat {
         this.status = SeatStatus.OCCUPIED;
     }
 
-    /**
-     * Puts the seat under maintenance.
-     *
-     * @throws IllegalStateException if the seat is not {@link SeatStatus#AVAILABLE}
-     */
     public void markMaintenance() {
         if (status != SeatStatus.AVAILABLE) {
             throw new IllegalStateException(
@@ -74,11 +53,6 @@ public class Seat {
         this.status = SeatStatus.MAINTENANCE;
     }
 
-    /**
-     * Restores the seat from maintenance to available.
-     *
-     * @throws IllegalStateException if the seat is not {@link SeatStatus#MAINTENANCE}
-     */
     public void markAvailable() {
         if (status != SeatStatus.MAINTENANCE) {
             throw new IllegalStateException(
@@ -87,12 +61,6 @@ public class Seat {
         this.status = SeatStatus.AVAILABLE;
     }
 
-    /**
-     * Soft-deletes the seat. Only {@link SeatStatus#AVAILABLE} or
-     * {@link SeatStatus#MAINTENANCE} seats can be removed.
-     *
-     * @throws IllegalStateException if the seat is not AVAILABLE or MAINTENANCE
-     */
     public void markRemoved() {
         if (status != SeatStatus.AVAILABLE && status != SeatStatus.MAINTENANCE) {
             throw new IllegalStateException(
@@ -103,7 +71,7 @@ public class Seat {
 
     // --- getters ---
 
-    public String id() {
+    public int id() {
         return id;
     }
 
@@ -111,17 +79,7 @@ public class Seat {
         return roomId;
     }
 
-    public String seatNumber() {
-        return seatNumber;
-    }
-
     public SeatStatus status() {
         return status;
-    }
-
-    // --- setters (for infrastructure use) ---
-
-    public void setId(String id) {
-        this.id = id;
     }
 }
