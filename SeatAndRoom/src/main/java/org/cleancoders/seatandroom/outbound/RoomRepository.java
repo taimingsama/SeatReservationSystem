@@ -18,4 +18,6 @@ public interface RoomRepository
     StudyRoom save(StudyRoom room);
 
     Optional<StudyRoom> findByName(String name);
+
+    List<StudyRoom> findAll();
 }

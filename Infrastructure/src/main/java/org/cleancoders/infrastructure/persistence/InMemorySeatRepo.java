@@ -50,4 +50,9 @@ public class InMemorySeatRepo implements SeatRepository {
                 .filter(s -> s.roomId().equals(roomId))
                 .toList();
     }
+
+    @Override
+    public List<Seat> findAll() {
+        return List.copyOf(store.values());
+    }
 }

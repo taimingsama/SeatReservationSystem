@@ -15,4 +15,6 @@ public interface SeatRepository {
     Seat save(Seat seat);
 
     List<Seat> findByRoomId(String roomId);
+
+    List<Seat> findAll();
 }

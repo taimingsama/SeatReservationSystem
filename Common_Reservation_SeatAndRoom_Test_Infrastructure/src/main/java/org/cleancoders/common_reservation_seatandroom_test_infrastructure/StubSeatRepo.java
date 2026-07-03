@@ -35,4 +35,10 @@ public class StubSeatRepo implements SeatRepository
                 .filter(s -> s.roomId().equals(roomId))
                 .toList();
     }
+
+    @Override
+    public List<Seat> findAll()
+    {
+        return List.copyOf(seats.values());
+    }
 }

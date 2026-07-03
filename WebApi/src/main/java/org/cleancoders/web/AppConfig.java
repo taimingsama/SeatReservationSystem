@@ -5,6 +5,7 @@ import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import jakarta.ws.rs.core.Application;
 import org.cleancoders.web.binder.ReservationBinder;
 import org.cleancoders.web.binder.SeatAndRoomBinder;
+import org.cleancoders.web.binder.SystemTaskBinder;
 import org.cleancoders.web.binder.UserAndAuthBinder;
 import org.cleancoders.web.binder.WebAppBinder;
 import org.cleancoders.web.filter.CorsFilter;
@@ -31,6 +32,7 @@ public class AppConfig extends Application
         classes.add(ReservationResource.class);
         classes.add(RoomResource.class);
         classes.add(AdminResource.class);
+        classes.add(AdminStatsResource.class);
         // Swagger / OpenAPI endpoints (served under /api/ prefix per web.xml mapping)
         classes.add(OpenApiConfig.class);
         classes.add(OpenApiResource.class);
@@ -41,6 +43,7 @@ public class AppConfig extends Application
         classes.add(WebAppBinder.class);
         classes.add(ReservationBinder.class);
         classes.add(SeatAndRoomBinder.class);
+        classes.add(SystemTaskBinder.class);
         classes.add(UserAndAuthBinder.class);
         return classes;
     }
