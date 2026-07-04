@@ -113,7 +113,7 @@ public class ProcessExpiredReservationsUseCase
                 int newCredit = Math.min(100, user.creditScore() + 5);
                 userRepo.save(new User(user.id(), user.username(), user.password(), user.role(),
                         user.name(), user.email(), user.reservationCount(), user.studyHours(),
-                        user.checkInCount(), newCredit));
+                        user.checkInCount(), newCredit, user.banned()));
 
                 autoCheckedOut++;
             }
@@ -127,7 +127,7 @@ public class ProcessExpiredReservationsUseCase
                 int newCredit2 = Math.max(0, user.creditScore() - 15);
                 userRepo.save(new User(user.id(), user.username(), user.password(), user.role(),
                         user.name(), user.email(), user.reservationCount(), user.studyHours(),
-                        user.checkInCount(), newCredit2));
+                        user.checkInCount(), newCredit2, user.banned()));
 
                 expired++;
             }

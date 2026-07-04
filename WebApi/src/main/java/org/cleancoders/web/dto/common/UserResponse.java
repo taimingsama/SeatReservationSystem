@@ -22,7 +22,9 @@ public record UserResponse(
         @Schema(description = "累计签到次数", example = "12")
         int checkInCount,
         @Schema(description = "信用分（满分100）", example = "95")
-        int creditScore
+        int creditScore,
+        @Schema(description = "是否被封禁", example = "false")
+        boolean banned
 )
 {
 }

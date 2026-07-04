@@ -178,5 +178,6 @@ class UpdateRoomUseCaseTest
         {
             fail("userNotFound() must not be called");
         }
+    @Override public void banned() {}
     }
 }

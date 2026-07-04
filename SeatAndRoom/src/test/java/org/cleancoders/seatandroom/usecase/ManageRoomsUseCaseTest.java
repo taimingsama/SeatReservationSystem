@@ -188,5 +188,6 @@ class ManageRoomsUseCaseTest
         {
             fail("userNotFound() must not be called — token validation is not under test");
         }
+    @Override public void banned() {}
     }
 }

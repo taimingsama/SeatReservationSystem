@@ -82,6 +82,12 @@ public abstract class AuthUseCase<R extends AuthUseCase.Request, O>
             return null;
         }
 
+        if (user.get().banned())
+        {
+            presenter.banned();
+            return null;
+        }
+
         return user.get();
     }
 
@@ -124,5 +130,7 @@ public abstract class AuthUseCase<R extends AuthUseCase.Request, O>
         void invalidToken();
 
         void userNotFound();
+
+        default void banned() {}
     }
 }

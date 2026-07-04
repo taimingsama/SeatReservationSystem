@@ -2,20 +2,15 @@ package org.cleancoders.userandauth.usecase;
 
 import jakarta.inject.Inject;
 import org.cleancoders.userandauth.domain.User;
-import org.cleancoders.userandauth.domain.UserRole;
-import org.cleancoders.userandauth.outbound.UserRepository;
 
 /**
- * 管理员管理用户信用分。
+ * 管理员封禁/解封学生。
  */
-public class ManageUserCreditUseCase extends AdminAuthUseCase<ManageUserCreditUseCase.Request, ManageUserCreditUseCase.Output>
+public class BanStudentUseCase extends AdminAuthUseCase<BanStudentUseCase.Request, BanStudentUseCase.Output>
 {
 
     @Inject
     Presenter presenter;
-
-    @Inject
-    UserRepository userRepo;
 
     @Override
     protected Output doExecute(User admin, Request req)
@@ -28,30 +23,22 @@ public class ManageUserCreditUseCase extends AdminAuthUseCase<ManageUserCreditUs
         }
 
         User user = userOpt.get();
-        int newScore = req.creditScore();
-
         User updated = new User(user.id(), user.username(), user.password(), user.role(),
                 user.name(), user.email(), user.reservationCount(), user.studyHours(),
-                user.checkInCount(), newScore, user.banned());
+                user.checkInCount(), user.creditScore(), req.ban());
 
         userRepo.save(updated);
-        presenter.creditUpdated(updated);
+        presenter.banUpdated(updated);
         return new Output(updated);
     }
 
     public interface Presenter
     {
-        void creditUpdated(User user);
+        void banUpdated(User user);
 
         void userNotFound(String userId);
     }
 
-    public record Request(String token, String userId, int creditScore)
-            implements AuthUseCase.Request
-    {
-    }
-
-    public record Output(User user)
-    {
-    }
+    public record Request(String token, String userId, boolean ban) implements AuthUseCase.Request {}
+    public record Output(User user) {}
 }

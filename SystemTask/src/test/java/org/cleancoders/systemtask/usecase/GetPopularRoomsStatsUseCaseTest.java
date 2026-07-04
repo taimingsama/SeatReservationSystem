@@ -121,7 +121,7 @@ class GetPopularRoomsStatsUseCaseTest
         @Override public Optional<StudyRoom> findById(String id) { return Optional.ofNullable(store.get(id)); }
         @Override public StudyRoom save(StudyRoom room) { store.put(room.id(), room); return room; }
         @Override public Optional<StudyRoom> findByName(String n) { return Optional.empty(); }
-        @Override public List<StudyRoom> findAll() { return List.copyOf(store.values()); }
+        @Override public List<StudyRoom> findAll() { return store.values().stream().toList(); }
     }
 
     static class StubPresenter implements GetPopularRoomsStatsUseCase.Presenter,
@@ -143,5 +143,6 @@ class GetPopularRoomsStatsUseCaseTest
         @Override public void forbidden() { forbiddenCalled = true; }
         @Override public void invalidToken() { invalidTokenCalled = true; }
         @Override public void userNotFound() { userNotFoundCalled = true; }
+    @Override public void banned() {}
     }
 }

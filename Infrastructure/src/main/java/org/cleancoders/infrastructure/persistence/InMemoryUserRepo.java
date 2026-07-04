@@ -3,6 +3,7 @@ package org.cleancoders.infrastructure.persistence;
 import org.cleancoders.userandauth.domain.User;
 import org.cleancoders.userandauth.outbound.UserRepository;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,9 +35,22 @@ public class InMemoryUserRepo implements UserRepository
         String id = user.id() != null ? user.id() : UUID.randomUUID().toString();
         User saved = new User(id, user.username(), user.password(), user.role(),
                 user.name(), user.email(), user.reservationCount(), user.studyHours(),
-                user.checkInCount(), user.creditScore());
+                user.checkInCount(), user.creditScore(), user.banned());
         byId.put(id, saved);
         byUsername.put(saved.username(), id);
         return saved;
+    }
+
+    @Override
+    public List<User> findAll() {
+        return List.copyOf(byId.values());
+    }
+
+    @Override
+    public void deleteById(String id) {
+        User removed = byId.remove(id);
+        if (removed != null) {
+            byUsername.remove(removed.username());
+        }
     }
 }

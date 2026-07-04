@@ -13,6 +13,9 @@ import org.cleancoders.web.dto.auth.UsernameConflictResponse;
 import org.cleancoders.web.dto.common.ErrorResponse;
 import org.cleancoders.web.dto.common.UserResponse;
 
+import java.util.List;
+import java.util.Map;
+
 @Singleton
 public class WebApiAuthPresenter extends WebApiPresenter implements
         LoginUseCase.Presenter,
@@ -22,6 +25,9 @@ public class WebApiAuthPresenter extends WebApiPresenter implements
         ChangePasswordUseCase.Presenter,
         ResetPasswordUseCase.Presenter,
         UpdateUserNameUseCase.Presenter,
+        ListAllStudentsUseCase.Presenter,
+        BanStudentUseCase.Presenter,
+        DeleteStudentUseCase.Presenter,
         StudentAuthUseCase.Presenter,
         AdminAuthUseCase.Presenter,
         AuthUseCase.Presenter
@@ -74,7 +80,7 @@ public class WebApiAuthPresenter extends WebApiPresenter implements
     private UserResponse toUserResponse(User user)
     {
         return new UserResponse(user.id(), user.username(), user.role(), user.name(), user.email(),
-                user.reservationCount(), user.studyHours(), user.checkInCount(), user.creditScore());
+                user.reservationCount(), user.studyHours(), user.checkInCount(), user.creditScore(), user.banned());
     }
 
     // --- ManageUserCreditUseCase.Presenter ---
@@ -84,7 +90,7 @@ public class WebApiAuthPresenter extends WebApiPresenter implements
     {
         responseContext.set(Response.ok(new UserResponse(user.id(), user.username(), user.role(),
                 user.name(), user.email(), user.reservationCount(), user.studyHours(),
-                user.checkInCount(), user.creditScore())).build());
+                user.checkInCount(), user.creditScore(), user.banned())).build());
     }
 
     @Override
@@ -134,7 +140,34 @@ public class WebApiAuthPresenter extends WebApiPresenter implements
         responseContext.set(Response.ok(
                 new UserResponse(user.id(), user.username(), user.role(),
                         user.name(), user.email(), user.reservationCount(),
-                        user.studyHours(), user.checkInCount(), user.creditScore())).build());
+                        user.studyHours(), user.checkInCount(), user.creditScore(), user.banned())).build());
+    }
+
+    // --- ListAllStudentsUseCase.Presenter ---
+
+    @Override
+    public void presentStudents(List<User> students)
+    {
+        List<UserResponse> dtos = students.stream()
+                .map(this::toUserResponse)
+                .toList();
+        responseContext.set(Response.ok(Map.of("students", dtos)).build());
+    }
+
+    // --- BanStudentUseCase.Presenter ---
+
+    @Override
+    public void banUpdated(User user)
+    {
+        responseContext.set(Response.ok(toUserResponse(user)).build());
+    }
+
+    // --- DeleteStudentUseCase.Presenter ---
+
+    @Override
+    public void deleted(String userId)
+    {
+        responseContext.set(Response.ok(Map.of("message", "学生已删除", "userId", userId)).build());
     }
 
     // --- AuthUseCase.Presenterr ---
@@ -149,6 +182,12 @@ public class WebApiAuthPresenter extends WebApiPresenter implements
     public void userNotFound()
     {
         responseContext.set(Response.status(404).entity(new ErrorResponse("User not found")).build());
+    }
+
+    @Override
+    public void banned()
+    {
+        responseContext.set(Response.status(403).entity(new ErrorResponse("账户已被封禁")).build());
     }
 
     // --- AdminAuthUseCase.Presenter ---

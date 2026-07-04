@@ -274,5 +274,6 @@ class CheckInUseCaseTest
         {
             fail("userNotFound() must not be called — token validation is not under the test");
         }
+    @Override public void banned() {}
     }
 }

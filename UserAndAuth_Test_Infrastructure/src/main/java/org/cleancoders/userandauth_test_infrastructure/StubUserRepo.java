@@ -34,8 +34,21 @@ public class StubUserRepo implements UserRepository
         String id = user.id() != null ? user.id() : "generated-id";
         User saved = new User(id, user.username(), user.password(), user.role(),
                 user.name(), user.email(), user.reservationCount(), user.studyHours(),
-                user.checkInCount(), user.creditScore());
+                user.checkInCount(), user.creditScore(), user.banned());
         users.put(saved.username(), saved);
         return saved;
+    }
+
+    @Override
+    public java.util.List<User> findAll() {
+        return java.util.List.copyOf(users.values());
+    }
+
+    @Override
+    public void deleteById(String id) {
+        User removed = users.remove(id);
+        if (removed != null) {
+            // clean up
+        }
     }
 }

@@ -40,7 +40,7 @@ public class ResetPasswordUseCase extends AdminAuthUseCase<ResetPasswordUseCase.
 
         User updated = new User(user.id(), user.username(), hashed, user.role(),
                 user.name(), user.email(), user.reservationCount(), user.studyHours(),
-                user.checkInCount(), user.creditScore());
+                user.checkInCount(), user.creditScore(), user.banned());
         userRepo.save(updated);
 
         presenter.passwordReset(user.username(), newPassword);

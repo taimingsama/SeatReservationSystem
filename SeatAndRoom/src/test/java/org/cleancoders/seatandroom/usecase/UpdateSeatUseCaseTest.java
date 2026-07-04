@@ -211,5 +211,6 @@ class UpdateSeatUseCaseTest
 
         @Override
         public void userNotFound() { fail("userNotFound() must not be called"); }
+    @Override public void banned() {}
     }
 }

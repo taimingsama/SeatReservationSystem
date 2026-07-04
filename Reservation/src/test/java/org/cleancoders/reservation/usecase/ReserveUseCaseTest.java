@@ -174,12 +174,12 @@ class ReserveUseCaseTest
         @Override public List<Reservation> findByUserId(String uid) {
             return m.values().stream().filter(r -> r.userId().equals(uid)).toList();
         }
+        @Override public List<Reservation> findAll() { return List.copyOf(m.values()); }
         @Override
         public List<Reservation> findBySeatIdAndStatusIn(String roomId, int seatId, Set<ReservationStatus> ss) {
             return m.values().stream()
                     .filter(r -> r.roomId().equals(roomId) && r.seatId() == seatId && ss.contains(r.status())).toList();
         }
-        @Override public List<Reservation> findAll() { return List.copyOf(m.values()); }
     }
 
     static class StubPresenter implements
@@ -260,5 +260,6 @@ class ReserveUseCaseTest
         @Override public void forbidden() { fail("forbidden() must not be called"); }
         @Override public void invalidToken() { fail("invalidToken() must not be called"); }
         @Override public void userNotFound() { fail("userNotFound() must not be called"); }
+    @Override public void banned() {}
     }
 }

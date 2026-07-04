@@ -131,5 +131,6 @@ class GetCheckInRateStatsUseCaseTest
         @Override public void forbidden() { forbiddenCalled = true; }
         @Override public void invalidToken() { invalidTokenCalled = true; }
         @Override public void userNotFound() { userNotFoundCalled = true; }
+    @Override public void banned() {}
     }
 }

@@ -203,5 +203,6 @@ class AdminAuthUseCaseTest
         {
             userNotFoundCalled = true;
         }
+    @Override public void banned() {}
     }
 }

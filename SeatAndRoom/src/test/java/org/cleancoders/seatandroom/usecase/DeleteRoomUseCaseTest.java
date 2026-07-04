@@ -156,5 +156,6 @@ class DeleteRoomUseCaseTest
         {
             fail("userNotFound() must not be called");
         }
+    @Override public void banned() {}
     }
 }

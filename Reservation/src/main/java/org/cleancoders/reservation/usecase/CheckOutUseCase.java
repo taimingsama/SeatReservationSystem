@@ -104,7 +104,7 @@ public class CheckOutUseCase extends StudentAuthUseCase<CheckOutUseCase.Request,
         User updatedUser = new User(
                 user.id(), user.username(), user.password(), user.role(), user.name(), user.email(),
                 user.reservationCount(), user.studyHours() + studyHoursToAdd,
-                user.checkInCount(), user.creditScore());
+                user.checkInCount(), user.creditScore(), user.banned());
         userRepo.save(updatedUser);
 
         presenter.success(reservation.id(), seatNumber, timeSlotLabel);

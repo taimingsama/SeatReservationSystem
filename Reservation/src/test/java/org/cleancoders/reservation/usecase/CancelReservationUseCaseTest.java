@@ -280,5 +280,6 @@ class CancelReservationUseCaseTest {
 
         @Override
         public void userNotFound() { userNotFoundCalled = true; }
+    @Override public void banned() {}
     }
 }

@@ -130,5 +130,6 @@ class GetMeUseCaseTest
         {
             fail("userNotFound() must not be called — token validation is not under test in GetMeUseCaseTest");
         }
+    @Override public void banned() {}
     }
 }

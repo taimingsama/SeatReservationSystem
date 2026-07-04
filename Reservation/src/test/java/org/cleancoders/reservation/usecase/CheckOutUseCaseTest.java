@@ -259,5 +259,6 @@ class CheckOutUseCaseTest {
 
         @Override
         public void userNotFound() { userNotFoundCalled = true; }
+    @Override public void banned() {}
     }
 }

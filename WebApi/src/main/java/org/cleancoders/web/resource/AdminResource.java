@@ -16,6 +16,9 @@ import org.cleancoders.seatandroom.usecase.DeleteRoomUseCase;
 import org.cleancoders.seatandroom.usecase.ManageRoomsUseCase;
 import org.cleancoders.seatandroom.usecase.UpdateRoomUseCase;
 import org.cleancoders.seatandroom.usecase.UpdateSeatUseCase;
+import org.cleancoders.userandauth.usecase.BanStudentUseCase;
+import org.cleancoders.userandauth.usecase.DeleteStudentUseCase;
+import org.cleancoders.userandauth.usecase.ListAllStudentsUseCase;
 import org.cleancoders.userandauth.usecase.ManageUserCreditUseCase;
 import org.cleancoders.userandauth.usecase.ResetPasswordUseCase;
 import org.cleancoders.web.dto.admin.CreateRoomRequest;
@@ -28,6 +31,8 @@ import org.cleancoders.web.dto.reservation.AdminReservationListResponse;
 import org.cleancoders.web.dto.room.*;
 import org.cleancoders.web.dto.seat.*;
 import org.cleancoders.web.presenter.ResponseContext;
+
+import java.util.Map;
 
 @Path("/admin")
 @Produces(MediaType.APPLICATION_JSON)
@@ -58,7 +63,83 @@ public class AdminResource
     ResetPasswordUseCase resetPasswordUseCase;
 
     @Inject
+    ListAllStudentsUseCase listAllStudentsUseCase;
+
+    @Inject
+    BanStudentUseCase banStudentUseCase;
+
+    @Inject
+    DeleteStudentUseCase deleteStudentUseCase;
+
+    @Inject
     ResponseContext responseContext;
+
+    @GET
+    @Path("/students")
+    @Operation(summary = "获取所有学生", description = "管理员查看所有学生信息（含统计数据）。")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "成功"),
+            @ApiResponse(responseCode = "401", description = "Token 无效",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "权限不足",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public Response listStudents(
+            @Parameter(description = "JWT 认证 token", required = true)
+            @CookieParam("Authorization") String authCookie)
+    {
+        listAllStudentsUseCase.execute(new ListAllStudentsUseCase.Request(authCookie));
+        return responseContext.get();
+    }
+
+    @PUT
+    @Path("/users/{userId}/ban")
+    @Operation(summary = "封禁/解封学生", description = "管理员封禁或解封指定学生。封禁后学生无法登录和预约。")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "更新成功",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = UserResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Token 无效",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "权限不足",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "用户不存在",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public Response banStudent(
+            @Parameter(description = "JWT 认证 token", required = true)
+            @CookieParam("Authorization") String authCookie,
+            @Parameter(description = "用户ID", required = true, example = "u1")
+            @PathParam("userId") String userId,
+            @Parameter(description = "封禁请求（ban=true封禁，ban=false解封）")
+            Map<String, Boolean> body)
+    {
+        boolean ban = body.getOrDefault("ban", true);
+        banStudentUseCase.execute(new BanStudentUseCase.Request(authCookie, userId, ban));
+        return responseContext.get();
+    }
+
+    @DELETE
+    @Path("/users/{userId}")
+    @Operation(summary = "删除学生", description = "管理员删除指定学生账户。")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "删除成功"),
+            @ApiResponse(responseCode = "401", description = "Token 无效",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "权限不足",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "用户不存在",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public Response deleteStudent(
+            @Parameter(description = "JWT 认证 token", required = true)
+            @CookieParam("Authorization") String authCookie,
+            @Parameter(description = "用户ID", required = true, example = "u1")
+            @PathParam("userId") String userId)
+    {
+        deleteStudentUseCase.execute(new DeleteStudentUseCase.Request(authCookie, userId));
+        return responseContext.get();
+    }
 
     @POST
     @Path("/users/{userId}/reset-password")

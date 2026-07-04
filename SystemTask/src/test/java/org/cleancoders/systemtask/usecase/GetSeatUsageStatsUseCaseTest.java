@@ -160,8 +160,8 @@ class GetSeatUsageStatsUseCaseTest
         @Override public Optional<Reservation> findBySeatIdAndDateAndTimeSlotIdAndStatusIn(
                 String roomId, int seatId, LocalDate d, String ts, Set<ReservationStatus> ss) { return Optional.empty(); }
         @Override public List<Reservation> findByUserId(String uid) { return List.of(); }
-        @Override public List<Reservation> findAll() { return List.copyOf(store.values()); }
         @Override public List<Reservation> findBySeatIdAndStatusIn(String roomId, int seatId, Set<ReservationStatus> ss) { return List.of(); }
+        @Override public List<Reservation> findAll() { return store.values().stream().toList(); }
     }
 
     static class StubPresenter implements GetSeatUsageStatsUseCase.Presenter,
@@ -186,5 +186,6 @@ class GetSeatUsageStatsUseCaseTest
         @Override public void forbidden() { forbiddenCalled = true; }
         @Override public void invalidToken() { invalidTokenCalled = true; }
         @Override public void userNotFound() { userNotFoundCalled = true; }
+    @Override public void banned() {}
     }
 }

@@ -142,5 +142,6 @@ class AuthUseCaseTest
         {
             userNotFoundCalled = true;
         }
+    @Override public void banned() {}
     }
 }

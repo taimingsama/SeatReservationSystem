@@ -16,12 +16,13 @@ public record User(
         int reservationCount,
         int studyHours,
         int checkInCount,
-        int creditScore
+        int creditScore,
+        boolean banned
 )
 {
-    /** 向后兼容的辅助构造函数：统计字段默认为 0，信用分默认为 100。 */
+    /** 向后兼容的辅助构造函数：统计字段默认为 0，信用分默认为 100，默认未封禁。 */
     public User(String id, String username, String password, UserRole role, String name, String email)
     {
-        this(id, username, password, role, name, email, 0, 0, 0, 100);
+        this(id, username, password, role, name, email, 0, 0, 0, 100, false);
     }
 }

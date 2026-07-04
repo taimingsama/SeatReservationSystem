@@ -285,5 +285,6 @@ class ManageReservationsUseCaseTest
         {
             userNotFoundCalled = true;
         }
+    @Override public void banned() {}
     }
 }
