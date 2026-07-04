@@ -3,11 +3,7 @@ package org.cleancoders.web;
 import io.swagger.v3.jaxrs2.integration.resources.AcceptHeaderOpenApiResource;
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import jakarta.ws.rs.core.Application;
-import org.cleancoders.web.binder.ReservationBinder;
-import org.cleancoders.web.binder.SeatAndRoomBinder;
-import org.cleancoders.web.binder.SystemTaskBinder;
-import org.cleancoders.web.binder.UserAndAuthBinder;
-import org.cleancoders.web.binder.WebAppBinder;
+import org.cleancoders.web.binder.*;
 import org.cleancoders.web.filter.CorsFilter;
 import org.cleancoders.web.resource.*;
 import org.cleancoders.web.scheduler.ReservationScheduler;
@@ -48,6 +44,7 @@ public class AppConfig extends Application
         classes.add(SeatAndRoomBinder.class);
         classes.add(SystemTaskBinder.class);
         classes.add(UserAndAuthBinder.class);
+        classes.add(MySqlBinder.class);
         return classes;
     }
 }
