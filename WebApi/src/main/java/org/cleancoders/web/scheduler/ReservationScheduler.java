@@ -16,8 +16,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * 后台定时调度器：每 60 秒自动执行一次过期预约处理。
@@ -29,8 +27,6 @@ import java.util.logging.Logger;
 @Provider
 public class ReservationScheduler implements ContainerResponseFilter
 {
-
-    private static final Logger LOG = Logger.getLogger(ReservationScheduler.class.getName());
 
     @Inject
     ProcessExpiredReservationsUseCase processExpiredReservationsUseCase;
@@ -45,14 +41,14 @@ public class ReservationScheduler implements ContainerResponseFilter
     @PostConstruct
     public void start()
     {
-        LOG.info("[ReservationScheduler] 预约超时处理调度器已启动，每 60 秒执行一次");
+        System.out.println("[ReservationScheduler] Started — running every 60s");
         executor.scheduleWithFixedDelay(this::processExpired, 10, 60, TimeUnit.SECONDS);
     }
 
     @PreDestroy
     public void stop()
     {
-        LOG.info("[ReservationScheduler] 预约超时处理调度器正在停止...");
+        System.out.println("[ReservationScheduler] Stopping...");
         executor.shutdown();
         try
         {
@@ -72,7 +68,7 @@ public class ReservationScheduler implements ContainerResponseFilter
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException
     {
-        // no-op: 仅用于让 Jersey 在启动时立即创建此 Provider 单例
+        // no-op — exists only so Jersey eagerly creates this Provider singleton
     }
 
     private void processExpired()
@@ -83,17 +79,18 @@ public class ReservationScheduler implements ContainerResponseFilter
             String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
             if (output.autoCheckedOut() > 0 || output.expired() > 0)
             {
-                LOG.info(String.format("[ReservationScheduler %s] 处理完成: 日期=%s, 自动退座=%d, 超时=%d",
-                        time, output.date(), output.autoCheckedOut(), output.expired()));
+                System.out.printf("[ReservationScheduler %s] Processed: date=%s, autoCheckOut=%d, expired=%d%n",
+                        time, output.date(), output.autoCheckedOut(), output.expired());
             }
             else
             {
-                LOG.info(String.format("[ReservationScheduler %s] 心跳: 无待处理预约", time));
+                System.out.printf("[ReservationScheduler %s] Heartbeat: nothing to process%n", time);
             }
         }
         catch (Exception e)
         {
-            LOG.log(Level.WARNING, "[ReservationScheduler] 处理过期预约时发生异常", e);
+            System.err.println("[ReservationScheduler] Error processing expired reservations:");
+            e.printStackTrace();
         }
     }
 }
