@@ -17,7 +17,7 @@ public class Reservation {
     private final String timeSlotId;
     private final LocalDate date;
     private ReservationStatus status;
-    private final LocalDateTime createdAt;
+    private LocalDateTime createdAt;
     private LocalDateTime checkInAt;
     private LocalDateTime checkOutAt;
 
@@ -122,5 +122,9 @@ public class Reservation {
 
     public void setCheckOutAt(LocalDateTime checkOutAt) {
         this.checkOutAt = checkOutAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

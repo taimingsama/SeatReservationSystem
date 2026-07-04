@@ -307,6 +307,7 @@ class ReservationResourceIntegrationTest extends JerseyTest
     void checkInShouldReturn404WhenReservationNotFound()
     {
         Response response = target("/reservations/nonexistent-id/check-in")
+                .queryParam("code", "123456")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", studentToken)
                 .post(Entity.json(""));
@@ -320,6 +321,7 @@ class ReservationResourceIntegrationTest extends JerseyTest
         String reservationId = createReservation(studentToken, "room-1", 1, "ts-1", "2026-07-03");
 
         Response response = target("/reservations/" + reservationId + "/check-in")
+                .queryParam("code", "123456")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", otherStudentToken)
                 .post(Entity.json(""));
@@ -331,6 +333,7 @@ class ReservationResourceIntegrationTest extends JerseyTest
     void checkInShouldReturn401ForInvalidToken()
     {
         Response response = target("/reservations/any-id/check-in")
+                .queryParam("code", "123456")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", "bad.token.here")
                 .post(Entity.json(""));

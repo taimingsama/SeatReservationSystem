@@ -35,6 +35,8 @@ class CheckInUseCaseTest
     // Time slot: 08:00-12:00
     private static final LocalTime SLOT_START = LocalTime.of(8, 0);
     private static final LocalTime SLOT_END = LocalTime.of(12, 0);
+    private static final String VALID_CODE = "123456";
+    private static final String WRONG_CODE = "000000";
     private TestableCheckInUseCase useCase;
     private StubTokenService tokenService;
     private org.cleancoders.userandauth_test_infrastructure.StubUserRepo userRepo;
@@ -80,7 +82,7 @@ class CheckInUseCaseTest
         Reservation res = new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         reservationRepo.addReservation(res);
 
-        var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "res-1"));
+        var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "res-1", VALID_CODE));
 
         assertNotNull(output);
         assertEquals("res-1", output.reservationId());
@@ -92,7 +94,7 @@ class CheckInUseCaseTest
     @Test
     void shouldRejectReservationNotFound()
     {
-        var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "nonexistent"));
+        var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "nonexistent", VALID_CODE));
 
         assertNull(output);
         assertTrue(presenter.reservationNotFoundCalled);
@@ -105,7 +107,7 @@ class CheckInUseCaseTest
         Reservation res = new Reservation("res-1", OTHER_STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         reservationRepo.addReservation(res);
 
-        var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "res-1"));
+        var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "res-1", VALID_CODE));
 
         assertNull(output);
         assertTrue(presenter.notYourReservationCalled);
@@ -118,7 +120,7 @@ class CheckInUseCaseTest
         res.checkIn(); // already checked in
         reservationRepo.addReservation(res);
 
-        var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "res-1"));
+        var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "res-1", VALID_CODE));
 
         assertNull(output);
         assertTrue(presenter.invalidStatusCalled);
@@ -132,7 +134,7 @@ class CheckInUseCaseTest
         res.cancel();
         reservationRepo.addReservation(res);
 
-        var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "res-1"));
+        var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "res-1", VALID_CODE));
 
         assertNull(output);
         assertTrue(presenter.invalidStatusCalled);
@@ -148,7 +150,7 @@ class CheckInUseCaseTest
         Reservation res = new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         reservationRepo.addReservation(res);
 
-        var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "res-1"));
+        var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "res-1", VALID_CODE));
 
         assertNull(output);
         assertTrue(presenter.checkInNotAvailableCalled);
@@ -164,7 +166,7 @@ class CheckInUseCaseTest
         Reservation res = new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         reservationRepo.addReservation(res);
 
-        var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "res-1"));
+        var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "res-1", VALID_CODE));
 
         assertNull(output);
         assertTrue(presenter.checkInNotAvailableCalled);
@@ -180,10 +182,34 @@ class CheckInUseCaseTest
         Reservation res = new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         reservationRepo.addReservation(res);
 
-        var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "res-1"));
+        var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "res-1", VALID_CODE));
 
         assertNotNull(output);
         assertEquals("res-1", output.reservationId());
+    }
+
+    @Test
+    void shouldRejectWrongCheckInCode()
+    {
+        Reservation res = new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
+        reservationRepo.addReservation(res);
+
+        var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "res-1", WRONG_CODE));
+
+        assertNull(output);
+        assertTrue(presenter.wrongCheckInCodeCalled);
+    }
+
+    @Test
+    void shouldRejectNullCheckInCode()
+    {
+        Reservation res = new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
+        reservationRepo.addReservation(res);
+
+        var output = useCase.execute(new CheckInUseCase.Request(STUDENT_TOKEN, "res-1", null));
+
+        assertNull(output);
+        assertTrue(presenter.wrongCheckInCodeCalled);
     }
 
     // --- Testable subclass that controls the clock ---
@@ -255,6 +281,14 @@ class CheckInUseCaseTest
         {
             checkInNotAvailableCalled = true;
             checkInNotAvailableReason.set(reason);
+        }
+
+        boolean wrongCheckInCodeCalled = false;
+
+        @Override
+        public void wrongCheckInCode()
+        {
+            wrongCheckInCodeCalled = true;
         }
 
         @Override

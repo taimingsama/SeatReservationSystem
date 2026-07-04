@@ -109,6 +109,13 @@ public class WebApiReservationPresenter extends WebApiPresenter implements
         responseContext.set(Response.status(409).entity(new ErrorResponse(reason)).build());
     }
 
+    @Override
+    public void wrongCheckInCode()
+    {
+        responseContext.set(Response.status(403).entity(new ErrorResponse(
+                "签到码错误")).build());
+    }
+
     // --- ListMyReservationsUseCase.Presenter ---
 
     @Override

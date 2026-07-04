@@ -136,4 +136,15 @@ class WebApiReservationPresenterTest {
         ErrorResponse entity = (ErrorResponse) response.getEntity();
         assertEquals("已过时段结束时间，无法签到", entity.error());
     }
+
+    @Test
+    void wrongCheckInCodeShouldReturn403() {
+        presenter.wrongCheckInCode();
+
+        Response response = responseContext.get();
+        assertEquals(403, response.getStatus());
+
+        ErrorResponse entity = (ErrorResponse) response.getEntity();
+        assertEquals("签到码错误", entity.error());
+    }
 }

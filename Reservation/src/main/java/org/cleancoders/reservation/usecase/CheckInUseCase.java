@@ -50,11 +50,21 @@ public class CheckInUseCase extends StudentAuthUseCase<CheckInUseCase.Request, C
         return LocalDateTime.now();
     }
 
+    /** 临时签到码（后续应改为每个预约动态生成） */
+    private static final String TEMP_CHECK_IN_CODE = "123456";
+
     // --- Request / Output ---
 
     @Override
     protected Output doExecute(User user, Request req)
     {
+        // 0. Validate check-in code
+        if (req.checkInCode() == null || !req.checkInCode().equals(TEMP_CHECK_IN_CODE))
+        {
+            presenter.wrongCheckInCode();
+            return null;
+        }
+
         // 1. Find reservation
         var reservationOpt = reservationRepo.findById(req.reservationId());
         if (reservationOpt.isEmpty())
@@ -151,9 +161,11 @@ public class CheckInUseCase extends StudentAuthUseCase<CheckInUseCase.Request, C
         void invalidStatus(ReservationStatus currentStatus);
 
         void checkInNotAvailable(String reason);
+
+        void wrongCheckInCode();
     }
 
-    public record Request(String token, String reservationId)
+    public record Request(String token, String reservationId, String checkInCode)
             implements AuthUseCase.Request
     {
     }

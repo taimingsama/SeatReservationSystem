@@ -18,14 +18,16 @@ import java.time.LocalTime;
 import java.util.List;
 
 /**
- * 系统定时任务：处理当日已过期的预约。
+ * 系统定时任务：每分钟执行一次，处理当日预约的超时与自动退座。
  * <p>
  * 由 {@link org.cleancoders.web.scheduler.ReservationScheduler} 每分钟自动调用。
  * <p>
- * 在时段结束后：
+ * 处理规则：
  * <ul>
- *   <li>已签到 (CHECKED_IN) → 自动退座，信用分 +5</li>
- *   <li>未签到 (RESERVED) → 标记为 EXPIRED（超时），信用分 -15</li>
+ *   <li>已签到 (CHECKED_IN) + 时段已结束 → 自动退座，信用分 +5</li>
+ *   <li>未签到 (RESERVED) + 时段已结束 → 标记为 EXPIRED，信用分 -15</li>
+ *   <li>未签到 (RESERVED) + 时段开始前预约 + 时段开始后 30 分钟未签到 → 标记为 EXPIRED，信用分 -15</li>
+ *   <li>未签到 (RESERVED) + 时段开始后预约 + 创建后 30 分钟未签到 → 标记为 EXPIRED，信用分 -15</li>
  * </ul>
  */
 public class ProcessExpiredReservationsUseCase
@@ -74,25 +76,26 @@ public class ProcessExpiredReservationsUseCase
             }
 
             TimeSlot timeSlot = timeSlotOpt.get();
+            LocalTime slotStart = LocalTime.parse(timeSlot.startTime());
             LocalTime slotEnd = LocalTime.parse(timeSlot.endTime());
+            LocalDateTime slotStartDateTime = LocalDateTime.of(today, slotStart);
             LocalDateTime slotEndDateTime = LocalDateTime.of(today, slotEnd);
-
-            // 时段尚未结束，跳过
-            if (now.isBefore(slotEndDateTime))
-            {
-                continue;
-            }
-
-            var userOpt = userRepo.findById(r.userId());
-            if (userOpt.isEmpty())
-            {
-                continue;
-            }
-
-            User user = userOpt.get();
 
             if (r.status() == ReservationStatus.CHECKED_IN)
             {
+                // 时段未结束则跳过
+                if (now.isBefore(slotEndDateTime))
+                {
+                    continue;
+                }
+
+                var userOpt = userRepo.findById(r.userId());
+                if (userOpt.isEmpty())
+                {
+                    continue;
+                }
+                User user = userOpt.get();
+
                 // 自动退座
                 r.checkOut();
                 reservationRepo.save(r);
@@ -126,6 +129,39 @@ public class ProcessExpiredReservationsUseCase
             }
             else if (r.status() == ReservationStatus.RESERVED)
             {
+                // 判断是否应标记为 EXPIRED
+                boolean shouldExpire = false;
+
+                if (!now.isBefore(slotEndDateTime))
+                {
+                    // 情况A: 时段已结束
+                    shouldExpire = true;
+                }
+                else if (r.createdAt().isBefore(slotStartDateTime)
+                        && !now.isBefore(slotStartDateTime.plusMinutes(30)))
+                {
+                    // 情况B: 时段开始前预约，时段开始后 30 分钟未签到
+                    shouldExpire = true;
+                }
+                else if (!r.createdAt().isBefore(slotStartDateTime)
+                        && !now.isBefore(r.createdAt().plusMinutes(30)))
+                {
+                    // 情况C: 时段开始后预约，创建后 30 分钟未签到
+                    shouldExpire = true;
+                }
+
+                if (!shouldExpire)
+                {
+                    continue;
+                }
+
+                var userOpt = userRepo.findById(r.userId());
+                if (userOpt.isEmpty())
+                {
+                    continue;
+                }
+                User user = userOpt.get();
+
                 // 标记为超时
                 r.expire();
                 reservationRepo.save(r);

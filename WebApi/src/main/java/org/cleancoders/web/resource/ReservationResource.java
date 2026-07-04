@@ -107,8 +107,10 @@ public class ReservationResource {
             @Parameter(description = "JWT 认证 token", required = true)
             @CookieParam("Authorization") String authCookie,
             @Parameter(description = "预约 ID", required = true, example = "res-001")
-            @PathParam("id") String reservationId) {
-        checkInUseCase.execute(new CheckInUseCase.Request(authCookie, reservationId));
+            @PathParam("id") String reservationId,
+            @Parameter(description = "6位签到码", required = true, example = "123456")
+            @QueryParam("code") String checkInCode) {
+        checkInUseCase.execute(new CheckInUseCase.Request(authCookie, reservationId, checkInCode));
         return responseContext.get();
     }
 

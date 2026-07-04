@@ -187,6 +187,107 @@ class ProcessExpiredReservationsUseCaseTest {
         assertEquals(0, output.expired());
     }
 
+    @Test
+    void shouldExpireWhenCreatedBeforeSlotAnd30MinPastSlotStart() {
+        // Slot 08:00-12:00, reservation created at 06:00 (before slot)
+        // Current time 08:31 → 31 min past slot start, should expire
+        Reservation res = new Reservation("res-7", USER_ID, ROOM_ID, SEAT_ID, TS_MORNING, TODAY);
+        res.setCreatedAt(LocalDateTime.of(2026, 7, 4, 6, 0));
+        reservationRepo.save(res);
+
+        useCase.setCurrentTime(LocalDateTime.of(2026, 7, 4, 8, 31));
+
+        var output = useCase.execute();
+
+        assertNotNull(output);
+        assertEquals(0, output.autoCheckedOut());
+        assertEquals(1, output.expired());
+
+        User updated = userRepo.findById(USER_ID).get();
+        assertEquals(85, updated.creditScore());
+
+        Reservation updatedRes = reservationRepo.findById("res-7").get();
+        assertEquals(ReservationStatus.EXPIRED, updatedRes.status());
+    }
+
+    @Test
+    void shouldExpireWhenCreatedAfterSlotStartAnd30MinPastCreation() {
+        // Slot 08:00-12:00, reservation created at 09:00 (during slot)
+        // Current time 09:31 → 31 min past creation, should expire
+        Reservation res = new Reservation("res-8", USER_ID, ROOM_ID, SEAT_ID, TS_MORNING, TODAY);
+        res.setCreatedAt(LocalDateTime.of(2026, 7, 4, 9, 0));
+        reservationRepo.save(res);
+
+        useCase.setCurrentTime(LocalDateTime.of(2026, 7, 4, 9, 31));
+
+        var output = useCase.execute();
+
+        assertNotNull(output);
+        assertEquals(0, output.autoCheckedOut());
+        assertEquals(1, output.expired());
+
+        User updated = userRepo.findById(USER_ID).get();
+        assertEquals(85, updated.creditScore());
+    }
+
+    @Test
+    void shouldNotExpireWhenWithin30MinWindowAfterSlotStart() {
+        // Slot 08:00-12:00, reservation created at 06:00 (before slot)
+        // Current time 08:15 → only 15 min past slot start, still within window
+        Reservation res = new Reservation("res-9", USER_ID, ROOM_ID, SEAT_ID, TS_MORNING, TODAY);
+        res.setCreatedAt(LocalDateTime.of(2026, 7, 4, 6, 0));
+        reservationRepo.save(res);
+
+        useCase.setCurrentTime(LocalDateTime.of(2026, 7, 4, 8, 15));
+
+        var output = useCase.execute();
+
+        assertNotNull(output);
+        assertEquals(0, output.autoCheckedOut());
+        assertEquals(0, output.expired());
+
+        // Credit score unchanged
+        User updated = userRepo.findById(USER_ID).get();
+        assertEquals(100, updated.creditScore());
+    }
+
+    @Test
+    void shouldNotExpireWhenWithin30MinWindowAfterCreation() {
+        // Slot 08:00-12:00, reservation created at 09:30 (during slot)
+        // Current time 09:45 → only 15 min past creation, still within window
+        Reservation res = new Reservation("res-10", USER_ID, ROOM_ID, SEAT_ID, TS_MORNING, TODAY);
+        res.setCreatedAt(LocalDateTime.of(2026, 7, 4, 9, 30));
+        reservationRepo.save(res);
+
+        useCase.setCurrentTime(LocalDateTime.of(2026, 7, 4, 9, 45));
+
+        var output = useCase.execute();
+
+        assertNotNull(output);
+        assertEquals(0, output.autoCheckedOut());
+        assertEquals(0, output.expired());
+
+        User updated = userRepo.findById(USER_ID).get();
+        assertEquals(100, updated.creditScore());
+    }
+
+    @Test
+    void shouldExpireWhenExactlyAt30MinBoundary() {
+        // Slot 08:00-12:00, reservation created at 07:00 (before slot)
+        // Current time 08:30 → exactly 30 min past slot start, should expire
+        Reservation res = new Reservation("res-11", USER_ID, ROOM_ID, SEAT_ID, TS_MORNING, TODAY);
+        res.setCreatedAt(LocalDateTime.of(2026, 7, 4, 7, 0));
+        reservationRepo.save(res);
+
+        useCase.setCurrentTime(LocalDateTime.of(2026, 7, 4, 8, 30));
+
+        var output = useCase.execute();
+
+        assertNotNull(output);
+        assertEquals(0, output.autoCheckedOut());
+        assertEquals(1, output.expired());
+    }
+
     // --- Testable subclass ---
 
     static class TestableProcessExpiredReservationsUseCase extends ProcessExpiredReservationsUseCase {
