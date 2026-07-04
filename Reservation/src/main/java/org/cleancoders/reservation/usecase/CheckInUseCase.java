@@ -5,6 +5,7 @@ import org.cleancoders.reservation.domain.Reservation;
 import org.cleancoders.reservation.domain.ReservationStatus;
 import org.cleancoders.reservation.outbound.ReservationRepository;
 import org.cleancoders.seatandroom.domain.Seat;
+import org.cleancoders.seatandroom.domain.SeatStatus;
 import org.cleancoders.seatandroom.domain.TimeSlot;
 import org.cleancoders.seatandroom.outbound.SeatRepository;
 import org.cleancoders.seatandroom.outbound.TimeSlotRepository;
@@ -121,9 +122,19 @@ public class CheckInUseCase extends StudentAuthUseCase<CheckInUseCase.Request, C
                 user.reservationCount(), user.studyHours(), user.checkInCount() + 1, user.creditScore());
         userRepo.save(updatedUser);
 
-        // 8. Look up seat for response
+        // 8. Update seat status if RESERVED
         var seatOpt = seatRepo.findByRoomIdAndSeatId(reservation.roomId(), reservation.seatId());
-        String seatNumber = seatOpt.map(s -> String.valueOf(s.id())).orElse("未知");
+        String seatNumber = "未知";
+        if (seatOpt.isPresent())
+        {
+            Seat seat = seatOpt.get();
+            seatNumber = String.valueOf(seat.id());
+            if (seat.status() == SeatStatus.RESERVED)
+            {
+                seat.occupy();
+                seatRepo.save(seat);
+            }
+        }
 
         presenter.success(reservation.id(), seatNumber, timeSlot.label());
         return new Output(reservation.id());
