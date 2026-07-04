@@ -102,7 +102,7 @@ public class ProcessExpiredReservationsUseCase
                 if (seatOpt.isPresent())
                 {
                     Seat seat = seatOpt.get();
-                    if (seat.status() == SeatStatus.OCCUPIED || seat.status() == SeatStatus.RESERVED)
+                    if (seat.status() == SeatStatus.OCCUPIED)
                     {
                         seat.release();
                         seatRepo.save(seat);

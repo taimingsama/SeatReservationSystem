@@ -30,17 +30,17 @@ public class Seat {
     }
 
     public void release() {
-        if (status != SeatStatus.RESERVED && status != SeatStatus.OCCUPIED) {
+        if (status != SeatStatus.OCCUPIED) {
             throw new IllegalStateException(
-                    "只有已预约或使用中的座位才能释放，当前状态: " + status);
+                    "只有使用中的座位才能释放，当前状态: " + status);
         }
         this.status = SeatStatus.AVAILABLE;
     }
 
     public void occupy() {
-        if (status != SeatStatus.RESERVED) {
+        if (status != SeatStatus.AVAILABLE && status != SeatStatus.RESERVED) {
             throw new IllegalStateException(
-                    "只有已预约的座位才能签到，当前状态: " + status);
+                    "只有可用或已预约的座位才能签到，当前状态: " + status);
         }
         this.status = SeatStatus.OCCUPIED;
     }

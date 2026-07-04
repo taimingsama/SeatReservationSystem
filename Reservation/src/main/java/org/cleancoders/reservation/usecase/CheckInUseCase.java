@@ -129,7 +129,7 @@ public class CheckInUseCase extends StudentAuthUseCase<CheckInUseCase.Request, C
         {
             Seat seat = seatOpt.get();
             seatNumber = String.valueOf(seat.id());
-            if (seat.status() == SeatStatus.RESERVED)
+            if (seat.status() == SeatStatus.AVAILABLE)
             {
                 seat.occupy();
                 seatRepo.save(seat);
