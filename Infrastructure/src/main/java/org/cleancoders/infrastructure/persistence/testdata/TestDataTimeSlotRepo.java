@@ -15,6 +15,5 @@ public class TestDataTimeSlotRepo extends InMemoryTimeSlotRepo {
         // Inherits ts-1 (08:00-12:00), ts-2 (13:00-17:00), ts-3 (18:00-22:00) from parent
 
         // Additional slot for edge-case testing
-        store.put("ts-4", new TimeSlot("ts-4", "22:00", "23:59", "深夜 22:00-23:59"));
     }
 }
