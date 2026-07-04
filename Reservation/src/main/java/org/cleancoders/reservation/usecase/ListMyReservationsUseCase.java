@@ -56,6 +56,7 @@ public class ListMyReservationsUseCase extends StudentAuthUseCase<ListMyReservat
             String reservationId,
             String roomId,
             String roomName,
+            String roomLocation,
             int seatId,
             String timeSlotId,
             String timeSlotLabel,
@@ -78,9 +79,11 @@ public class ListMyReservationsUseCase extends StudentAuthUseCase<ListMyReservat
 
                     String roomName = roomRepo.findById(r.roomId())
                             .map(StudyRoom::name).orElse("未知");
+                    String roomLocation = roomRepo.findById(r.roomId())
+                            .map(StudyRoom::location).orElse("未知");
 
                     return new ReservationItem(
-                            r.id(), r.roomId(), roomName, r.seatId(),
+                            r.id(), r.roomId(), roomName, roomLocation, r.seatId(),
                             r.timeSlotId(), timeSlotLabel,
                             r.date(), r.status().name(), r.createdAt()
                     );

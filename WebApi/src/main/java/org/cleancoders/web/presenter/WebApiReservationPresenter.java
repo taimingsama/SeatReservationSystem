@@ -119,6 +119,7 @@ public class WebApiReservationPresenter extends WebApiPresenter implements
                         item.reservationId(),
                         item.roomId(),
                         item.roomName(),
+                        item.roomLocation(),
                         item.seatId(),
                         item.timeSlotId(),
                         item.timeSlotLabel(),

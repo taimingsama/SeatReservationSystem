@@ -91,6 +91,7 @@ class ListMyReservationsUseCaseTest
         assertEquals("res-1", presenter.items.get(0).reservationId());
         assertEquals(ROOM_ID, presenter.items.get(0).roomId());
         assertEquals("自习室A", presenter.items.get(0).roomName());
+        assertEquals("图书馆一楼", presenter.items.get(0).roomLocation());
         assertEquals(SEAT_ID, presenter.items.get(0).seatId());
     }
 

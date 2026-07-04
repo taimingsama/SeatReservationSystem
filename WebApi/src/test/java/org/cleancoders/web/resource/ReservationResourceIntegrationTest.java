@@ -465,6 +465,7 @@ class ReservationResourceIntegrationTest extends JerseyTest
         assertNotNull(first.get("reservationId"));
         assertEquals("room-1", first.get("roomId"));
         assertEquals("自习室A", first.get("roomName"));
+        assertEquals("图书馆一楼", first.get("roomLocation"));
         assertNotNull(first.get("timeSlotLabel"));
         assertEquals("2026-07-03", first.get("date"));
         assertEquals("RESERVED", first.get("status"));
@@ -525,6 +526,7 @@ class ReservationResourceIntegrationTest extends JerseyTest
         assertEquals(1, list.get(0).get("seatId"));
         assertEquals("room-1", list.get(0).get("roomId"));
         assertEquals("自习室A", list.get(0).get("roomName"));
+        assertEquals("图书馆一楼", list.get(0).get("roomLocation"));
     }
 
     // ================================================================
