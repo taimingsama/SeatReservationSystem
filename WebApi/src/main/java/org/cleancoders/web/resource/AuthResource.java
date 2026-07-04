@@ -15,14 +15,17 @@ import org.cleancoders.userandauth.usecase.ChangePasswordUseCase;
 import org.cleancoders.userandauth.usecase.GetMeUseCase;
 import org.cleancoders.userandauth.usecase.LoginUseCase;
 import org.cleancoders.userandauth.usecase.RegisterUseCase;
+import org.cleancoders.userandauth.usecase.UpdateUserNameUseCase;
 import org.cleancoders.web.dto.auth.ChangePasswordRequest;
 import org.cleancoders.web.dto.auth.LoginRequest;
 import org.cleancoders.web.dto.auth.LoginResponse;
 import org.cleancoders.web.dto.auth.MeResponse;
 import org.cleancoders.web.dto.auth.RegisterRequest;
 import org.cleancoders.web.dto.auth.RegisterResponse;
+import org.cleancoders.web.dto.auth.UpdateNameRequest;
 import org.cleancoders.web.dto.auth.UsernameConflictResponse;
 import org.cleancoders.web.dto.common.ErrorResponse;
+import org.cleancoders.web.dto.common.UserResponse;
 import org.cleancoders.web.presenter.ResponseContext;
 
 @Path("/auth")
@@ -41,7 +44,29 @@ public class AuthResource
     @Inject
     ChangePasswordUseCase changePasswordUseCase;
     @Inject
+    UpdateUserNameUseCase updateUserNameUseCase;
+    @Inject
     ResponseContext responseContext;
+
+    @PUT
+    @Path("/name")
+    @Operation(summary = "修改显示名称", description = "用户修改自己的显示名称。")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "修改成功",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = UserResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Token 无效或已过期",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public Response updateName(
+            @Parameter(description = "JWT 认证 token", required = true)
+            @CookieParam("Authorization") String authCookie,
+            UpdateNameRequest request)
+    {
+        updateUserNameUseCase.execute(new UpdateUserNameUseCase.Request(
+                authCookie, request.name()));
+        return responseContext.get();
+    }
 
     @PUT
     @Path("/password")

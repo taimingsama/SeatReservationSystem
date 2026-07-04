@@ -21,6 +21,7 @@ public class WebApiAuthPresenter extends WebApiPresenter implements
         ManageUserCreditUseCase.Presenter,
         ChangePasswordUseCase.Presenter,
         ResetPasswordUseCase.Presenter,
+        UpdateUserNameUseCase.Presenter,
         StudentAuthUseCase.Presenter,
         AdminAuthUseCase.Presenter,
         AuthUseCase.Presenter
@@ -123,6 +124,17 @@ public class WebApiAuthPresenter extends WebApiPresenter implements
     {
         responseContext.set(Response.ok(
                 new ResetPasswordResponse(username, newPassword)).build());
+    }
+
+    // --- UpdateUserNameUseCase.Presenter ---
+
+    @Override
+    public void nameUpdated(User user)
+    {
+        responseContext.set(Response.ok(
+                new UserResponse(user.id(), user.username(), user.role(),
+                        user.name(), user.email(), user.reservationCount(),
+                        user.studyHours(), user.checkInCount(), user.creditScore())).build());
     }
 
     // --- AuthUseCase.Presenterr ---
