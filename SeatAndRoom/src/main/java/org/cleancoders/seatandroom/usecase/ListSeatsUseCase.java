@@ -104,30 +104,34 @@ public class ListSeatsUseCase
      * 当前时段：CHECKED_IN → OCCUPIED, RESERVED → RESERVED, 无预约 → AVAILABLE
      * 未来时段：任何活跃预约 → RESERVED（无 OCCUPIED）
      * MAINTENANCE / REMOVED 保持不变。
+     * <p>
+     * 注意：OCCUPIED/RESERVED 状态可能来自其他时段，需要验证是否属于当前查询时段。
      */
     private Seat computeEffectiveStatus(Seat seat, String timeSlotId, LocalDate date, boolean isCurrent)
     {
-        // 非 AVAILABLE 的静态状态保持不变
-        if (seat.status() != SeatStatus.AVAILABLE)
+        // MAINTENANCE / REMOVED 不受时段影响，直接返回
+        if (seat.status() == SeatStatus.MAINTENANCE || seat.status() == SeatStatus.REMOVED)
         {
             return seat;
         }
 
-        // 当前时段：CHECKED_IN → OCCUPIED
-        if (isCurrent && activeReservationChecker.isCheckedInForTimeSlot(
-                seat.roomId(), seat.id(), timeSlotId, date))
+        // 当前时段：该时段 CHECKED_IN → OCCUPIED
+        boolean isCheckedInThisSlot = activeReservationChecker.isCheckedInForTimeSlot(
+                seat.roomId(), seat.id(), timeSlotId, date);
+        if (isCurrent && isCheckedInThisSlot)
         {
             return new Seat(seat.id(), seat.roomId(), SeatStatus.OCCUPIED);
         }
 
-        // 当前/未来时段：活跃预约 → RESERVED
+        // 该时段有活跃预约 → 被预约
         if (activeReservationChecker.isReservedForTimeSlot(
                 seat.roomId(), seat.id(), timeSlotId, date))
         {
             return new Seat(seat.id(), seat.roomId(), SeatStatus.RESERVED);
         }
 
-        return seat; // AVAILABLE
+        // 静态 OCCUPIED/RESERVED 但该时段无对应预约 → 视为 AVAILABLE
+        return new Seat(seat.id(), seat.roomId(), SeatStatus.AVAILABLE);
     }
 
     public record Request(String roomId, String timeSlotId, LocalDate date)
