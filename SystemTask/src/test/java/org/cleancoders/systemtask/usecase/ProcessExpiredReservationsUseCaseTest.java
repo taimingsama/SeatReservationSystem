@@ -78,9 +78,9 @@ class ProcessExpiredReservationsUseCaseTest {
         assertEquals(1, output.autoCheckedOut());
         assertEquals(0, output.expired());
 
-        // Verify studyHours added: 08:30 → 12:00 = 3 hours
+        // Verify studySeconds added: 08:30 → 12:00 = 3.5h → 12600 seconds
         User updated = userRepo.findById(USER_ID).get();
-        assertEquals(3, updated.studyHours());
+        assertEquals(12600, updated.studySeconds());
 
         // Verify credit score: 100 + 5 = 100 (capped)
         assertEquals(100, updated.creditScore());
@@ -103,9 +103,9 @@ class ProcessExpiredReservationsUseCaseTest {
         assertNotNull(output);
         assertEquals(1, output.autoCheckedOut());
 
-        // studyHours = 10:00 → 12:00 (slot end) = 2 hours
+        // studySeconds = 10:00 → 12:00 (slot end) = 2 hours → 7200 seconds
         User updated = userRepo.findById(USER_ID).get();
-        assertEquals(2, updated.studyHours());
+        assertEquals(7200, updated.studySeconds());
     }
 
     @Test
@@ -124,9 +124,9 @@ class ProcessExpiredReservationsUseCaseTest {
         assertEquals(0, output.autoCheckedOut());
         assertEquals(0, output.expired());
 
-        // studyHours should remain 0
+        // studySeconds should remain 0
         User updated = userRepo.findById(USER_ID).get();
-        assertEquals(0, updated.studyHours());
+        assertEquals(0, updated.studySeconds());
     }
 
     @Test
@@ -143,9 +143,9 @@ class ProcessExpiredReservationsUseCaseTest {
         assertEquals(0, output.autoCheckedOut());
         assertEquals(1, output.expired());
 
-        // studyHours should remain 0 (no check-in = no study time)
+        // studySeconds should remain 0 (no check-in = no study time)
         User updated = userRepo.findById(USER_ID).get();
-        assertEquals(0, updated.studyHours());
+        assertEquals(0, updated.studySeconds());
 
         // Credit score should be deducted: 100 - 15 = 85
         assertEquals(85, updated.creditScore());

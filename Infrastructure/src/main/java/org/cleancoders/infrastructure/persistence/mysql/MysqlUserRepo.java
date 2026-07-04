@@ -46,10 +46,10 @@ public class MysqlUserRepo implements UserRepository {
     public User save(User user) {
         String id = user.id() != null ? user.id() : UUID.randomUUID().toString();
         String sql = "INSERT INTO `user` (id, username, password, role, name, email, " +
-                "reservation_count, study_hours, check_in_count, credit_score, banned) " +
+                "reservation_count, study_seconds, check_in_count, credit_score, banned) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
                 "ON DUPLICATE KEY UPDATE username=?, password=?, role=?, name=?, email=?, " +
-                "reservation_count=?, study_hours=?, check_in_count=?, credit_score=?, banned=?";
+                "reservation_count=?, study_seconds=?, check_in_count=?, credit_score=?, banned=?";
         try (Connection c = cp.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
             int i = 1;
             ps.setString(i++, id);
@@ -59,7 +59,7 @@ public class MysqlUserRepo implements UserRepository {
             ps.setString(i++, user.name());
             ps.setString(i++, user.email());
             ps.setInt(i++, user.reservationCount());
-            ps.setInt(i++, user.studyHours());
+            ps.setInt(i++, user.studySeconds());
             ps.setInt(i++, user.checkInCount());
             ps.setInt(i++, user.creditScore());
             ps.setBoolean(i++, user.banned());
@@ -70,14 +70,14 @@ public class MysqlUserRepo implements UserRepository {
             ps.setString(i++, user.name());
             ps.setString(i++, user.email());
             ps.setInt(i++, user.reservationCount());
-            ps.setInt(i++, user.studyHours());
+            ps.setInt(i++, user.studySeconds());
             ps.setInt(i++, user.checkInCount());
             ps.setInt(i++, user.creditScore());
             ps.setBoolean(i++, user.banned());
             ps.executeUpdate();
         } catch (SQLException e) { throw new RuntimeException(e); }
         return new User(id, user.username(), user.password(), user.role(), user.name(), user.email(),
-                user.reservationCount(), user.studyHours(), user.checkInCount(), user.creditScore(), user.banned());
+                user.reservationCount(), user.studySeconds(), user.checkInCount(), user.creditScore(), user.banned());
     }
 
     @Override
@@ -108,7 +108,7 @@ public class MysqlUserRepo implements UserRepository {
                 rs.getString("name"),
                 rs.getString("email"),
                 rs.getInt("reservation_count"),
-                rs.getInt("study_hours"),
+                rs.getInt("study_seconds"),
                 rs.getInt("check_in_count"),
                 rs.getInt("credit_score"),
                 rs.getBoolean("banned")

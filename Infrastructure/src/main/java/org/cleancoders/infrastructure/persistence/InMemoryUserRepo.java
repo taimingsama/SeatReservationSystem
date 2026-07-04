@@ -34,7 +34,7 @@ public class InMemoryUserRepo implements UserRepository
     {
         String id = user.id() != null ? user.id() : UUID.randomUUID().toString();
         User saved = new User(id, user.username(), user.password(), user.role(),
-                user.name(), user.email(), user.reservationCount(), user.studyHours(),
+                user.name(), user.email(), user.reservationCount(), user.studySeconds(),
                 user.checkInCount(), user.creditScore(), user.banned());
         byId.put(id, saved);
         byUsername.put(saved.username(), id);

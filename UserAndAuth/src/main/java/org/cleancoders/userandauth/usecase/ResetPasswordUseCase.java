@@ -39,7 +39,7 @@ public class ResetPasswordUseCase extends AdminAuthUseCase<ResetPasswordUseCase.
         String hashed = passwordEncoder.encode(newPassword);
 
         User updated = new User(user.id(), user.username(), hashed, user.role(),
-                user.name(), user.email(), user.reservationCount(), user.studyHours(),
+                user.name(), user.email(), user.reservationCount(), user.studySeconds(),
                 user.checkInCount(), user.creditScore(), user.banned());
         userRepo.save(updated);
 

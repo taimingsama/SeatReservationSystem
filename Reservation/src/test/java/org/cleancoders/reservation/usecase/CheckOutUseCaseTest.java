@@ -176,10 +176,10 @@ class CheckOutUseCaseTest {
     }
 
     @Test
-    void studyHoursShouldBeBasedOnActualCheckInCheckOutDuration() {
+    void studySecondsShouldBeBasedOnActualCheckInCheckOutDuration() {
         // Time slot is 08:00-12:00 (4 hours), but actual stay is only 3 hours
         User student = userRepo.findById(STUDENT_ID).get();
-        assertEquals(0, student.studyHours());
+        assertEquals(0, student.studySeconds());
 
         Reservation res = new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
         res.checkIn();
@@ -192,8 +192,8 @@ class CheckOutUseCaseTest {
         assertNotNull(output);
 
         User updated = userRepo.findById(STUDENT_ID).get();
-        // Should be ~3 hours (actual duration), not 4 hours (time slot duration)
-        assertEquals(3, updated.studyHours());
+        // Should be ~10800 seconds (3 hours actual duration), not 4 hours time slot
+        assertEquals(10800, updated.studySeconds());
     }
 
     // --- Stubs ---

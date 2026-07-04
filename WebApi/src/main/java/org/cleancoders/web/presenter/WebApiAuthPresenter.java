@@ -82,7 +82,7 @@ public class WebApiAuthPresenter extends WebApiPresenter implements
     private UserResponse toUserResponse(User user)
     {
         return new UserResponse(user.id(), user.username(), user.role(), user.name(), user.email(),
-                user.reservationCount(), user.studyHours(), user.checkInCount(), user.creditScore(), user.banned());
+                user.reservationCount(), user.studySeconds(), user.checkInCount(), user.creditScore(), user.banned());
     }
 
     // --- ManageUserCreditUseCase.Presenter ---
@@ -91,7 +91,7 @@ public class WebApiAuthPresenter extends WebApiPresenter implements
     public void creditUpdated(User user)
     {
         responseContext.set(Response.ok(new UserResponse(user.id(), user.username(), user.role(),
-                user.name(), user.email(), user.reservationCount(), user.studyHours(),
+                user.name(), user.email(), user.reservationCount(), user.studySeconds(),
                 user.checkInCount(), user.creditScore(), user.banned())).build());
     }
 
@@ -142,7 +142,7 @@ public class WebApiAuthPresenter extends WebApiPresenter implements
         responseContext.set(Response.ok(
                 new UserResponse(user.id(), user.username(), user.role(),
                         user.name(), user.email(), user.reservationCount(),
-                        user.studyHours(), user.checkInCount(), user.creditScore(), user.banned())).build());
+                        user.studySeconds(), user.checkInCount(), user.creditScore(), user.banned())).build());
     }
 
     // --- ListAllStudentsUseCase.Presenter ---

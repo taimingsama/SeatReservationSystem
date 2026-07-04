@@ -3,7 +3,7 @@ package org.cleancoders.userandauth.domain;
 /**
  * 用户聚合根。
  * <p>
- * 统计字段（reservationCount / studyHours / checkInCount / creditScore）
+ * 统计字段（reservationCount / studySeconds / checkInCount / creditScore）
  * 初始值均为 0，信用分默认为 100。
  */
 public record User(
@@ -14,7 +14,7 @@ public record User(
         String name,
         String email,
         int reservationCount,
-        int studyHours,
+        int studySeconds,
         int checkInCount,
         int creditScore,
         boolean banned

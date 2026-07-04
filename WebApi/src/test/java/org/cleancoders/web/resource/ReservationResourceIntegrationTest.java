@@ -4,6 +4,7 @@ import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.util.Map;
 import org.cleancoders.infrastructure.persistence.InMemoryReservationRepo;
 import org.cleancoders.infrastructure.persistence.InMemorySeatRepo;
 import org.cleancoders.infrastructure.persistence.InMemoryTimeSlotRepo;
@@ -307,10 +308,9 @@ class ReservationResourceIntegrationTest extends JerseyTest
     void checkInShouldReturn404WhenReservationNotFound()
     {
         Response response = target("/reservations/nonexistent-id/check-in")
-                .queryParam("code", "123456")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", studentToken)
-                .post(Entity.json(""));
+                .post(Entity.json(Map.of("code", "123456")));
 
         assertEquals(404, response.getStatus());
     }
@@ -321,10 +321,9 @@ class ReservationResourceIntegrationTest extends JerseyTest
         String reservationId = createReservation(studentToken, "room-1", 1, "ts-1", "2026-07-03");
 
         Response response = target("/reservations/" + reservationId + "/check-in")
-                .queryParam("code", "123456")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", otherStudentToken)
-                .post(Entity.json(""));
+                .post(Entity.json(Map.of("code", "123456")));
 
         assertEquals(403, response.getStatus());
     }
@@ -333,10 +332,9 @@ class ReservationResourceIntegrationTest extends JerseyTest
     void checkInShouldReturn401ForInvalidToken()
     {
         Response response = target("/reservations/any-id/check-in")
-                .queryParam("code", "123456")
                 .request(MediaType.APPLICATION_JSON)
                 .cookie("Authorization", "bad.token.here")
-                .post(Entity.json(""));
+                .post(Entity.json(Map.of("code", "123456")));
 
         assertEquals(401, response.getStatus());
     }

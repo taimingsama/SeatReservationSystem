@@ -31,7 +31,7 @@ public class ManageUserCreditUseCase extends AdminAuthUseCase<ManageUserCreditUs
         int newScore = req.creditScore();
 
         User updated = new User(user.id(), user.username(), user.password(), user.role(),
-                user.name(), user.email(), user.reservationCount(), user.studyHours(),
+                user.name(), user.email(), user.reservationCount(), user.studySeconds(),
                 user.checkInCount(), newScore, user.banned());
 
         userRepo.save(updated);

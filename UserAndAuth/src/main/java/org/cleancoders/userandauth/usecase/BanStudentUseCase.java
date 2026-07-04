@@ -24,7 +24,7 @@ public class BanStudentUseCase extends AdminAuthUseCase<BanStudentUseCase.Reques
 
         User user = userOpt.get();
         User updated = new User(user.id(), user.username(), user.password(), user.role(),
-                user.name(), user.email(), user.reservationCount(), user.studyHours(),
+                user.name(), user.email(), user.reservationCount(), user.studySeconds(),
                 user.checkInCount(), user.creditScore(), req.ban());
 
         userRepo.save(updated);

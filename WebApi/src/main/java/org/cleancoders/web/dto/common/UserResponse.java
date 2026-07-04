@@ -17,8 +17,8 @@ public record UserResponse(
         String email,
         @Schema(description = "累计预约次数", example = "15")
         int reservationCount,
-        @Schema(description = "累计学习时长（小时）", example = "42")
-        int studyHours,
+        @Schema(description = "累计学习时长（秒）", example = "151200")
+        int studySeconds,
         @Schema(description = "累计签到次数", example = "12")
         int checkInCount,
         @Schema(description = "信用分（满分100）", example = "95")

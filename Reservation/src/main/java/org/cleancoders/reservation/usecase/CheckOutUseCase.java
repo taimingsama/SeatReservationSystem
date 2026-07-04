@@ -93,15 +93,15 @@ public class CheckOutUseCase extends StudentAuthUseCase<CheckOutUseCase.Request,
         String timeSlotLabel = timeSlotOpt.map(TimeSlot::label).orElse("未知");
 
         // 7. Calculate study hours from actual check-in to check-out time
-        int studyHoursToAdd = 0;
+        int studySecondsToAdd = 0;
         if (reservation.checkInAt() != null && reservation.checkOutAt() != null) {
-            studyHoursToAdd = (int) Duration.between(reservation.checkInAt(), reservation.checkOutAt()).toHours();
+            studySecondsToAdd = (int) Duration.between(reservation.checkInAt(), reservation.checkOutAt()).getSeconds();
         }
 
-        // 8. Update user stats: studyHours + actual duration
+        // 8. Update user stats: studySeconds + actual duration
         User updatedUser = new User(
                 user.id(), user.username(), user.password(), user.role(), user.name(), user.email(),
-                user.reservationCount(), user.studyHours() + studyHoursToAdd,
+                user.reservationCount(), user.studySeconds() + studySecondsToAdd,
                 user.checkInCount(), user.creditScore(), user.banned());
         userRepo.save(updatedUser);
 

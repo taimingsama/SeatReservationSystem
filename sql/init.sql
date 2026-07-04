@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS `user` (
     name        VARCHAR(100) NOT NULL,
     email       VARCHAR(100) NOT NULL,
     reservation_count INT   NOT NULL DEFAULT 0,
-    study_hours       INT   NOT NULL DEFAULT 0,
+    study_seconds       INT   NOT NULL DEFAULT 0,
     check_in_count    INT   NOT NULL DEFAULT 0,
     credit_score      INT   NOT NULL DEFAULT 100,
     banned            BOOLEAN NOT NULL DEFAULT FALSE

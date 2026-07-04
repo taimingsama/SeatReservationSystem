@@ -106,7 +106,7 @@ public class ReserveUseCase extends StudentAuthUseCase<ReserveUseCase.Request, R
         // 7. Update user stats: reservationCount + 1
         User updatedUser = new User(
                 user.id(), user.username(), user.password(), user.role(), user.name(), user.email(),
-                user.reservationCount() + 1, user.studyHours(), user.checkInCount(), user.creditScore(), user.banned());
+                user.reservationCount() + 1, user.studySeconds(), user.checkInCount(), user.creditScore(), user.banned());
         userRepo.save(updatedUser);
 
         // 8. Present success

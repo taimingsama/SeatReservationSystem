@@ -36,7 +36,7 @@ public class ChangePasswordUseCase extends AuthUseCase<ChangePasswordUseCase.Req
         // 更新密码
         String hashed = passwordEncoder.encode(req.newPassword());
         User updated = new User(user.id(), user.username(), hashed, user.role(),
-                user.name(), user.email(), user.reservationCount(), user.studyHours(),
+                user.name(), user.email(), user.reservationCount(), user.studySeconds(),
                 user.checkInCount(), user.creditScore(), user.banned());
         userRepo.save(updated);
 

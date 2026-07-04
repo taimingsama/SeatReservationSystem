@@ -8,7 +8,7 @@ USE seat_reservation;
 -- -----------------------------------------------------------
 -- 用户
 -- -----------------------------------------------------------
-INSERT INTO `user` (id, username, password, role, name, email, reservation_count, study_hours, check_in_count, credit_score, banned) VALUES
+INSERT INTO `user` (id, username, password, role, name, email, reservation_count, study_seconds, check_in_count, credit_score, banned) VALUES
 ('user-admin',    'admin',    'admin123', 'ADMIN',  '系统管理员', 'admin@example.com',    0, 0,  0, 100, FALSE),
 ('user-zhangsan', 'zhangsan', 'pass123',  'STUDENT','张三',      'zhangsan@example.com', 0, 0,  0, 100, FALSE),
 ('user-lisi',     'lisi',     'pass123',  'STUDENT','李四',      'lisi@example.com',     0, 0,  0, 100, FALSE),

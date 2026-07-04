@@ -33,7 +33,7 @@ class StubUserRepo implements UserRepository
     {
         String id = user.id() != null ? user.id() : "generated-id";
         User saved = new User(id, user.username(), user.password(), user.role(),
-                user.name(), user.email(), user.reservationCount(), user.studyHours(),
+                user.name(), user.email(), user.reservationCount(), user.studySeconds(),
                 user.checkInCount(), user.creditScore(), user.banned());
         users.put(saved.username(), saved);
         return saved;

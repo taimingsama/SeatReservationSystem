@@ -129,7 +129,7 @@ public class CheckInUseCase extends StudentAuthUseCase<CheckInUseCase.Request, C
         // 7. Update user stats: checkInCount + 1
         User updatedUser = new User(
                 user.id(), user.username(), user.password(), user.role(), user.name(), user.email(),
-                user.reservationCount(), user.studyHours(), user.checkInCount() + 1, user.creditScore(), user.banned());
+                user.reservationCount(), user.studySeconds(), user.checkInCount() + 1, user.creditScore(), user.banned());
         userRepo.save(updatedUser);
 
         // 8. Update seat status if RESERVED

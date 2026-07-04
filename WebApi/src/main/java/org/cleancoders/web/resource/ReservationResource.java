@@ -17,6 +17,7 @@ import org.cleancoders.reservation.usecase.CheckOutUseCase;
 import org.cleancoders.reservation.usecase.ListMyReservationsUseCase;
 import org.cleancoders.reservation.usecase.ReserveUseCase;
 import org.cleancoders.web.dto.common.ErrorResponse;
+import org.cleancoders.web.dto.reservation.CheckInInput;
 import org.cleancoders.web.dto.reservation.InvalidDateResponse;
 import org.cleancoders.web.dto.reservation.InvalidStatusResponse;
 import org.cleancoders.web.dto.reservation.ReservationCreatedResponse;
@@ -108,9 +109,9 @@ public class ReservationResource {
             @CookieParam("Authorization") String authCookie,
             @Parameter(description = "预约 ID", required = true, example = "res-001")
             @PathParam("id") String reservationId,
-            @Parameter(description = "6位签到码", required = true, example = "123456")
-            @QueryParam("code") String checkInCode) {
-        checkInUseCase.execute(new CheckInUseCase.Request(authCookie, reservationId, checkInCode));
+            @Parameter(description = "签到码", required = true)
+            CheckInInput input) {
+        checkInUseCase.execute(new CheckInUseCase.Request(authCookie, reservationId, input.code()));
         return responseContext.get();
     }
 

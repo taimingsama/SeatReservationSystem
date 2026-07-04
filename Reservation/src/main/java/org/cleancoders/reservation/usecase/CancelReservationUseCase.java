@@ -90,7 +90,7 @@ public class CancelReservationUseCase extends StudentAuthUseCase<CancelReservati
         int newCreditScore = Math.max(0, user.creditScore() - 5);
         User updatedUser = new User(
                 user.id(), user.username(), user.password(), user.role(), user.name(), user.email(),
-                user.reservationCount(), user.studyHours(), user.checkInCount(), newCreditScore, user.banned());
+                user.reservationCount(), user.studySeconds(), user.checkInCount(), newCreditScore, user.banned());
         userRepo.save(updatedUser);
 
         // 6. Look up seat and time slot for response

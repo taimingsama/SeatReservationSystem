@@ -16,7 +16,7 @@ public class UpdateUserNameUseCase extends AuthUseCase<UpdateUserNameUseCase.Req
     protected Output doExecute(User user, Request req)
     {
         User updated = new User(user.id(), user.username(), user.password(), user.role(),
-                req.name(), user.email(), user.reservationCount(), user.studyHours(),
+                req.name(), user.email(), user.reservationCount(), user.studySeconds(),
                 user.checkInCount(), user.creditScore(), user.banned());
         userRepo.save(updated);
 
