@@ -211,10 +211,10 @@ class RoomResourceIntegrationTest extends JerseyTest
         // All pre-seeded seats should be AVAILABLE
         assertTrue(seats.stream().allMatch(s -> "AVAILABLE".equals(s.get("status"))));
 
-        // Query with a specific timeSlotId (no reservations exist yet for this slot)
+        // Query with a specific timeSlotId (use far-future date to avoid past-slot rejection)
         Response response2 = target("/rooms/room-1/seats")
-                .queryParam("timeSlotId", "ts-1")
-                .queryParam("date", "2026-07-03")
+                .queryParam("timeSlotId", "ts-2")
+                .queryParam("date", "2099-12-31")
                 .request(MediaType.APPLICATION_JSON).get();
         assertEquals(200, response2.getStatus());
         Map<String, Object> body2 = response2.readEntity(new GenericType<>() {});

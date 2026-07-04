@@ -19,4 +19,10 @@ public interface ActiveReservationChecker {
      * for the specified time slot on the given date.
      */
     boolean isReservedForTimeSlot(String roomId, int seatId, String timeSlotId, LocalDate date);
+
+    /**
+     * Returns {@code true} if the seat has a CHECKED_IN reservation
+     * for the specified time slot on the given date.
+     */
+    boolean isCheckedInForTimeSlot(String roomId, int seatId, String timeSlotId, LocalDate date);
 }

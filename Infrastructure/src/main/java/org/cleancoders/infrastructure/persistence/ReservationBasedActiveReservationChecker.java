@@ -27,4 +27,11 @@ public class ReservationBasedActiveReservationChecker implements ActiveReservati
                 roomId, seatId, date, timeSlotId,
                 Set.of(ReservationStatus.RESERVED, ReservationStatus.CHECKED_IN)).isPresent();
     }
+
+    @Override
+    public boolean isCheckedInForTimeSlot(String roomId, int seatId, String timeSlotId, LocalDate date) {
+        return reservationRepo.findBySeatIdAndDateAndTimeSlotIdAndStatusIn(
+                roomId, seatId, date, timeSlotId,
+                Set.of(ReservationStatus.CHECKED_IN)).isPresent();
+    }
 }

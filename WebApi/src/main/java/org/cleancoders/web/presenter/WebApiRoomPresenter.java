@@ -7,9 +7,11 @@ import org.cleancoders.seatandroom.domain.SeatStatus;
 import org.cleancoders.seatandroom.domain.StudyRoom;
 import org.cleancoders.seatandroom.domain.TimeSlot;
 import org.cleancoders.seatandroom.usecase.*;
+import org.cleancoders.web.dto.common.ErrorResponse;
 import org.cleancoders.web.dto.room.*;
 import org.cleancoders.web.dto.seat.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -60,6 +62,13 @@ public class WebApiRoomPresenter extends WebApiPresenter implements
         responseContext.set(Response.status(404).entity(
                 new RoomNotFoundResponse("自习室不存在", roomId)
         ).build());
+    }
+
+    @Override
+    public void pastTimeSlot(String timeSlotId, LocalDate date)
+    {
+        responseContext.set(Response.status(400).entity(
+                new ErrorResponse("不能查询过去时段")).build());
     }
 
     @Override
