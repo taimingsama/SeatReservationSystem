@@ -99,6 +99,32 @@ class LoginUseCaseTest
         assertTrue(presenter.invalidCredentialsCalled);
     }
 
+    @Test
+    void shouldRejectBannedUser()
+    {
+        userRepo.addUser(new User("u1", "alice", "encoded:secret", UserRole.STUDENT, "Alice", "a@b.com",
+                0, 0, 0, 100, true));
+
+        var output = useCase.execute(new LoginUseCase.Request("alice", "secret"));
+
+        assertNull(output);
+        assertTrue(presenter.userBannedCalled);
+        assertNull(presenter.successToken.get());
+    }
+
+    @Test
+    void shouldAllowNonBannedUser()
+    {
+        userRepo.addUser(new User("u1", "alice", "encoded:secret", UserRole.STUDENT, "Alice", "a@b.com",
+                0, 0, 0, 100, false));
+
+        var output = useCase.execute(new LoginUseCase.Request("alice", "secret"));
+
+        assertNotNull(output);
+        assertEquals("jwt:u1", output.token());
+        assertFalse(presenter.userBannedCalled);
+    }
+
     static class StubPasswordEncoder implements PasswordEncoder
     {
         @Override
@@ -140,6 +166,7 @@ class LoginUseCaseTest
         AtomicReference<User> successUser = new AtomicReference<>();
         boolean invalidCredentialsCalled = false;
         boolean userNotFoundCalled = false;
+        boolean userBannedCalled = false;
 
         @Override
         public void success(String token, User user)
@@ -158,6 +185,12 @@ class LoginUseCaseTest
         public void userNotFound()
         {
             userNotFoundCalled = true;
+        }
+
+        @Override
+        public void userBanned()
+        {
+            userBannedCalled = true;
         }
     }
 }

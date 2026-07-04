@@ -48,3 +48,4 @@ buildNumber.properties
 .mvn/timing.properties
 # https://maven.apache.org/tools/wrapper/#Usage_with_or_without_Binary_JAR
 .mvn/wrapper/maven-wrapper.jar
+/my/

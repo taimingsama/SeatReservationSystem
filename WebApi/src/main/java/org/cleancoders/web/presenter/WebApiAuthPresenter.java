@@ -5,13 +5,9 @@ import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import org.cleancoders.userandauth.domain.User;
 import org.cleancoders.userandauth.usecase.*;
-import org.cleancoders.web.dto.auth.LoginResponse;
-import org.cleancoders.web.dto.auth.MeResponse;
-import org.cleancoders.web.dto.auth.RegisterResponse;
-import org.cleancoders.web.dto.auth.ResetPasswordResponse;
-import org.cleancoders.web.dto.auth.UsernameConflictResponse;
-import org.cleancoders.web.dto.common.ErrorResponse;
+import org.cleancoders.web.dto.auth.*;
 import org.cleancoders.web.dto.common.AdminStudentResponse;
+import org.cleancoders.web.dto.common.ErrorResponse;
 import org.cleancoders.web.dto.common.UserListResponse;
 import org.cleancoders.web.dto.common.UserResponse;
 
@@ -53,6 +49,12 @@ public class WebApiAuthPresenter extends WebApiPresenter implements
     public void invalidCredentials()
     {
         responseContext.set(Response.status(401).entity(new ErrorResponse("Invalid credentials")).build());
+    }
+
+    @Override
+    public void userBanned()
+    {
+        responseContext.set(Response.status(403).entity(new ErrorResponse("账户已被封禁，无法登录")).build());
     }
 
     // --- RegisterUseCase.Presenter ---

@@ -34,6 +34,12 @@ public class LoginUseCase
             return null;
         }
 
+        if (u.banned())
+        {
+            presenter.userBanned();
+            return null;
+        }
+
         String token = tokenService.generate(u.id());
         presenter.success(token, u);
         return new Output(token);
@@ -46,6 +52,8 @@ public class LoginUseCase
         void invalidCredentials();
 
         void userNotFound();
+
+        void userBanned();
     }
 
     public record Request(String username, String password)

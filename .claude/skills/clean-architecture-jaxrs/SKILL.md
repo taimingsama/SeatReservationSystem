@@ -38,7 +38,7 @@ description: >
 
 ```
 WebApi ──→ UseCase ──→ Outbound (接口) ←── Infrastructure
-                │            ↑                   │
+                │            ↓                   │
                 └──→ Domain (实体) ←──────────────┘
 ```
 
