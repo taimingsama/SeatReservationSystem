@@ -5,6 +5,7 @@ import org.cleancoders.reservation.domain.Reservation;
 import org.cleancoders.reservation.domain.ReservationStatus;
 import org.cleancoders.reservation.outbound.ReservationRepository;
 import org.cleancoders.seatandroom.domain.Seat;
+import org.cleancoders.seatandroom.domain.SeatStatus;
 import org.cleancoders.seatandroom.domain.TimeSlot;
 import org.cleancoders.seatandroom.outbound.SeatRepository;
 import org.cleancoders.seatandroom.outbound.TimeSlotRepository;
@@ -101,8 +102,11 @@ public class ProcessExpiredReservationsUseCase
                 if (seatOpt.isPresent())
                 {
                     Seat seat = seatOpt.get();
-                    seat.release();
-                    seatRepo.save(seat);
+                    if (seat.status() == SeatStatus.OCCUPIED || seat.status() == SeatStatus.RESERVED)
+                    {
+                        seat.release();
+                        seatRepo.save(seat);
+                    }
                 }
 
                 // 信用分 +5（上限 100）
