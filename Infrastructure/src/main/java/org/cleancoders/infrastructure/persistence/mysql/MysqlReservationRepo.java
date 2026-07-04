@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -169,6 +170,13 @@ public class MysqlReservationRepo implements ReservationRepository {
 
         // setId overwrites the auto-generated id
         r.setId(id);
+
+        // Restore real timestamps from DB (domain methods above set them to now())
+        java.sql.Timestamp checkInTs = rs.getTimestamp("check_in_at");
+        if (checkInTs != null) r.setCheckInAt(checkInTs.toLocalDateTime());
+        java.sql.Timestamp checkOutTs = rs.getTimestamp("check_out_at");
+        if (checkOutTs != null) r.setCheckOutAt(checkOutTs.toLocalDateTime());
+
         return r;
     }
 }

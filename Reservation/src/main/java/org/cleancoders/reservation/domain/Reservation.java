@@ -115,4 +115,12 @@ public class Reservation {
     public void setId(String id) {
         this.id = id;
     }
+
+    public void setCheckInAt(LocalDateTime checkInAt) {
+        this.checkInAt = checkInAt;
+    }
+
+    public void setCheckOutAt(LocalDateTime checkOutAt) {
+        this.checkOutAt = checkOutAt;
+    }
 }

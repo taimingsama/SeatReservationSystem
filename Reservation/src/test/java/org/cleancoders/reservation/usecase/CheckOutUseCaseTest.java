@@ -19,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -172,6 +173,27 @@ class CheckOutUseCaseTest {
 
         assertNull(output);
         assertTrue(presenter.forbiddenCalled);
+    }
+
+    @Test
+    void studyHoursShouldBeBasedOnActualCheckInCheckOutDuration() {
+        // Time slot is 08:00-12:00 (4 hours), but actual stay is only 3 hours
+        User student = userRepo.findById(STUDENT_ID).get();
+        assertEquals(0, student.studyHours());
+
+        Reservation res = new Reservation("res-1", STUDENT_ID, ROOM_ID, SEAT_ID, TIME_SLOT_ID, DATE);
+        res.checkIn();
+        // Simulate checking in 3 hours ago
+        res.setCheckInAt(LocalDateTime.now().minusHours(3));
+        reservationRepo.addReservation(res);
+
+        var output = useCase.execute(new CheckOutUseCase.Request(STUDENT_TOKEN, "res-1"));
+
+        assertNotNull(output);
+
+        User updated = userRepo.findById(STUDENT_ID).get();
+        // Should be ~3 hours (actual duration), not 4 hours (time slot duration)
+        assertEquals(3, updated.studyHours());
     }
 
     // --- Stubs ---

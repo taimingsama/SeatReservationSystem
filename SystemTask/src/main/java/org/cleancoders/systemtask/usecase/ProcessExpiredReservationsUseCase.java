@@ -109,10 +109,17 @@ public class ProcessExpiredReservationsUseCase
                     }
                 }
 
-                // 信用分 +5（上限 100）
+                // 计算学习时长：签到时间 ~ 时段结束时间
+                int studyHoursToAdd = 0;
+                if (r.checkInAt() != null) {
+                    studyHoursToAdd = (int) java.time.Duration.between(r.checkInAt(), slotEndDateTime).toHours();
+                }
+
+                // 信用分 +5（上限 100），累加学习时长
                 int newCredit = Math.min(100, user.creditScore() + 5);
                 userRepo.save(new User(user.id(), user.username(), user.password(), user.role(),
-                        user.name(), user.email(), user.reservationCount(), user.studyHours(),
+                        user.name(), user.email(), user.reservationCount(),
+                        user.studyHours() + studyHoursToAdd,
                         user.checkInCount(), newCredit, user.banned()));
 
                 autoCheckedOut++;

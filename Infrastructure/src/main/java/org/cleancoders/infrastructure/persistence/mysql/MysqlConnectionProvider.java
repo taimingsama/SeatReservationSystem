@@ -13,9 +13,9 @@ import java.sql.SQLException;
 public class MysqlConnectionProvider {
 
     private static final String URL = System.getProperty("db.url",
-            "jdbc:mysql://localhost:3306/seat_reservation?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&characterEncoding=utf8mb4");
+            "jdbc:mysql://localhost:3306/seat_reservation?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8");
     private static final String USER = System.getProperty("db.user", "root");
-    private static final String PASSWORD = System.getProperty("db.password", "root");
+    private static final String PASSWORD = System.getProperty("db.password", "123456");
 
     static {
         try {
