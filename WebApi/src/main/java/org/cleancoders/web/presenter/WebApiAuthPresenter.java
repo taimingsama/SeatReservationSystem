@@ -11,6 +11,7 @@ import org.cleancoders.web.dto.auth.RegisterResponse;
 import org.cleancoders.web.dto.auth.ResetPasswordResponse;
 import org.cleancoders.web.dto.auth.UsernameConflictResponse;
 import org.cleancoders.web.dto.common.ErrorResponse;
+import org.cleancoders.web.dto.common.AdminStudentResponse;
 import org.cleancoders.web.dto.common.UserListResponse;
 import org.cleancoders.web.dto.common.UserResponse;
 
@@ -149,8 +150,9 @@ public class WebApiAuthPresenter extends WebApiPresenter implements
     @Override
     public void presentStudents(List<User> students)
     {
-        List<UserResponse> dtos = students.stream()
-                .map(this::toUserResponse)
+        List<AdminStudentResponse> dtos = students.stream()
+                .map(u -> new AdminStudentResponse(u.id(), u.username(), u.name(), u.email(),
+                        u.role(), u.checkInCount(), u.creditScore(), u.banned()))
                 .toList();
         responseContext.set(Response.ok(new UserListResponse(dtos)).build());
     }
