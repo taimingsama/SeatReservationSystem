@@ -149,6 +149,7 @@ class AdminResourceIntegrationTest extends JerseyTest
         assertEquals("alice", first.get("username"));
         assertEquals("room-1", first.get("roomId"));
         assertEquals("自习室A", first.get("roomName"));
+        assertEquals("图书馆一楼", first.get("roomLocation"));
         assertNotNull(first.get("timeSlotLabel"));
         assertEquals("2026-07-03", first.get("date"));
         assertEquals("RESERVED", first.get("status"));

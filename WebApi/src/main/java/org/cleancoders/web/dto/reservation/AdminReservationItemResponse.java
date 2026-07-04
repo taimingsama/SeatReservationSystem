@@ -14,6 +14,8 @@ public record AdminReservationItemResponse(
         String roomId,
         @Schema(description = "自习室名称", example = "A 自习室")
         String roomName,
+        @Schema(description = "自习室位置", example = "图书馆一楼")
+        String roomLocation,
         @Schema(description = "座位ID", example = "1")
         int seatId,
         @Schema(description = "时段ID", example = "ts-1")

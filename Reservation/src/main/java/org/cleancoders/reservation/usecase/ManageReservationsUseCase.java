@@ -55,6 +55,7 @@ public class ManageReservationsUseCase extends AdminAuthUseCase<ManageReservatio
             String username,
             String roomId,
             String roomName,
+            String roomLocation,
             int seatId,
             String timeSlotId,
             String timeSlotLabel,
@@ -81,10 +82,12 @@ public class ManageReservationsUseCase extends AdminAuthUseCase<ManageReservatio
 
                     String roomName = roomRepo.findById(r.roomId())
                             .map(StudyRoom::name).orElse("未知");
+                    String roomLocation = roomRepo.findById(r.roomId())
+                            .map(StudyRoom::location).orElse("未知");
 
                     return new ReservationItem(
                             r.id(), r.userId(), username,
-                            r.roomId(), roomName, r.seatId(),
+                            r.roomId(), roomName, roomLocation, r.seatId(),
                             r.timeSlotId(), timeSlotLabel,
                             r.date(), r.status().name(),
                             r.createdAt(), r.checkInAt(), r.checkOutAt()
