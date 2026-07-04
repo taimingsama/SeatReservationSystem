@@ -26,6 +26,7 @@ import org.cleancoders.web.dto.admin.UpdateSeatRequest;
 import org.cleancoders.web.dto.admin.UpdateCreditRequest;
 import org.cleancoders.web.dto.auth.ResetPasswordResponse;
 import org.cleancoders.web.dto.common.ErrorResponse;
+import org.cleancoders.web.dto.common.UserListResponse;
 import org.cleancoders.web.dto.common.UserResponse;
 import org.cleancoders.web.dto.reservation.AdminReservationListResponse;
 import org.cleancoders.web.dto.room.*;
@@ -75,10 +76,12 @@ public class AdminResource
     ResponseContext responseContext;
 
     @GET
-    @Path("/students")
+    @Path("/users")
     @Operation(summary = "获取所有学生", description = "管理员查看所有学生信息（含统计数据）。")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "成功"),
+            @ApiResponse(responseCode = "200", description = "成功",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = UserListResponse.class))),
             @ApiResponse(responseCode = "401", description = "Token 无效",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "权限不足",

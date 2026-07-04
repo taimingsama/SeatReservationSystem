@@ -11,6 +11,7 @@ import org.cleancoders.web.dto.auth.RegisterResponse;
 import org.cleancoders.web.dto.auth.ResetPasswordResponse;
 import org.cleancoders.web.dto.auth.UsernameConflictResponse;
 import org.cleancoders.web.dto.common.ErrorResponse;
+import org.cleancoders.web.dto.common.UserListResponse;
 import org.cleancoders.web.dto.common.UserResponse;
 
 import java.util.List;
@@ -151,7 +152,7 @@ public class WebApiAuthPresenter extends WebApiPresenter implements
         List<UserResponse> dtos = students.stream()
                 .map(this::toUserResponse)
                 .toList();
-        responseContext.set(Response.ok(Map.of("students", dtos)).build());
+        responseContext.set(Response.ok(new UserListResponse(dtos)).build());
     }
 
     // --- BanStudentUseCase.Presenter ---

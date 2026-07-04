@@ -107,9 +107,23 @@ class GetTimeSlotStatsUseCaseTest
     static class StubTimeSlotRepo implements TimeSlotRepository
     {
         private final Map<String, TimeSlot> store = new LinkedHashMap<>();
-        void addTimeSlot(TimeSlot ts) { store.put(ts.id(), ts); }
-        @Override public Optional<TimeSlot> findById(String id) { return Optional.ofNullable(store.get(id)); }
-        @Override public List<TimeSlot> findAll() { return store.values().stream().toList(); }
+
+        void addTimeSlot(TimeSlot ts)
+        {
+            store.put(ts.id(), ts);
+        }
+
+        @Override
+        public Optional<TimeSlot> findById(String id)
+        {
+            return Optional.ofNullable(store.get(id));
+        }
+
+        @Override
+        public List<TimeSlot> findAll()
+        {
+            return store.values().stream().toList();
+        }
     }
 
     static class StubPresenter implements GetTimeSlotStatsUseCase.Presenter,
@@ -128,9 +142,27 @@ class GetTimeSlotStatsUseCaseTest
             this.items = items;
         }
 
-        @Override public void forbidden() { forbiddenCalled = true; }
-        @Override public void invalidToken() { invalidTokenCalled = true; }
-        @Override public void userNotFound() { userNotFoundCalled = true; }
-    @Override public void banned() {}
+        @Override
+        public void forbidden()
+        {
+            forbiddenCalled = true;
+        }
+
+        @Override
+        public void invalidToken()
+        {
+            invalidTokenCalled = true;
+        }
+
+        @Override
+        public void userNotFound()
+        {
+            userNotFoundCalled = true;
+        }
+
+        @Override
+        public void banned()
+        {
+        }
     }
 }
